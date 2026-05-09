@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - css-split-migration
-      - feat/ui-restructure
+      - ui-restructure
   workflow_dispatch:
 
 permissions:
