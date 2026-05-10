@@ -36,6 +36,7 @@ jobs:
         run: |
           mkdir -p public
           cp -r index.html manifest.json sw.js build public/
+          cp -r assets public/
           cp -r css css-src scripts public/
           cp -r theme.js fooddb.js ai.js data.js food-log.js advice-panel.js backup.js sync.js sync-status.js workout.js workout-engine.js workout-state.js app-update.js public/
           touch public/.nojekyll
