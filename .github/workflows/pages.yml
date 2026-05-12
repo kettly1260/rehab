@@ -5,6 +5,7 @@ on:
     branches:
       - css-split-migration
       - ui-restructure
+      - 'opt/**'
   workflow_dispatch:
 
 permissions:
