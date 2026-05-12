@@ -43,6 +43,7 @@ jobs:
           cp -r data-utils.js data-store.js data-ui-state.js health-diet.js health-weight.js health-exercise.js goal-plan.js routine-library.js history-view.js data-views.js data.js public/
           cp -r food-log.js advice-panel.js advice-render.js advice-prompt.js backup.js sync.js sync-status.js public/
           cp -r workout-system.js workout-pip.js workout-core.js workout-cardio.js workout-engine.js workout-state.js app-update.js public/
+          cp -r weekly-summary.js onboarding.js swipe-actions.js public/
           touch public/.nojekyll
 
       - name: Upload Pages artifact
