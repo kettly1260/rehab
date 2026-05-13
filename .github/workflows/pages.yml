@@ -39,11 +39,9 @@ jobs:
           cp -r index.html manifest.json sw.js build public/
           cp -r assets public/
           cp -r css-src scripts public/
-          cp -r toast.js theme.js fooddb.js ai-store.js ai-profile.js ai-models.js ai-api.js public/
-          cp -r data-utils.js data-store.js data-ui-state.js health-diet.js health-weight.js health-exercise.js goal-plan.js routine-library.js history-view.js data-views.js data.js public/
-          cp -r food-log.js advice-panel.js advice-render.js advice-prompt.js backup.js sync.js sync-status.js public/
-          cp -r workout-system.js workout-pip.js workout-core.js workout-cardio.js workout-engine.js workout-state.js app-update.js public/
-          cp -r weekly-summary.js onboarding.js swipe-actions.js public/
+          # Copy every top-level .js file referenced from index.html so newly added modules
+          # (e.g. health-profile.js) don't 404 on Pages because someone forgot to extend the list.
+          find . -maxdepth 1 -type f -name '*.js' -exec cp {} public/ \;
           touch public/.nojekyll
 
       - name: Upload Pages artifact
