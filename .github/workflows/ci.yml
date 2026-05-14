@@ -2,7 +2,12 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
+      - master
+      - 'opt/**'
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
