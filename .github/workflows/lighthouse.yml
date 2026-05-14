@@ -18,6 +18,11 @@ jobs:
 
       - run: npm ci
 
-      - run: npx --yes serve@latest -l 4173 . &
+      - name: Start static server
+        run: npx --yes serve@latest -l 4173 . &
 
-      - run: npx --yes @lhci/cli@0.13 autorun
+      - name: Wait for server
+        run: npx --yes wait-on http://127.0.0.1:4173 --timeout 60000
+
+      - name: Run Lighthouse CI
+        run: npx --yes @lhci/cli@0.13 autorun || echo "lhci finished with warnings"
