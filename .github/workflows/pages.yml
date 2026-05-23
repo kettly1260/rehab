@@ -3,6 +3,9 @@ name: Deploy GitHub Pages
 on:
   push:
     branches:
+      - main
+      - master
+      - rebuild
       - css-split-migration
       - ui-restructure
       - 'opt/**'
@@ -28,6 +31,9 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
 
       - name: Build CSS bundle
         run: node scripts/build-css.mjs
