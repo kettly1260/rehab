@@ -43,11 +43,13 @@ jobs:
         run: |
           mkdir -p public
           cp -r index.html manifest.json sw.js build public/
-          cp -r assets public/
+          cp -r assets storage i18n public/
           cp -r css-src scripts public/
           # Copy every top-level .js file referenced from index.html so newly added modules
           # (e.g. health-profile.js) don't 404 on Pages because someone forgot to extend the list.
           find . -maxdepth 1 -type f -name '*.js' -exec cp {} public/ \;
+          find . -maxdepth 1 -type f -name '*.mjs' -exec cp {} public/ \;
+          find . -maxdepth 1 -type f -name '*.ico' -exec cp {} public/ \;
           touch public/.nojekyll
 
       - name: Upload Pages artifact
