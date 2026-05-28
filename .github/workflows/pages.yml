@@ -8,7 +8,7 @@ on:
       - rebuild
       - css-split-migration
       - ui-restructure
-      - 'opt/**'
+      - ui-mockup
   workflow_dispatch:
 
 permissions:
