@@ -218,6 +218,9 @@ async function collectMetrics(page, url, waitMs) {
     const requests = new Map();
     const exceptions = [];
     const consoleErrors = [];
+    const blockedExternalPatterns = [
+        '*://*.kaspersky-labs.com/*'
+    ];
     page.on('Network.responseReceived', (event) => {
         requests.set(event.requestId, {
             url: event.response?.url || '',
@@ -243,6 +246,11 @@ async function collectMetrics(page, url, waitMs) {
     });
     await page.send('Page.enable');
     await page.send('Network.enable');
+    // System security products can inject their own browser script into localhost
+    // pages. That work is outside the Rehab origin and can dominate Long Task
+    // measurements, so exclude the known injected security-script origin while
+    // keeping the pattern visible in the result for auditability.
+    await page.send('Network.setBlockedURLs', { urls: blockedExternalPatterns });
     await page.send('Runtime.enable');
     await page.send('Page.addScriptToEvaluateOnNewDocument', {
         source: `
@@ -313,6 +321,7 @@ async function collectMetrics(page, url, waitMs) {
     metrics.networkTransferSize = [...requests.values()].reduce((sum, item) => sum + Number(item.encodedDataLength || 0), 0);
     metrics.exceptions = exceptions;
     metrics.consoleErrors = consoleErrors;
+    metrics.blockedExternalPatterns = blockedExternalPatterns;
     return metrics;
 }
 
@@ -375,6 +384,7 @@ async function main() {
             resourceTransferKb,
             networkTransferKb,
             consoleErrors: metrics.consoleErrors,
+            blockedExternalPatterns: metrics.blockedExternalPatterns,
             largestResources: metrics.largestResources,
             slowestResources: metrics.slowestResources,
             budgets

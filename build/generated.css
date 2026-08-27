@@ -13406,6 +13406,141 @@ body.rehab-v7-shell {
 
 
 }
+@layer v7 {
+/* --- V7 Today --- */
+.rehab-v7-shell #today.v7-feature-today {
+    width: min(100%, var(--v7-content-max));
+    margin-inline: auto;
+    padding-inline: clamp(14px, 4vw, 24px);
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #today .today-v6-appbar {
+    position: relative;
+    min-height: 5.25rem;
+    padding: var(--v7-space-4) 0 var(--v7-space-3);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #today .today-v6-greet { display: grid; gap: 0.2rem; }
+.rehab-v7-shell #today .today-v6-greet-line { color: var(--v7-text); font-size: var(--v7-type-2xl); font-weight: var(--v7-weight-semibold); letter-spacing: -0.025em; }
+.rehab-v7-shell #today .today-v6-greet-sub { color: var(--v7-text-muted); font-size: var(--v7-type-sm); }
+.rehab-v7-shell #today #syncStatus { border-color: var(--v7-border); background: var(--v7-surface); color: var(--v7-text-muted); box-shadow: none; }
+
+.rehab-v7-shell #today #todayOverview,
+.rehab-v7-shell #today #todayQuickActions,
+.rehab-v7-shell #today #todayPlanStatus,
+.rehab-v7-shell #today #todayDietStatus,
+.rehab-v7-shell #today #todayTimeline,
+.rehab-v7-shell #today #todayAiCard { margin-block: 0 var(--v7-space-5); }
+
+.rehab-v7-shell #today .hero,
+.rehab-v7-shell #today .glass-card,
+.rehab-v7-shell #today .today-v7-surface {
+    position: relative;
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-xl);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #today .hero { padding: var(--v7-space-5); overflow: hidden; }
+.rehab-v7-shell #today .glass-card { padding: var(--v7-space-5); }
+.rehab-v7-shell #today .hero::before,
+.rehab-v7-shell #today .glass-card::before,
+.rehab-v7-shell #today .hero-motion-aura,
+.rehab-v7-shell #today .ring-motion-aura { display: none !important; }
+
+.rehab-v7-shell #today .hero-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--v7-space-3); }
+.rehab-v7-shell #today .hero-label { color: var(--v7-text-muted); font-size: var(--v7-type-xs); font-weight: var(--v7-weight-medium); letter-spacing: 0.04em; }
+.rehab-v7-shell #today .hero-title { margin-top: var(--v7-space-1); max-width: 15em; color: var(--v7-text); font-size: var(--v7-type-xl); font-weight: var(--v7-weight-semibold); line-height: var(--v7-leading-tight); }
+
+.rehab-v7-shell #today .rings { display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); align-items: center; gap: var(--v7-space-4); margin-top: var(--v7-space-5); }
+.rehab-v7-shell #today .ring-divider { width: 1px; height: 3.25rem; background: var(--v7-border); }
+.rehab-v7-shell #today .ring {
+    width: 100%;
+    min-width: 0;
+    min-height: 5.5rem;
+    border: 0;
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-bg-subtle);
+    box-shadow: none;
+    color: var(--v7-text);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+.rehab-v7-shell #today .ring > div { display: grid; gap: 0.1rem; }
+.rehab-v7-shell #today .ring b { font-size: var(--v7-type-xl); }
+.rehab-v7-shell #today .ring small,
+.rehab-v7-shell #today .ring em { color: var(--v7-text-muted); font-size: var(--v7-type-xs); font-style: normal; }
+
+.rehab-v7-shell #today .sect-head { display: flex; align-items: center; justify-content: space-between; gap: var(--v7-space-3); margin: 0 0 var(--v7-space-2); padding: 0 var(--v7-space-1); }
+.rehab-v7-shell #today .sect-head .t { color: var(--v7-text); font-size: var(--v7-type-md); font-weight: var(--v7-weight-semibold); }
+.rehab-v7-shell #today .sect-head .a { min-height: var(--v7-touch-min); border: 0; background: transparent; color: var(--v7-primary); font: inherit; font-size: var(--v7-type-sm); }
+
+.rehab-v7-shell #today .quick-dock { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--v7-space-2); }
+.rehab-v7-shell #today .record-quick-btn {
+    min-width: 0;
+    min-height: 4.4rem;
+    display: grid;
+    place-items: center;
+    gap: 0.25rem;
+    padding: var(--v7-space-2);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface);
+    color: var(--v7-text-muted);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+.rehab-v7-shell #today .record-quick-btn .material-symbols-rounded { color: var(--v7-primary); font-size: var(--v7-icon-md); }
+.rehab-v7-shell #today .record-quick-btn span:last-child { font-size: var(--v7-type-xs); font-weight: var(--v7-weight-medium); }
+
+.rehab-v7-shell #today .plan-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--v7-space-3); }
+.rehab-v7-shell #today .pt { color: var(--v7-primary); font-size: var(--v7-type-xs); font-weight: var(--v7-weight-semibold); }
+.rehab-v7-shell #today .pn { margin-top: 0.2rem; color: var(--v7-text); font-size: var(--v7-type-lg); font-weight: var(--v7-weight-semibold); }
+.rehab-v7-shell #today .plan-chip,
+.rehab-v7-shell #today .streak-chip { border: 0; border-radius: var(--v7-radius-pill); background: var(--v7-primary-soft); color: var(--v7-primary-strong); box-shadow: none; }
+.rehab-v7-shell #today .seg-bar { overflow: hidden; margin-block: var(--v7-space-4); border-radius: var(--v7-radius-pill); background: var(--v7-surface-muted); }
+.rehab-v7-shell #today .seg { background: var(--v7-border-strong); }
+.rehab-v7-shell #today .seg.done { background: var(--v7-primary); }
+.rehab-v7-shell #today .seg.cur { background: var(--v7-info); }
+.rehab-v7-shell #today .plan-meta { color: var(--v7-text-muted); font-size: var(--v7-type-sm); }
+.rehab-v7-shell #today .plan-actions { display: flex; flex-wrap: wrap; gap: var(--v7-space-2); margin-top: var(--v7-space-4); }
+
+.rehab-v7-shell #today .calorie-head .num { color: var(--v7-text); font-size: var(--v7-type-2xl); font-weight: var(--v7-weight-semibold); }
+.rehab-v7-shell #today .calorie-head .unit,
+.rehab-v7-shell #today .calorie-head .lab { color: var(--v7-text-muted); }
+.rehab-v7-shell #today .stack-bar { background: var(--v7-surface-muted); box-shadow: none; }
+.rehab-v7-shell #today .macros { gap: var(--v7-space-2); }
+.rehab-v7-shell #today .macro { border: 0; background: transparent; }
+
+.rehab-v7-shell #today .v7-today-primary-cta {
+    border-color: transparent;
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    box-shadow: var(--v7-shadow-1);
+}
+
+@media (max-width: 390px) {
+    .rehab-v7-shell #today .quick-dock { gap: 6px; }
+    .rehab-v7-shell #today .record-quick-btn { min-height: 4rem; padding-inline: 4px; }
+    .rehab-v7-shell #today .rings { gap: var(--v7-space-2); }
+}
+
+
+}
 @layer components {
 /* === M3 Expressive Effects ===
    Design-language level: card-rise + chip-press + token-in keyframes,

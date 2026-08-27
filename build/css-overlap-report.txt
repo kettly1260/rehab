@@ -1,7 +1,7 @@
 # css overlap report
 # real-conflict threshold: 220
 
-## REAL CONFLICTS (same selector + same property, different value): 202
+## REAL CONFLICTS (same selector + same property, different value): 205
 *
   files: 02-base.css, 36-responsive.css, 50-v6-ui.css, 40-a11y.css
     animation-duration: 1ms !important | 0.001ms !important (36-responsive.css / 50-v6-ui.css / 40-a11y.css)
@@ -1029,6 +1029,18 @@ to
   files: 63-v7-navigation.css
     font-size: 0.6875rem | 0.625rem (63-v7-navigation.css / 63-v7-navigation.css)
 
+.rehab-v7-shell #today .rings
+  files: 64-v7-today.css
+    gap: var(--v7-space-4) | var(--v7-space-2) (64-v7-today.css / 64-v7-today.css)
+
+.rehab-v7-shell #today .quick-dock
+  files: 64-v7-today.css
+    gap: var(--v7-space-2) | 6px (64-v7-today.css / 64-v7-today.css)
+
+.rehab-v7-shell #today .record-quick-btn
+  files: 64-v7-today.css
+    min-height: 4.4rem | 4rem (64-v7-today.css / 64-v7-today.css)
+
 ## DUPLICATES (same selector + same property + same value): 30
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
@@ -1175,7 +1187,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 145
+## COMPLEMENTS (same selector, disjoint properties): 147
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1610,3 +1622,9 @@ body.is-paused .fab-play
 
 .rehab-v7-shell .v7-bottom-nav__indicator
   files: 63-v7-navigation.css
+
+.rehab-v7-shell #today .hero
+  files: 64-v7-today.css
+
+.rehab-v7-shell #today .glass-card
+  files: 64-v7-today.css
