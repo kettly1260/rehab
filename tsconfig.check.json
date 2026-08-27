@@ -18,6 +18,7 @@
     "*.js",
     "globals.d.ts",
     "test/globals.d.ts",
+    "src/**/*.js",
     "storage/**/*.js",
     "scripts/**/*.mjs",
     "test/**/*.mjs"

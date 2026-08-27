@@ -11,6 +11,7 @@ import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { launchAuditBrowser } from './helpers/browser-launch.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const root = path.resolve(path.dirname(__filename), '..');
@@ -103,14 +104,7 @@ function loadPlaywright() {
 async function withBrowser(fn) {
     const pw = loadPlaywright();
     const chromium = pw.chromium || pw.default?.chromium;
-    if (!chromium?.launch) throw new Error('playwright.chromium.launch unavailable');
-    let browser;
-    try {
-        browser = await chromium.launch({ channel: process.env.AUDIT_CHANNEL || 'msedge', headless: true });
-    } catch (error) {
-        if (process.env.AUDIT_CHANNEL || !String(error?.message || '').includes("distribution 'msedge' is not found")) throw error;
-        browser = await chromium.launch({ headless: true });
-    }
+    const { browser } = await launchAuditBrowser(chromium);
     try {
         return await fn(browser, pw);
     } finally {
@@ -128,7 +122,11 @@ function snapshotNav(page) {
             navStack: stack,
             routineView: window.data?.routineView || null,
             healthView: window.data?.healthView || null,
-            activePageId: window.data?._activePageId || null
+            activePageId: window.data?._activePageId || null,
+            v7ActivePage: document.documentElement.dataset.v7ActivePage || null,
+            v7Lifecycle: (/** @type {any} */ (window)).rehabV7?.diagnostics?.snapshot?.() || null,
+            horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body?.scrollWidth || 0)
+                - document.documentElement.clientWidth
         };
     });
 }
@@ -229,6 +227,9 @@ test('B-T2 browser: hash / DOM / navStack / subroute stay aligned', async () => 
             await writeFile(path.join(evidenceRoot, 'b-t2.json'), JSON.stringify(settled, null, 2));
             assert.equal(settled.active, 'profile');
             assert.equal(settled.activePageId, 'profile');
+            assert.equal(settled.v7ActivePage, 'profile');
+            assert.equal(settled.v7Lifecycle?.activeId, 'profile');
+            assert.ok(settled.horizontalOverflow <= 1, `mobile horizontal overflow=${settled.horizontalOverflow}`);
             assert.match(settled.hash, /#\/profile\/library/);
             assert.equal(settled.routineView, 'library');
             const tabIds = settled.navStack.filter((e) => e.type === 'tab').map((e) => e.id);

@@ -1808,6 +1808,17 @@
             try { window.__rehabClearUpgradeOverlay?.(); window.appUpdate?.hideUpgradeOverlay?.(); } catch {}
             try { document.getElementById('localeSelectSheet') && (document.getElementById('localeSelectSheet').value = i18n.currentLocale || 'auto'); } catch {}
             ui.syncSwitchAria(document.getElementById('isAlt'));
+            try {
+                const resolvedEntry = typeof window.resolveAssetUrl === 'function'
+                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=427')
+                    : 'src/app/bootstrap.js?v=427';
+                const entry = new URL(resolvedEntry, document.baseURI).href;
+                const v7 = await import(entry);
+                await v7.bootstrapV7?.({ host: window, documentRef: document });
+            } catch (e) {
+                errorBus?.report?.('v7.bootstrap', e);
+                console.error('[v7] app shell bootstrap failed', e);
+            }
             window.addEventListener('scroll', () => {
                 document.querySelector('.md-top-app-bar')?.classList.toggle('scrolled', window.scrollY > 8);
             }, { passive: true });

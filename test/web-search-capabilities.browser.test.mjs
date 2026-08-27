@@ -8,6 +8,7 @@ import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { launchAuditBrowser } from './helpers/browser-launch.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = path.resolve(root, '../..');
@@ -73,14 +74,7 @@ async function startServer() {
 async function withPage(viewport, run) {
     const { server, base } = await startServer();
     const pw = loadPlaywright();
-    let browser;
-    let channel = process.env.AUDIT_CHANNEL || 'msedge';
-    try { browser = await pw.chromium.launch({ channel, headless: true }); }
-    catch (error) {
-        if (process.env.AUDIT_CHANNEL || !String(error?.message || '').includes("distribution 'msedge' is not found")) throw error;
-        channel = 'chromium';
-        browser = await pw.chromium.launch({ headless: true });
-    }
+    const { browser, channel } = await launchAuditBrowser(pw.chromium);
     const context = await browser.newContext({ viewport });
     const page = await context.newPage();
     await page.goto(`${base}/__test__`);

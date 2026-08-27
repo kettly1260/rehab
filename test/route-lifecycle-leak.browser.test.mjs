@@ -12,6 +12,7 @@ import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { launchAuditBrowser } from './helpers/browser-launch.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const root = path.resolve(path.dirname(__filename), '..');
@@ -104,20 +105,7 @@ function loadPlaywright() {
 async function launchBrowser() {
     const pw = loadPlaywright();
     const chromium = pw.chromium || pw.default?.chromium;
-    if (!chromium?.launch) throw new Error('playwright.chromium.launch unavailable');
-    const preferred = process.env.AUDIT_CHANNEL || 'msedge';
-    try {
-        return {
-            browser: await chromium.launch({ channel: preferred, headless: true }),
-            channel: preferred
-        };
-    } catch (error) {
-        if (process.env.AUDIT_CHANNEL || !String(error?.message || '').includes("distribution 'msedge' is not found")) throw error;
-        return {
-            browser: await chromium.launch({ headless: true }),
-            channel: 'chromium'
-        };
-    }
+    return launchAuditBrowser(chromium);
 }
 
 /**

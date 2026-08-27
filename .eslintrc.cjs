@@ -21,6 +21,12 @@ module.exports = {
     },
     overrides: [
         {
+            // V7 application code is native browser ESM. Keep the V6 classic-script
+            // parser contract unchanged outside src/ during the staged migration.
+            files: ['src/**/*.js'],
+            parserOptions: { sourceType: 'module' }
+        },
+        {
             files: ['*-pure.js', 'sync-pure.js', 'workout-*-pure.js', 'error-bus-pure.js', 'voice-engine.js', 'action-identity.js'],
             parserOptions: { sourceType: 'module' },
             env: { node: true }
