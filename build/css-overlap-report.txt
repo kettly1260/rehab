@@ -1,7 +1,7 @@
 # css overlap report
 # real-conflict threshold: 220
 
-## REAL CONFLICTS (same selector + same property, different value): 212
+## REAL CONFLICTS (same selector + same property, different value): 214
 *
   files: 02-base.css, 36-responsive.css, 50-v6-ui.css, 40-a11y.css
     animation-duration: 1ms !important | 0.001ms !important (36-responsive.css / 50-v6-ui.css / 40-a11y.css)
@@ -1069,6 +1069,15 @@ to
   files: 65-v7-workout.css
     padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
 
+.rehab-v7-shell #ai-coach.v7-feature-coach
+  files: 67-v7-coach.css
+    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) (67-v7-coach.css / 67-v7-coach.css)
+
+.rehab-v7-shell #ai-coach .advice-composer-stack
+  files: 67-v7-coach.css
+    bottom: calc(5.75rem + env(safe-area-inset-bottom)) | calc(5.25rem + env(safe-area-inset-bottom)) (67-v7-coach.css / 67-v7-coach.css)
+    border-radius: var(--v7-radius-xl) | var(--v7-radius-lg) (67-v7-coach.css / 67-v7-coach.css)
+
 ## DUPLICATES (same selector + same property + same value): 30
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
@@ -1215,7 +1224,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 158
+## COMPLEMENTS (same selector, disjoint properties): 160
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1689,3 +1698,9 @@ body.is-paused .fab-play
 
 .rehab-v7-shell #records .weight-chart-wrap
   files: 66-v7-records.css
+
+.rehab-v7-shell #ai-coach .ai-insight
+  files: 67-v7-coach.css
+
+.rehab-v7-shell #ai-coach .advice-v6-chat-list
+  files: 67-v7-coach.css

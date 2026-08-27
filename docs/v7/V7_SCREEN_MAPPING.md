@@ -57,17 +57,17 @@ The V7 visual references define visual hierarchy only. This document maps every 
 
 | V6 function | V6 entry | V7 entry | Status | Data compatible | Notes |
 |---|---|---|---|---|---|
-| Chat history and ranges | Coach page | Coach timeline/range control | Mapped / Phase 9 | Yes | Virtualized history retained |
-| Streaming / auto-follow | Coach list | Coach message list | Mapped / Phase 9 | Yes | Route-owned RAF/scroll handlers |
-| Manual scroll/new message jump | Coach list rail | Compact list navigation | Mapped / Phase 9 | Yes | Do not force auto-follow |
-| Stop/cancel | Composer/send state | Composer stop state | Mapped / Phase 9 | Yes | Partial response preserved |
-| Retry/version/edit | message actions | Message action menu | Mapped / Phase 9 | Yes | Same version records |
-| Model picker/favorites/recents | picker sheet | Model control/sheet | Mapped / Phase 9/11 | Yes | Soft Glass selected control only |
-| Search/history search | search control | Coach search/filter | Mapped / Phase 9 | Yes | All-history search retained |
-| Search evidence/citations | answer evidence UI | Evidence cards/detail | Mapped / Phase 9 | Yes | No data loss |
-| Attachments | composer controls | Composer attachment action | Mapped / Phase 9 | Yes | Preview secondary surface |
-| Prompt/context/templates | hidden/context/settings | Composer context + Profile AI settings | Mapped / Phase 9/10 | Yes | Templates remain secondary settings |
-| Usage/pricing/settings | topbar/settings | Model/details secondary UI | Mapped / Phase 9/10 | Yes | Not required in primary chat chrome |
+| Chat history and ranges | Coach page | Coach timeline/range control | Migrated / Phase 9 | Yes | Virtualized and cold history retained |
+| Streaming / auto-follow | Coach list | Coach message list | Migrated / Phase 9 | Yes | Route-owned visual RAF/scroll handlers; transport continues under legacy semantics |
+| Manual scroll/new message jump | Coach list rail | Compact list navigation | Migrated / Phase 9 | Yes | Manual scroll pauses follow without forcing the viewport back |
+| Stop/cancel | Composer/send state | Composer stop state | Migrated / Phase 9 | Yes | Partial response preserved |
+| Retry/version/edit | message actions | Message action menu | Migrated / Phase 9 | Yes | Same version records |
+| Model picker/favorites/recents | picker sheet | Model control/sheet | Migrated / Phase 9; secondary visual Phase 11 | Yes | Soft Glass selected control only |
+| Search/history search | search control | Coach search/filter | Migrated / Phase 9 | Yes | All-history search retained |
+| Search evidence/citations | answer evidence UI | Evidence cards/detail | Migrated / Phase 9 | Yes | Existing evidence records retained |
+| Attachments | composer controls | Composer attachment action | Migrated / Phase 9; preview visual Phase 11 | Yes | Route exit revokes temporary object URLs without persisting raw files |
+| Prompt/context/templates | hidden/context/settings | Composer context + Profile AI settings | Migrated / Phase 9; Profile visual Phase 10 | Yes | Templates remain secondary settings |
+| Usage/pricing/settings | topbar/settings | Model/details secondary UI | Migrated / Phase 9; Profile visual Phase 10 | Yes | Not required in primary chat chrome |
 
 ## Profile
 

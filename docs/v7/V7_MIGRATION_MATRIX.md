@@ -36,10 +36,10 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `health-exercise.js` | KEEP domain + V7 Records UI owner | Records/Workout | 7/8 | Preserve classification/library semantics |
 | `health-profile.js` | KEEP domain + V7 Records UI owner | Records/Profile secondary | 8/10/11 | Preserve rehab weekly/profile data |
 | `weekly-summary.js`, `report-panel.js` | KEEP + Records route owner | Records secondary routes/sheets | 8/11 | Preserve report versions |
-| `advice-panel.js` | MERGE / REWRITE_RUNTIME / REWRITE_UI | Coach feature | 9 | Preserve request/history semantics; centralize mount/unmount |
+| `advice-panel.js` | KEEP domain/request semantics + V7 route runtime owner | Coach feature | 9 | V7 mount/unmount owns scroll listeners, visual RAF and route cleanup without aborting transport |
 | `advice-render.js`, templates/context | KEEP / WRAP | Coach service/view helpers | 9 | Preserve safe text handling and version behavior |
-| `advice-attachments.js` | KEEP / WRAP | Coach attachment controller | 9 | Object URLs/payloads released on owner cleanup |
-| `advice-virtual-list.js` | KEEP / WRAP | Coach virtual history adapter | 9 | Keep virtualization/cold store |
+| `advice-attachments.js` | KEEP / WRAP | Coach attachment controller | 9 | Temporary object URLs release on removal/clear/route exit; raw files remain session-only |
+| `advice-virtual-list.js` | KEEP / WRAP | Coach virtual history adapter | 9 | Virtual controller is route-owned and destroyed on exit; cold store remains unchanged |
 | `ai-*` service/routing/model modules | KEEP / WRAP | services/ai | 2/9/10 | V7 consumes via context adapter; credentials never copied into UI state |
 | `search-*` | KEEP / WRAP | services/search | 2/9/10 | Preserve evidence/search policy |
 | `sync*` | KEEP / WRAP | services/sync | 2/10 | Preserve remote formats/conflict rules |

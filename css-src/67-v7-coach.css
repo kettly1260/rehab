@@ -1,0 +1,127 @@
+/* --- V7 Coach --- */
+.rehab-v7-shell #ai-coach.v7-feature-coach {
+    width: min(100%, var(--v7-content-max));
+    margin-inline: auto;
+    padding-inline: clamp(14px, 4vw, 24px);
+    padding-bottom: calc(12.5rem + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #ai-coach .advice-v6-page {
+    display: grid;
+    gap: var(--v7-space-4);
+}
+
+.rehab-v7-shell #ai-coach .v7-coach-surface {
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #ai-coach .ai-insight,
+.rehab-v7-shell #ai-coach .advice-v6-chat-list,
+.rehab-v7-shell #ai-coach .advice-v6-suggestions-card {
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #ai-coach .ai-insight {
+    overflow: hidden;
+}
+
+.rehab-v7-shell #ai-coach .advice-v6-filter-bar {
+    padding: var(--v7-space-2);
+    border-radius: var(--v7-radius-lg);
+}
+
+.rehab-v7-shell #ai-coach .advice-v6-chat-list {
+    min-width: 0;
+    overflow-x: hidden;
+    padding: var(--v7-space-3);
+}
+
+.rehab-v7-shell #ai-coach .advice-bubble {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #ai-coach .advice-bubble.user {
+    background: var(--v7-surface-muted);
+}
+
+.rehab-v7-shell #ai-coach .advice-bubble.assistant {
+    background: var(--v7-surface);
+}
+
+.rehab-v7-shell #ai-coach .advice-composer-stack {
+    position: sticky;
+    bottom: calc(5.75rem + env(safe-area-inset-bottom));
+    z-index: 4;
+    padding: var(--v7-space-2);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-xl);
+    background: var(--v7-surface);
+    box-shadow: var(--v7-shadow-2);
+}
+
+.rehab-v7-shell #ai-coach .advice-composer-stack .ai-input {
+    min-width: 0;
+    border: 1px solid var(--v7-border-strong);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface-muted);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #ai-coach .v7-coach-selected-control {
+    border-color: color-mix(in srgb, var(--v7-primary) 34%, var(--v7-border));
+    background: var(--v7-surface);
+}
+
+.rehab-v7-shell #ai-coach .advice-send,
+.rehab-v7-shell #ai-coach .ai-send {
+    border-color: transparent;
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #ai-coach .advice-v6-suggestions-card summary {
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #ai-coach .v7-coach-suggestion-controls > button {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-surface-muted);
+    color: var(--v7-text-muted);
+}
+
+.rehab-v7-shell #ai-coach .advice-scroll-rail {
+    opacity: .86;
+}
+
+@media (max-width: 480px) {
+    .rehab-v7-shell #ai-coach.v7-feature-coach {
+        padding-inline: var(--v7-space-3);
+    }
+
+    .rehab-v7-shell #ai-coach .advice-v6-chat-list {
+        padding-inline: var(--v7-space-2);
+    }
+
+    .rehab-v7-shell #ai-coach .advice-composer-stack {
+        bottom: calc(5.25rem + env(safe-area-inset-bottom));
+        border-radius: var(--v7-radius-lg);
+    }
+}
