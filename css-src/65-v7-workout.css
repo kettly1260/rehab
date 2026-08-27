@@ -1,0 +1,257 @@
+/* --- V7 Workout --- */
+.rehab-v7-shell #workout.v7-feature-workout {
+    width: min(100%, var(--v7-content-max));
+    margin-inline: auto;
+    padding-inline: clamp(14px, 4vw, 24px);
+    padding-bottom: calc(12.5rem + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #workout .workout-only-bar {
+    position: relative;
+    min-height: 4.75rem;
+    padding: var(--v7-space-4) 0 var(--v7-space-3);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .timer-panel,
+.rehab-v7-shell #workout .v7-workout-surface {
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .timer-panel {
+    min-height: 17.5rem;
+    padding: var(--v7-space-6) var(--v7-space-5) var(--v7-space-5);
+    border-radius: var(--v7-radius-xl);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.rehab-v7-shell #workout .timer-panel::before,
+.rehab-v7-shell #workout .timer-panel::after,
+.rehab-v7-shell #workout .fab-play-aura { display: none; }
+
+.rehab-v7-shell #workout .timer-panel:hover,
+.rehab-v7-shell #workout .timer-panel:active {
+    background: var(--v7-surface);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #workout .timer-panel #statusText {
+    color: var(--v7-primary);
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: 0.08em;
+}
+
+.rehab-v7-shell #workout .timer-panel #mainTime {
+    margin: var(--v7-space-3) 0 var(--v7-space-2);
+    color: var(--v7-text);
+    font-size: 5rem;
+    font-weight: var(--v7-weight-regular);
+    line-height: 1;
+    letter-spacing: 0;
+    text-shadow: none;
+}
+
+.rehab-v7-shell #workout .timer-panel #subText {
+    min-height: 1.5rem;
+    margin-bottom: var(--v7-space-5);
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-sm);
+}
+
+.rehab-v7-shell #workout .timer-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    padding: var(--v7-space-3) 0;
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-bg-subtle);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .timer-stats .stat-item {
+    min-width: 0;
+    padding-inline: var(--v7-space-2);
+    border-right: 1px solid var(--v7-border);
+}
+
+.rehab-v7-shell #workout .timer-stats .stat-item:last-child { border-right: 0; }
+.rehab-v7-shell #workout .timer-panel .stat-label { color: var(--v7-text-muted); letter-spacing: 0; }
+.rehab-v7-shell #workout .timer-panel .stat-item b { color: var(--v7-text); }
+.rehab-v7-shell #workout .workout-readiness { margin-top: var(--v7-space-3); border: 0; background: transparent; color: var(--v7-text-muted); }
+
+.rehab-v7-shell #workout .timer-tts-btn,
+.rehab-v7-shell #workout .timer-wakelock-btn,
+.rehab-v7-shell #workout .skip-btn {
+    min-width: var(--v7-touch-min);
+    min-height: var(--v7-touch-min);
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface-muted);
+    color: var(--v7-text-muted);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .mode-tabs,
+.rehab-v7-shell #workout .v7-workout-segmented {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--v7-space-1);
+    margin-block: var(--v7-space-4);
+    padding: var(--v7-space-1);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface-muted);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .mode-tab,
+.rehab-v7-shell #workout .v7-workout-segment {
+    min-width: 0;
+    min-height: var(--v7-touch-min);
+    border-radius: var(--v7-radius-md);
+    background: transparent;
+    color: var(--v7-text-muted);
+    box-shadow: none;
+    transition: background-color var(--v7-motion-fast) var(--v7-ease-standard), color var(--v7-motion-fast) var(--v7-ease-standard), transform var(--v7-motion-fast) var(--v7-ease-standard);
+}
+
+.rehab-v7-shell #workout .mode-tab.active,
+.rehab-v7-shell #workout .v7-workout-segment[aria-selected="true"] {
+    background: var(--v7-surface);
+    color: var(--v7-primary-strong);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #workout .input-card,
+.rehab-v7-shell #workout .cardio-card,
+.rehab-v7-shell #workout .strength-log-card,
+.rehab-v7-shell #workout .routine-tool,
+.rehab-v7-shell #workout .workout-plan-card {
+    border-radius: var(--v7-radius-lg);
+    padding: var(--v7-space-5);
+}
+
+.rehab-v7-shell #workout .rate-row,
+.rehab-v7-shell #workout .md-field,
+.rehab-v7-shell #workout .md-chip,
+.rehab-v7-shell #workout .workout-plan-toolbar,
+.rehab-v7-shell #workout .workout-controls {
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .md-field,
+.rehab-v7-shell #workout .md-chip {
+    border-color: var(--v7-border);
+    box-shadow: none;
+}
+
+.rehab-v7-shell #workout .md-field { border-radius: var(--v7-radius-md); }
+.rehab-v7-shell #workout .md-field label { color: var(--v7-text-muted); letter-spacing: 0; }
+.rehab-v7-shell #workout .md-field input,
+.rehab-v7-shell #workout .md-field select,
+.rehab-v7-shell #workout .md-field textarea { color: var(--v7-text); }
+
+.rehab-v7-shell #workout .strength-presets { gap: var(--v7-space-2); }
+.rehab-v7-shell #workout .strength-presets .md-chip { min-height: 2.5rem; }
+
+.rehab-v7-shell #workout .workout-controls {
+    display: flex;
+    width: max-content;
+    max-width: 100%;
+    margin: var(--v7-space-4) auto;
+    padding: var(--v7-space-2);
+    gap: var(--v7-space-2);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-pill);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #workout .md-fab {
+    border-color: var(--v7-border);
+    background: var(--v7-surface-muted);
+    color: var(--v7-text);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .v7-workout-primary-cta {
+    border-color: transparent;
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    box-shadow: var(--v7-shadow-2);
+}
+
+.rehab-v7-shell #workout .fab-play-shell { min-width: 8.25rem; }
+.rehab-v7-shell #workout .fab-play { min-width: 8.25rem; }
+.rehab-v7-shell #workout .fab-stop { color: var(--v7-danger); }
+.rehab-v7-shell #workout .fab-prev,
+.rehab-v7-shell #workout .fab-pip { color: var(--v7-primary-strong); }
+
+.rehab-v7-shell #workout .action-phase-group,
+.rehab-v7-shell #workout #currentActionList,
+.rehab-v7-shell #workout .workout-plan-recent { background: transparent; }
+
+.rehab-v7-shell #workout .action-phase-head {
+    margin: var(--v7-space-4) var(--v7-space-1) var(--v7-space-2);
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: 0.04em;
+}
+
+.rehab-v7-shell #workout .list-item,
+.rehab-v7-shell #workout .workout-plan-recent-item,
+.rehab-v7-shell #workout .empty-state {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #workout .list-item { margin-bottom: var(--v7-space-2); }
+.rehab-v7-shell #workout .list-item small,
+.rehab-v7-shell #workout .item-chip,
+.rehab-v7-shell #workout .workout-plan-card small,
+.rehab-v7-shell #workout .workout-plan-card p { color: var(--v7-text-muted); }
+
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] .timer-panel { border-color: color-mix(in srgb, var(--v7-warning) 45%, var(--v7-border)); }
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] .timer-panel { border-color: color-mix(in srgb, var(--v7-info) 45%, var(--v7-border)); }
+.rehab-v7-shell #workout[data-v7-workout-state="error"] .timer-panel { border-color: color-mix(in srgb, var(--v7-danger) 55%, var(--v7-border)); }
+
+@media (max-width: 390px) {
+    .rehab-v7-shell #workout .timer-panel { min-height: 16rem; padding-inline: var(--v7-space-4); }
+    .rehab-v7-shell #workout .timer-panel #mainTime { font-size: 4.5rem; }
+    .rehab-v7-shell #workout .mode-tab { padding-inline: var(--v7-space-1); font-size: var(--v7-type-xs); }
+    .rehab-v7-shell #workout .mode-tab .material-symbols-rounded { font-size: var(--v7-icon-sm); }
+    .rehab-v7-shell #workout .input-card,
+    .rehab-v7-shell #workout .cardio-card,
+    .rehab-v7-shell #workout .strength-log-card,
+    .rehab-v7-shell #workout .routine-tool,
+    .rehab-v7-shell #workout .workout-plan-card { padding: var(--v7-space-4); }
+}

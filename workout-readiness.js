@@ -44,8 +44,22 @@
         return cap;
     }
 
-    window.workoutReadiness = { available, score, message, render, notifyBeforeStart };
-    document.addEventListener('visibilitychange', render);
-    window.addEventListener('online', render);
-    window.addEventListener('offline', render);
+    let mounted = false;
+    const mount = () => {
+        if (mounted) return;
+        mounted = true;
+        document.addEventListener('visibilitychange', render);
+        window.addEventListener('online', render);
+        window.addEventListener('offline', render);
+        render();
+    };
+    const unmount = () => {
+        if (!mounted) return;
+        mounted = false;
+        document.removeEventListener('visibilitychange', render);
+        window.removeEventListener('online', render);
+        window.removeEventListener('offline', render);
+    };
+
+    window.workoutReadiness = { available, score, message, render, notifyBeforeStart, mount, unmount };
 })();

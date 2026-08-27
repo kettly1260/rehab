@@ -6,36 +6,36 @@ The V7 visual references define visual hierarchy only. This document maps every 
 
 | V6 function | V6 entry | V7 entry | Status | Data compatible | Notes |
 |---|---|---|---|---|---|
-| Greeting/current day | Today header | Today header/status | Mapped / Phase 6 | Yes | Calm header, no decorative hero blur |
-| Plan aggregate/completion | Today overview | Core status + Today plan section | Mapped / Phase 6 | Yes | Real plan data |
-| Today plan/tasks | Today plan card | Today action section | Mapped / Phase 6 | Yes | Expand/detail sheet for dense task controls |
-| Plan task edit/move/lock/delete/confirm | task drawer | Plan task detail sheet | Mapped / Phase 6/11 | Yes | Preserve all controls |
-| Create plan / AI plan | Today plan actions | New-plan / AI plan sheet | Mapped / Phase 6/11 | Yes | Secondary surface |
-| Quick record | action dock | Today quick actions | Mapped / Phase 6 | Yes | Diet/weight/exercise/workout real entries |
-| Diet/intake | diet card | Today metric/status section | Mapped / Phase 6 | Yes | No fake visual numbers |
-| Timeline/recent records | timeline | Today timeline/trend detail | Mapped / Phase 6 | Yes | Stable Surface rows |
-| Context AI / weekly insight | Today AI cards | Insight card -> Coach/detail | Mapped / Phase 6/9 | Yes | Keep AI source/context |
-| Start planned workout | plan task | Primary CTA -> Workout | Mapped / Phase 6/7 | Yes | Liquid only on key CTA |
-| Quick repeat/save routine | plan enhancements | Plan task overflow/detail | Mapped / Phase 6/11 | Yes | Not removed from primary flow |
+| Greeting/current day | Today header | Today header/status | Migrated / Phase 6 | Yes | Calm header, no decorative hero blur |
+| Plan aggregate/completion | Today overview | Core status + Today plan section | Migrated / Phase 6 | Yes | Real plan data |
+| Today plan/tasks | Today plan card | Today action section | Migrated / Phase 6 | Yes | Expand/detail sheet for dense task controls |
+| Plan task edit/move/lock/delete/confirm | task drawer | Plan task detail sheet | Migrated / Phase 6; secondary visual Phase 11 | Yes | Preserve all controls |
+| Create plan / AI plan | Today plan actions | New-plan / AI plan sheet | Migrated / Phase 6; secondary visual Phase 11 | Yes | Secondary surface |
+| Quick record | action dock | Today quick actions | Migrated / Phase 6 | Yes | Diet/weight/exercise/workout real entries |
+| Diet/intake | diet card | Today metric/status section | Migrated / Phase 6 | Yes | No fake visual numbers |
+| Timeline/recent records | timeline | Today timeline/trend detail | Migrated / Phase 6 | Yes | Stable Surface rows |
+| Context AI / weekly insight | Today AI cards | Insight card -> Coach/detail | Migrated / Phase 6; Coach visual Phase 9 | Yes | Keep AI source/context |
+| Start planned workout | plan task | Primary CTA -> Workout | Migrated / Phase 6/7 | Yes | Liquid only on key CTA |
+| Quick repeat/save routine | plan enhancements | Plan task overflow/detail | Migrated / Phase 6; secondary visual Phase 11 | Yes | Not removed from primary flow |
 
 ## Workout
 
 | V6 function | V6 entry | V7 entry | Status | Data compatible | Notes |
 |---|---|---|---|---|---|
-| Strength/cardio/recovery/stretch modes | Workout mode controls | Workout segmented control | Mapped / Phase 7 | Yes | Restrained segmented surface |
-| Idle/readiness | Workout page | Workout status summary | Mapped / Phase 7 | Yes | Readiness secondary to action |
-| Action plan/list | current action list | Workout action sequence | Mapped / Phase 7 | Yes | Solid Surface, no per-row backdrop |
-| Add/edit/delete/reorder actions | form/list | Action editor/detail | Mapped / Phase 7/11 | Yes | Preserve library integration |
-| Routine/action library | Workout library | Library sheet / Profile library | Mapped / Phase 7/10/11 | Yes | Same action IDs |
-| Start/pause/resume/finish | FAB controls | Primary session control | Mapped / Phase 7 | Yes | Liquid interaction budget applies |
-| Skip/previous | Workout controls | Secondary session controls | Mapped / Phase 7 | Yes | Stable controls |
-| Rep/work/rest/set timers | workout panel | Running session body | Mapped / Phase 7 | Yes | No backdrop on timer body |
-| RPE/RIR set review | set review modal | Set review sheet | Mapped / Phase 7/11 | Yes | Preserve logging |
-| Manual strength log | Workout card | Quick log sheet/detail | Mapped / Phase 7/11 | Yes | Same health record path |
-| Cardio plan/edit/save | cardio card/modal | Cardio configure/session/result | Mapped / Phase 7 | Yes | Same MET rules |
-| Voice settings | Workout/Profile setting | Session audio control + Profile Voice | Mapped / Phase 7/10 | Yes | Platform service owner |
-| WakeLock/MediaSession/PIP | session runtime | Session owner; PIP action | Mapped / Phase 7 | Yes | Not tied to page mount |
-| Crash/session restore | startup/workout state | Resume banner / session restore | Mapped / Phase 7/11 | Yes | Preserve journal schema |
+| Strength/cardio/recovery/stretch modes | Workout mode controls | Workout segmented control + action taxonomy focus | Migrated / Phase 7 | Yes | Engine modes unchanged; recovery/stretch remain action-domain focus |
+| Idle/readiness | Workout page | Workout status summary | Migrated / Phase 7 | Yes | Readiness listeners are route-owned |
+| Action plan/list | current action list | Workout action sequence | Migrated / Phase 7 | Yes | Solid Surface, no per-row backdrop |
+| Add/edit/delete/reorder actions | form/list | Action editor/detail | Migrated / Phase 7; secondary visual Phase 11 | Yes | Preserve library integration |
+| Routine/action library | Workout library | Library sheet / Profile library | Migrated / Phase 7; Profile/secondary visual Phase 10/11 | Yes | Same action IDs |
+| Start/pause/resume/finish | FAB controls | Primary session control | Migrated / Phase 7 | Yes | Only Play/Pause receives Liquid interaction |
+| Skip/previous | Workout controls | Secondary session controls | Migrated / Phase 7 | Yes | Stable controls |
+| Rep/work/rest/set timers | workout panel | Running session body | Migrated / Phase 7 | Yes | No backdrop on timer body |
+| RPE/RIR set review | set review modal | Set review sheet | Migrated / Phase 7; secondary visual Phase 11 | Yes | Preserve logging |
+| Manual strength log | Workout card | Quick log sheet/detail | Migrated / Phase 7; secondary visual Phase 11 | Yes | Same health record path |
+| Cardio plan/edit/save | cardio card/modal | Cardio configure/session/result | Migrated / Phase 7 | Yes | Same MET rules |
+| Voice settings | Workout/Profile setting | Session audio control + Profile Voice | Migrated / Phase 7; Profile visual Phase 10 | Yes | Existing voice service retained |
+| WakeLock/MediaSession/PIP | session runtime | Session owner; PIP action | Migrated / Phase 7 | Yes | Session ownership survives route unmount |
+| Crash/session restore | startup/workout state | Session restore + visible state rebuild | Migrated / Phase 7; resume banner visual Phase 11 | Yes | Journal schema unchanged |
 
 ## Records
 
@@ -99,4 +99,3 @@ All V6 modal/sheet/picker/loading/error/offline/toast/confirmation/attachment/pe
 - Inventoried V6 capabilities without a V7 entry: **0**.
 - Explicitly deferred capability: **Debug/diagnostics primary-page polish only**; the route remains reachable and its functionality is retained.
 - Data compatibility assumption: all mappings initially read/write through the existing V6 store/schema until Phase 2 adapters are proven equivalent.
-

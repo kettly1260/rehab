@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const BASE_COMMIT = 'e575601cd3018677fed29ed409e12ce7185cf9c2';
+const BASE_COMMIT = 'ae1194b';
 
 const TODAY_CSS = 'css-src/51-v6-today.css';
 const WORKOUT_CSS = 'css-src/52-v6-workout.css';
@@ -30,7 +30,7 @@ const FORBIDDEN_HOST_ANIMATIONS = [
 
 const FROZEN_PATHS = [
   'workout-core.js',
-  'workout-system.js',
+  // Phase 7 may wrap route-owned hotkey lifecycle in workout-system.js.
   'workout-cardio.js',
   'workout-pip.js',
   'css-src/41-m3e-effects.css',

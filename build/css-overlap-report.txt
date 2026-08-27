@@ -1,7 +1,7 @@
 # css overlap report
 # real-conflict threshold: 220
 
-## REAL CONFLICTS (same selector + same property, different value): 205
+## REAL CONFLICTS (same selector + same property, different value): 212
 *
   files: 02-base.css, 36-responsive.css, 50-v6-ui.css, 40-a11y.css
     animation-duration: 1ms !important | 0.001ms !important (36-responsive.css / 50-v6-ui.css / 40-a11y.css)
@@ -1041,6 +1041,34 @@ to
   files: 64-v7-today.css
     min-height: 4.4rem | 4rem (64-v7-today.css / 64-v7-today.css)
 
+.rehab-v7-shell #workout .timer-panel
+  files: 65-v7-workout.css
+    min-height: 17.5rem | 16rem (65-v7-workout.css / 65-v7-workout.css)
+
+.rehab-v7-shell #workout .timer-panel #mainTime
+  files: 65-v7-workout.css
+    font-size: 5rem | 4.5rem (65-v7-workout.css / 65-v7-workout.css)
+
+.rehab-v7-shell #workout .input-card
+  files: 65-v7-workout.css
+    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+
+.rehab-v7-shell #workout .cardio-card
+  files: 65-v7-workout.css
+    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+
+.rehab-v7-shell #workout .strength-log-card
+  files: 65-v7-workout.css
+    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+
+.rehab-v7-shell #workout .routine-tool
+  files: 65-v7-workout.css
+    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+
+.rehab-v7-shell #workout .workout-plan-card
+  files: 65-v7-workout.css
+    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+
 ## DUPLICATES (same selector + same property + same value): 30
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
@@ -1187,7 +1215,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 147
+## COMPLEMENTS (same selector, disjoint properties): 152
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1628,3 +1656,18 @@ body.is-paused .fab-play
 
 .rehab-v7-shell #today .glass-card
   files: 64-v7-today.css
+
+.rehab-v7-shell #workout .mode-tab
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .md-field
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .md-chip
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .workout-controls
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .list-item
+  files: 65-v7-workout.css

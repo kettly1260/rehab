@@ -24,8 +24,8 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `routine-library.js` | KEEP domain + REWRITE_UI | Workout/Profile | 7/10 | Split huge renderer from library operations |
 | `workout-engine.js` | KEEP | domain workout | 7 | No algorithm rewrite |
 | `workout-state.js` | KEEP / WRAP | workout session owner | 7 | Keep journal schema/recovery; decouple from route DOM |
-| `workout-core.js` | MERGE / WRAP | workout feature + session adapter | 7 | UI methods move to feature; session commands remain stable |
-| `workout-system.js` | REWRITE_RUNTIME / WRAP | `platform` + session owner | 7 | Route listeners get disposers; background session services survive route changes |
+| `workout-core.js` | KEEP / WRAP; V7 UI owner active | `src/features/workout` + legacy session engine | 7 | Session commands and algorithms remain stable; V7 owns visible state/classes and rebuilds from runtime state |
+| `workout-system.js` | WRAP; route hotkeys migrated | Workout feature + session owner | 7 | Hotkeys bind/unbind with the route; audio/back/session services remain session-owned and survive route changes |
 | `workout-cardio*` | KEEP + REWRITE_UI | workout domain/feature | 7 | Preserve MET/save rules |
 | `workout-voice.js`, `voice-*` | KEEP / WRAP | services/voice + platform | 7/10 | Preserve engine/cache settings |
 | `workout-wakelock.js` | KEEP | platform/wake-lock | 7 | Session-owned |
@@ -46,7 +46,7 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `backup.js` | KEEP / WRAP | services/storage/backup | 2/10 | Preserve archive/import safety |
 | `theme.js`, `i18n.js`, `haptics.js` | KEEP / WRAP | app/platform preferences | 3/10 | Expose through context |
 | `css-src/01..49` | KEEP where generic, progressively normalize | V7 layers/primitives/features | 3-11 | Avoid mass deletion; eliminate overlap as host modules migrate |
-| `css-src/50..56` V6 UI | REWRITE_UI | V7 feature styles | 3-11 | Visual direction replaced incrementally, not in one override file |
+| `css-src/50..56` V6 UI | REWRITE_UI | V7 feature styles | 3-11 | Today and Workout are overridden by owned V7 feature CSS; remaining pages migrate incrementally |
 | scattered Glass CSS | REWRITE_UI | `src/ui/effects` | 4 | Feature CSS may consume classes/tokens but not invent backdrop rules |
 | `sw.js`, `app-update.js`, manifest | KEEP then integrate | platform/PWA | 12 | Do not redesign SW while main UI is still moving |
 | existing perf/browser/unit tests | KEEP / MERGE | V7-equivalent tests | all | Replace only when the new test covers the same contract; document replacements |
@@ -58,4 +58,3 @@ This matrix records how the V6 source is treated during the staged migration. V6
 3. Legacy globals may be read only through explicitly named adapters/context during the bridge period.
 4. A legacy renderer can be retired only after its functions have a mapped V7 entry and equivalent tests/manual QA.
 5. CSS migration must reduce, not increase, high-cost idle effects.
-

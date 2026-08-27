@@ -187,10 +187,11 @@ Object.assign(workout, {
 
     // Training keyboard shortcuts, only active when workout page is visible.
     _kbdBound: false,
+    _hotkeyHandler: null,
     bindHotkeys() {
         if (this._kbdBound) return;
         this._kbdBound = true;
-        window.addEventListener('keydown', (e) => {
+        this._hotkeyHandler = (e) => {
             const active = document.querySelector('.page.active')?.id === 'workout';
             if (!active) return;
             if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
@@ -198,6 +199,13 @@ Object.assign(workout, {
             if (e.code === 'ArrowRight') { e.preventDefault(); this.skip(); }
             if (e.code === 'ArrowLeft') { e.preventDefault(); this.prevAction?.(); }
             if (e.code === 'Escape') { e.preventDefault(); this.stop(); }
-        });
+        };
+        window.addEventListener('keydown', this._hotkeyHandler);
+    },
+    unbindHotkeys() {
+        if (!this._kbdBound || !this._hotkeyHandler) return;
+        window.removeEventListener('keydown', this._hotkeyHandler);
+        this._hotkeyHandler = null;
+        this._kbdBound = false;
     },
 });
