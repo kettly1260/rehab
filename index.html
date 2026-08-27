@@ -1443,6 +1443,7 @@
                         }
                     } catch {}
                     const registration = await navigator.serviceWorker.register('./sw.js?v=427', { updateViaCache: 'none' });
+                    if (!registration) return;
                     await registration.update?.();
                     // Never auto-activate a waiting worker here. Quiet registration only discovers
                     // updates; activation must wait for explicit user apply (or the post-apply
@@ -1733,7 +1734,19 @@
                 };
                 if (document.startViewTransition) {
                     const transition = document.startViewTransition(activate);
-                    try { await transition.updateCallbackDone; } catch (e) { errorBus?.report?.('ui.tab.transition', e, { page: id }); }
+                    const consumeTransitionPromise = (promise, stage) => {
+                        promise?.catch?.((e) => {
+                            if (e?.name === 'AbortError') return;
+                            errorBus?.report?.(`ui.tab.transition.${stage}`, e, { page: id });
+                        });
+                    };
+                    consumeTransitionPromise(transition.ready, 'ready');
+                    consumeTransitionPromise(transition.finished, 'finished');
+                    try {
+                        await transition.updateCallbackDone;
+                    } catch (e) {
+                        if (e?.name !== 'AbortError') errorBus?.report?.('ui.tab.transition.update', e, { page: id });
+                    }
                 } else activate();
                 if (!this.isCurrentNavigation(navigationToken)) return false;
                 if (id === 'today') scheduleTodayEnhancementLoad();

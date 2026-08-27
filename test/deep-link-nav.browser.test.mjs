@@ -438,3 +438,73 @@ test('H2-T2 browser: PWA mode re-pushes root instead of silent blank dump', asyn
         await new Promise((resolve) => http.server.close(resolve));
     }
 });
+
+test('V7-NAV browser: floating rail handles touch, rapid switching, pointer cancel and keyboard focus', async () => {
+    const http = await startServer();
+    try {
+        await withBrowser(async (browser) => {
+            const context = await browser.newContext({
+                serviceWorkers: 'block',
+                viewport: { width: 390, height: 844 },
+                hasTouch: true,
+                isMobile: true
+            });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+            await page.goto(`${http.base}/index.html#/today`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await page.waitForFunction(() => (/** @type {any} */ (window)).rehabV7?.lifecycle?.activeId === 'today', null, { timeout: 45000 });
+
+            const geometry = await page.evaluate(() => {
+                const nav = /** @type {HTMLElement} */ (document.querySelector('.v7-bottom-nav'));
+                const style = getComputedStyle(nav);
+                return {
+                    count: nav.querySelectorAll('.nav-item').length,
+                    position: style.position,
+                    backdrop: style.backdropFilter,
+                    bottom: style.bottom,
+                    width: nav.getBoundingClientRect().width,
+                    overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth
+                };
+            });
+            assert.equal(geometry.count, 5);
+            assert.equal(geometry.position, 'fixed');
+            assert.equal(geometry.backdrop, 'none');
+            assert.ok(geometry.width <= 366 && geometry.width > 300);
+            assert.ok(geometry.overflow <= 1);
+            assert.ok(Number.parseFloat(geometry.bottom) >= 0);
+
+            const indicator = page.locator('.v7-bottom-nav__indicator');
+            await indicator.dispatchEvent('pointerdown', { pointerId: 1, clientX: 30, clientY: 20, pointerType: 'touch' });
+            assert.equal(await indicator.getAttribute('data-v7-interacting'), 'true');
+            await indicator.dispatchEvent('pointercancel', { pointerId: 1, pointerType: 'touch' });
+            assert.equal(await indicator.getAttribute('data-v7-interacting'), 'false');
+
+            const today = page.locator('.nav-item[data-v7-page="today"]');
+            await today.focus();
+            await page.keyboard.press('ArrowRight');
+            assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-v7-page')), 'workout');
+            await page.keyboard.press('End');
+            assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-v7-page')), 'profile');
+            await page.keyboard.press('Home');
+            assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-v7-page')), 'today');
+
+            await page.locator('.nav-item[data-v7-page="workout"]').tap();
+            await page.waitForFunction(() => document.querySelector('.page.active')?.id === 'workout', null, { timeout: 45000 });
+            await page.goBack({ waitUntil: 'domcontentloaded' }).catch(() => null);
+            await page.waitForFunction(() => document.querySelector('.page.active')?.id === 'today', null, { timeout: 45000 });
+
+            await page.evaluate(() => {
+                for (const pageId of ['records', 'profile', 'ai-coach', 'today']) {
+                    document.querySelector(`.nav-item[data-v7-page="${pageId}"]`)?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                }
+            });
+            await page.waitForFunction(() => (/** @type {any} */ (window)).rehabV7?.lifecycle?.activeId === 'today', null, { timeout: 45000 });
+            await delay(500);
+            assert.deepEqual(errors, []);
+            await context.close();
+        });
+    } finally {
+        await new Promise((resolve) => http.server.close(resolve));
+    }
+});

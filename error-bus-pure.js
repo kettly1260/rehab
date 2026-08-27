@@ -16,7 +16,7 @@ export function mapFriendlyMessage(err) {
 /** @param {Error|unknown} err */
 export function isIgnorableBrowserError(err) {
     const message = String(err instanceof Error ? err.message : err || '');
-    return /ResizeObserver loop (?:limit exceeded|completed with undelivered notifications)|Observer loop completed with undelivered notifications/i.test(message);
+    return /ResizeObserver loop (?:limit exceeded|completed with undelivered notifications)|Observer loop completed with undelivered notifications|Transition was skipped/i.test(message);
 }
 
 export function createErrorBus(max = 100) {

@@ -1,7 +1,7 @@
 # css overlap report
 # real-conflict threshold: 220
 
-## REAL CONFLICTS (same selector + same property, different value): 199
+## REAL CONFLICTS (same selector + same property, different value): 202
 *
   files: 02-base.css, 36-responsive.css, 50-v6-ui.css, 40-a11y.css
     animation-duration: 1ms !important | 0.001ms !important (36-responsive.css / 50-v6-ui.css / 40-a11y.css)
@@ -1016,6 +1016,19 @@ to
     color: var(--v7-text) | var(--v7-on-primary) (61-v7-primitives.css / 61-v7-primitives.css)
     box-shadow: var(--v7-shadow-1) | var(--v7-shadow-2) (61-v7-primitives.css / 61-v7-primitives.css)
 
+.rehab-v7-shell .md-nav-rail.v7-bottom-nav
+  files: 63-v7-navigation.css
+    bottom: calc(var(--v7-space-2) + env(safe-area-inset-bottom)) | calc(var(--v7-space-1) + env(safe-area-inset-bottom)) (63-v7-navigation.css / 63-v7-navigation.css)
+    width: min(calc(100% - 24px), 460px) | calc(100% - 16px) (63-v7-navigation.css / 63-v7-navigation.css)
+
+.rehab-v7-shell .v7-bottom-nav .nav-item.active .nav-content > .material-symbols-rounded
+  files: 63-v7-navigation.css
+    transform: none | translateY(-1px) (63-v7-navigation.css / 63-v7-navigation.css)
+
+.rehab-v7-shell .v7-bottom-nav .nav-content small
+  files: 63-v7-navigation.css
+    font-size: 0.6875rem | 0.625rem (63-v7-navigation.css / 63-v7-navigation.css)
+
 ## DUPLICATES (same selector + same property + same value): 30
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
@@ -1162,7 +1175,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 143
+## COMPLEMENTS (same selector, disjoint properties): 145
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1591,3 +1604,9 @@ body.is-paused .fab-play
 
 .rehab-v7-shell .v7-liquid-control[data-v7-interacting="true"]
   files: 62-v7-effects.css
+
+.rehab-v7-shell .v7-bottom-nav .nav-content > .material-symbols-rounded
+  files: 63-v7-navigation.css
+
+.rehab-v7-shell .v7-bottom-nav__indicator
+  files: 63-v7-navigation.css

@@ -18,7 +18,7 @@
 
     function isIgnorableBrowserError(err) {
         const message = String(err?.message || err || '');
-        return /ResizeObserver loop (?:limit exceeded|completed with undelivered notifications)|Observer loop completed with undelivered notifications/i.test(message);
+        return /ResizeObserver loop (?:limit exceeded|completed with undelivered notifications)|Observer loop completed with undelivered notifications|Transition was skipped/i.test(message);
     }
 
     function safeToast(message) {
@@ -147,7 +147,10 @@
             });
         });
         window.addEventListener('unhandledrejection', function (event) {
-            if (isIgnorableBrowserError(event.reason)) return;
+            if (isIgnorableBrowserError(event.reason)) {
+                event.preventDefault?.();
+                return;
+            }
             errorBus.report('global', event.reason || '未处理的 Promise 拒绝');
         });
 

@@ -5,6 +5,7 @@ import { createRouter } from './router.js';
 import { getFeature } from './feature-registry.js';
 import { createLegacyAdapters } from '../legacy/adapters/index.js';
 import { createEffectsController } from '../ui/effects/index.js';
+import { createBottomNavigation } from '../ui/navigation/bottom-nav.js';
 
 const RUNTIME_KEY = Symbol.for('rehab.v7.runtime');
 
@@ -44,6 +45,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
 
     router.start();
     markBottomNav(documentRef);
+    const bottomNavigation = createBottomNavigation({ documentRef, events });
     const activePage = context.activePage;
     await lifecycle.transition(getFeature(activePage), context, { source: 'bootstrap' });
     documentRef.documentElement?.classList?.add('rehab-v7-shell');
@@ -59,6 +61,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         lifecycle,
         events,
         effects,
+        bottomNavigation,
         diagnostics: Object.freeze({
             snapshot: () => lifecycle.snapshot()
         }),
@@ -68,6 +71,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         }),
         dispose() {
             offMount();
+            bottomNavigation.dispose();
             effects.dispose();
             router.stop();
             lifecycle.dispose();

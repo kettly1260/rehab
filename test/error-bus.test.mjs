@@ -25,3 +25,11 @@ test('resize observer loop browser warnings are ignored', () => {
     assert.equal(bus.report('global', warning), null);
     assert.equal(bus.list().length, 0);
 });
+
+test('expected overlapping View Transition abort is ignored', () => {
+    const bus = createErrorBus();
+    const warning = new DOMException('Transition was skipped', 'AbortError');
+    assert.equal(isIgnorableBrowserError(warning), true);
+    assert.equal(bus.report('global', warning), null);
+    assert.equal(bus.list().length, 0);
+});

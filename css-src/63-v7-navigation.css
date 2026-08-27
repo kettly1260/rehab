@@ -1,0 +1,133 @@
+/* --- V7 Navigation --- */
+.rehab-v7-shell .md-nav-rail.v7-bottom-nav {
+    position: fixed;
+    left: 50%;
+    right: auto;
+    bottom: calc(var(--v7-space-2) + env(safe-area-inset-bottom));
+    z-index: 220;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: min(calc(100% - 24px), 460px);
+    height: var(--v7-nav-height);
+    min-height: var(--v7-nav-height);
+    padding: var(--v7-space-1) var(--v7-space-2);
+    box-sizing: border-box;
+    overflow: hidden;
+    transform: translateX(-50%);
+    border: 1px solid var(--v7-border);
+    border-radius: calc(var(--v7-nav-height) / 2);
+    background: color-mix(in srgb, var(--v7-surface) 96%, var(--v7-primary-soft));
+    box-shadow: var(--v7-shadow-float);
+    isolation: isolate;
+    contain: layout paint;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-item {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: var(--v7-nav-item-min);
+    padding: var(--v7-space-1) var(--v7-space-1);
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: transparent;
+    color: var(--v7-text-muted);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-item .nav-indicator {
+    display: none;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    gap: 0.125rem;
+    min-width: 0;
+    color: inherit;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-content > .material-symbols-rounded,
+.rehab-v7-shell .v7-bottom-nav .nav-item.active .nav-content > .material-symbols-rounded {
+    width: auto;
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    transform: none;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-size: var(--v7-icon-md);
+    transition: color var(--v7-motion-fast) var(--v7-ease-standard), transform var(--v7-motion-fast) var(--v7-ease-standard);
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-content small {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    color: inherit;
+    font-size: 0.6875rem;
+    font-weight: var(--v7-weight-medium);
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-item.active {
+    color: var(--v7-primary-strong);
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-item.active .nav-content > .material-symbols-rounded {
+    transform: translateY(-1px);
+    font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" 24;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-item:focus-visible {
+    outline: 3px solid var(--v7-focus);
+    outline-offset: -3px;
+}
+
+.rehab-v7-shell .v7-bottom-nav__indicator {
+    position: absolute;
+    z-index: 0;
+    top: var(--v7-space-1);
+    bottom: var(--v7-space-1);
+    left: var(--v7-space-2);
+    width: calc((100% - (2 * var(--v7-space-2))) / 5);
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-primary-soft);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--v7-primary) 12%, transparent);
+    transform: translateX(calc(var(--v7-nav-index, 0) * 100%));
+    transform-origin: center;
+    transition: transform var(--v7-motion-normal) var(--v7-ease-emphasized), border-radius var(--v7-motion-fast) var(--v7-ease-standard);
+    pointer-events: none;
+}
+
+.rehab-v7-shell .v7-bottom-nav[data-v7-nav-moving="true"] .v7-bottom-nav__indicator {
+    border-radius: 42% 58% 48% 52% / 52% 46% 54% 48%;
+}
+
+.rehab-v7-shell main {
+    padding-bottom: calc(var(--v7-nav-height) + var(--v7-space-8) + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 360px) {
+    .rehab-v7-shell .md-nav-rail.v7-bottom-nav {
+        width: calc(100% - 16px);
+        bottom: calc(var(--v7-space-1) + env(safe-area-inset-bottom));
+    }
+    .rehab-v7-shell .v7-bottom-nav .nav-content small { font-size: 0.625rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rehab-v7-shell .v7-bottom-nav__indicator,
+    .rehab-v7-shell .v7-bottom-nav .nav-content > .material-symbols-rounded { transition-duration: 1ms; }
+}
+
