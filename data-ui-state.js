@@ -732,8 +732,8 @@
                 }
             };
             const activeView = this.healthView || this.healthViewOrder()[0];
-            return `<div id="healthSwipeDeck" class="health-swipe-deck" onscroll="data.onHealthDeckScroll(this)">
-            ${this.healthViewOrder().map(view => `<section class="health-swipe-page${view === activeView ? ' is-active' : ''}" data-health-page="${view}" data-health-active="${view === activeView ? 'true' : 'false'}">${renderOne(view)}</section>`).join('')}
+            return `<div id="healthSwipeDeck" class="health-swipe-deck v7-records-view-host" data-v7-single-view="true">
+            <section class="health-swipe-page is-active" data-health-page="${activeView}" data-health-active="true">${renderOne(activeView)}</section>
         </div>`;
         },
 
@@ -758,7 +758,7 @@
             this.updateHealthTabActive();
             this.syncHealthSwipeActive(view);
             const deck = document.getElementById('healthSwipeDeck');
-            if (!deck) {
+            if (!deck || deck.dataset.v7SingleView === 'true') {
                 this.renderRecordsPage();
                 window.appRoute?.syncFromState?.();
                 return;

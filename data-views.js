@@ -158,6 +158,7 @@
         },
 
         renderRecordsPage() {
+            if (typeof this.renderHealthTabs !== 'function' || typeof this.renderHealthSwipeDeck !== 'function') return;
             const overview = document.getElementById('recordsOverview');
             const content = document.getElementById('recordsContent');
             if (overview) overview.innerHTML = this.renderRecordsV6Overview?.() || '';
@@ -167,8 +168,8 @@
                 ${this.renderHealthSwipeDeck()}`;
             }
             requestAnimationFrame(() => {
-                this.syncHealthDeckPosition(false);
-                this.updateHealthSwipeEffects();
+                this.syncHealthSwipeActive();
+                if (this.healthView === 'weight') this.scheduleWeightChartPinchBinding?.();
                 if (this.healthView === 'diet') this.autoResizeDietInput?.();
             });
         },

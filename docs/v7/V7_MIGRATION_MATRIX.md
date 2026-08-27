@@ -17,7 +17,7 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `storage/*-collections*` | KEEP | storage adapter | 2 | Preserve collection IDs/index behavior |
 | `data-records.js`, pure data utils | KEEP | domain/services | 2+ | Reuse directly through adapter |
 | `today-view-core.js` | KEEP calculations + REWRITE_UI | `src/features/today` | 6 | Replace HTML ownership, keep data computations |
-| `history-view.js` | MERGE / REWRITE_UI | Today + Records adapters | 6/8 | Separate cross-page calculations from page render strings |
+| `history-view.js` | MERGE / WRAP; Records owner active | Today + `src/features/records` adapters | 6/8 | Keep cross-page calculations and rebuild one Records subview at a time |
 | `plan-*` domain modules | KEEP / WRAP | domain plan adapter | 2/6/7 | Preserve task IDs, plans, feedback and progression semantics |
 | `plan-ui.js` | REWRITE_UI | Today/Workout secondary UI | 6/7/11 | Keep feature operations behind adapter during migration |
 | `routine-plan.js` | KEEP domain + REWRITE_UI | Workout | 7 | Preserve action IDs and current plan state |
@@ -31,11 +31,11 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `workout-wakelock.js` | KEEP | platform/wake-lock | 7 | Session-owned |
 | `workout-media-session.js` | KEEP | platform/media-session | 7 | Session-owned |
 | `workout-pip.js` | KEEP / WRAP | platform/PIP | 7 | Remove dependency on hidden route DOM where possible |
-| `health-diet.js`, `food-*` | KEEP domain + REWRITE_UI | Records | 8 | Preserve food data/evidence/AI paths |
-| `health-weight.js` | KEEP calculations + REWRITE_RUNTIME UI gestures | Records | 8 | Chart loop/gesture lifecycle owned by visible view |
-| `health-exercise.js` | KEEP domain + REWRITE_UI | Records/Workout | 7/8 | Preserve classification/library semantics |
-| `health-profile.js` | KEEP domain + REWRITE_UI | Records/Profile secondary | 8/10/11 | Preserve rehab weekly/profile data |
-| `weekly-summary.js`, `report-panel.js` | KEEP + REWRITE_UI | Records secondary routes/sheets | 8/11 | Preserve report versions |
+| `health-diet.js`, `food-*` | KEEP domain + V7 Records UI owner | Records | 8 | Preserve food data/evidence/AI paths |
+| `health-weight.js` | KEEP calculations + V7 runtime wrapper | Records | 8 | Chart gesture handlers bind only to the visible view and unbind on route exit |
+| `health-exercise.js` | KEEP domain + V7 Records UI owner | Records/Workout | 7/8 | Preserve classification/library semantics |
+| `health-profile.js` | KEEP domain + V7 Records UI owner | Records/Profile secondary | 8/10/11 | Preserve rehab weekly/profile data |
+| `weekly-summary.js`, `report-panel.js` | KEEP + Records route owner | Records secondary routes/sheets | 8/11 | Preserve report versions |
 | `advice-panel.js` | MERGE / REWRITE_RUNTIME / REWRITE_UI | Coach feature | 9 | Preserve request/history semantics; centralize mount/unmount |
 | `advice-render.js`, templates/context | KEEP / WRAP | Coach service/view helpers | 9 | Preserve safe text handling and version behavior |
 | `advice-attachments.js` | KEEP / WRAP | Coach attachment controller | 9 | Object URLs/payloads released on owner cleanup |

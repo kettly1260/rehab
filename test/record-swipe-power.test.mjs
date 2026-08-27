@@ -17,7 +17,7 @@ const css38 = readFileSync(new URL('../css-src/38-record-page.css', import.meta.
 const css53 = readFileSync(new URL('../css-src/53-v6-records.css', import.meta.url), 'utf8');
 const src = readFileSync(new URL('../data-ui-state.js', import.meta.url), 'utf8');
 
-test('swipe deck marks only one active page matching healthView', () => {
+test('V7 records host renders only the active page', () => {
   const api = loadUiState();
   const ctx = {
     ...api,
@@ -26,26 +26,26 @@ test('swipe deck marks only one active page matching healthView', () => {
     renderHealthViewByKey(view) { return `<div class="md-card">${view}</div>`; }
   };
   const html = api.renderHealthSwipeDeck.call(ctx);
-  const actives = [...html.matchAll(/class="health-swipe-page([^"]*)"/g)].map((m) => m[1]);
-  assert.equal(actives.filter((c) => c.includes('is-active')).length, 1);
-  assert.match(html, /data-health-page="weight"[^>]*data-health-active="true"|class="health-swipe-page is-active"[^>]*data-health-page="weight"/);
-  assert.match(html, /data-health-page="diet"[^>]*data-health-active="false"|class="health-swipe-page"[^>]*data-health-page="diet"/);
+  assert.equal([...html.matchAll(/class="health-swipe-page/g)].length, 1);
+  assert.match(html, /data-v7-single-view="true"/);
+  assert.match(html, /data-health-page="weight"[^>]*data-health-active="true"/);
+  assert.doesNotMatch(html, /onscroll=/);
 });
 
-test('scroll settle path sets and clears is-swiping and syncs active', () => {
-  assert.match(src, /deck\.classList\.add\('is-swiping'\)/);
-  assert.match(src, /deck\.classList\.remove\('is-swiping'\)/);
-  assert.match(src, /setTimeout\(\(\)\s*=>\s*\{[\s\S]*80\)/);
-  assert.match(src, /syncHealthSwipeActive/);
-  assert.match(src, /scrollToHealthView[\s\S]*syncHealthSwipeActive\(view\)/);
+test('V7 tab switch rebuilds one active view instead of retaining a hidden deck', () => {
+  assert.match(src, /data-v7-single-view="true"/);
+  assert.match(src, /if \(!deck \|\| deck\.dataset\.v7SingleView === 'true'\)/);
+  assert.match(src, /this\.renderRecordsPage\(\);/);
 });
 
-test('offscreen cards skip m3e entry animation and will-change is swipe-scoped', () => {
-  assert.match(css38, /\.health-swipe-page:not\(\.is-active\)\s+\.md-card\s*\{[\s\S]*animation:\s*none/);
-  assert.match(css53, /\.health-swipe-page:not\(\.is-active\)\s+\.md-card\s*\{[\s\S]*animation:\s*none/);
-  const permanentPageRule = css38.match(/\.health-swipe-page\s*\{([\s\S]*?)\n\}/)?.[1] || '';
-  assert.doesNotMatch(permanentPageRule, /will-change:\s*transform,\s*opacity/);
-  assert.match(css38, /\.health-swipe-deck\.is-swiping\s+\.health-swipe-page\s*\{[\s\S]*will-change:\s*transform,\s*opacity/);
-  assert.match(css38, /scroll-snap-type:\s*x\s+mandatory/);
-  assert.match(css38, /transform-origin:\s*center\s+top/);
+test('V7 records surfaces avoid idle paint cost', () => {
+  const css66 = readFileSync(new URL('../css-src/66-v7-records.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(css66, /backdrop-filter:\s*blur/);
+  assert.doesNotMatch(css66, /animation\s*:[^;]*\binfinite\b/);
+  assert.doesNotMatch(css66, /transition\s*:\s*all/);
+  assert.match(css66, /\.health-swipe-deck\.v7-records-view-host[\s\S]*overflow:\s*visible/);
+  assert.match(css66, /\.weight-chart-wrap[\s\S]*touch-action:\s*pan-y/);
+  assert.doesNotMatch(css66, /will-change:\s*transform/);
+  assert.doesNotMatch(css38, /\.health-swipe-deck\s*\{[^}]*will-change/);
+  assert.doesNotMatch(css53, /\.health-swipe-deck\s*\{[^}]*will-change/);
 });

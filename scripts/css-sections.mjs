@@ -63,6 +63,7 @@ export const cssSections = [
   { file: '63-v7-navigation.css', marker: { type: 'exact', value: '/* --- V7 Navigation --- */' } },
   { file: '64-v7-today.css', marker: { type: 'exact', value: '/* --- V7 Today --- */' } },
   { file: '65-v7-workout.css', marker: { type: 'exact', value: '/* --- V7 Workout --- */' } },
+  { file: '66-v7-records.css', marker: { type: 'exact', value: '/* --- V7 Records --- */' } },
   { file: '41-m3e-effects.css', marker: { type: 'exact', value: '/* === M3 Expressive Effects ===' } },
   { file: '40-a11y.css', marker: { type: 'exact', value: '/* --- A11y --- */' } },
 ];

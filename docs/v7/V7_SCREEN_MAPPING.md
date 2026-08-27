@@ -41,17 +41,17 @@ The V7 visual references define visual hierarchy only. This document maps every 
 
 | V6 function | V6 entry | V7 entry | Status | Data compatible | Notes |
 |---|---|---|---|---|---|
-| Training/history overview | Records overview | Records summary | Mapped / Phase 8 | Yes | Data-first Surface |
-| Diet | Records diet tab | Records > Diet | Mapped / Phase 8 | Yes | Text/photo AI preserved |
-| Weight | Records weight tab | Records > Weight | Mapped / Phase 8 | Yes | Trends + entries + reports |
-| Health profile/rehab weekly | Records training tab | Records > Health | Mapped / Phase 8 | Yes | Health profile and rehab weekly both accessible |
-| Manual exercise records | Records training tab | Records > Training/Health detail | Mapped / Phase 8 | Yes | Preserve library mapping |
-| Calendar/day detail/full history | Records calendar tab | Records > Calendar/detail route | Mapped / Phase 8 | Yes | Can be drill-down instead of all mounted at once |
-| PR leaderboard/volume heatmap | training review | Records > Training insight | Mapped / Phase 8 | Yes | Surface charts |
-| Weekly/monthly summaries | summary sheets | Records > Reports | Mapped / Phase 8/11 | Yes | Versioned AI summaries retained |
-| Weight reports/archive | report sheet | Records > Weight > Reports | Mapped / Phase 8/11 | Yes | Same version archive |
-| Context AI | per-record AI cards | Insight action/detail -> Coach | Mapped / Phase 8/9 | Yes | Preserve context generation |
-| Xiaomi scale | weight modal/experiment | Weight add sheet when enabled | Mapped / Phase 8/10 | Yes | Experimental secondary action |
+| Training/history overview | Records overview | Records summary | Migrated / Phase 8 | Yes | Data-first stable Surface |
+| Diet | Records diet tab | Records > Diet | Migrated / Phase 8 | Yes | Text/photo AI preserved |
+| Weight | Records weight tab | Records > Weight | Migrated / Phase 8 | Yes | Trends + entries + reports |
+| Health profile/rehab weekly | Records training tab | Records > Health | Migrated / Phase 8 | Yes | Health profile and rehab weekly both accessible |
+| Manual exercise records | Records training tab | Records > Training/Health detail | Migrated / Phase 8 | Yes | Preserve library mapping |
+| Calendar/day detail/full history | Records calendar tab | Records > Calendar/detail route | Migrated / Phase 8 | Yes | Only active subview is mounted at a time |
+| PR leaderboard/volume heatmap | training review | Records > Training insight | Migrated / Phase 8 | Yes | Surface charts |
+| Weekly/monthly summaries | summary sheets | Records > Reports | Migrated / Phase 8; secondary visual Phase 11 | Yes | Versioned AI summaries retained |
+| Weight reports/archive | report sheet | Records > Weight > Reports | Migrated / Phase 8; secondary visual Phase 11 | Yes | Same version archive |
+| Context AI | per-record AI cards | Insight action/detail -> Coach | Migrated / Phase 8; Coach visual Phase 9 | Yes | Preserve context generation |
+| Xiaomi scale | weight modal/experiment | Weight add sheet when enabled | Migrated / Phase 8; Profile/experiment visual Phase 10 | Yes | Experimental secondary action |
 
 ## Coach
 

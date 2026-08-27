@@ -209,7 +209,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: block;
-    src: url("../assets/material-symbols-rounded.woff2?v=429") format("woff2");
+    src: url("../assets/material-symbols-rounded.woff2?v=431") format("woff2");
 }
 
 .material-symbols-rounded {
@@ -13798,6 +13798,221 @@ body.rehab-v7-shell {
     .rehab-v7-shell #workout .strength-log-card,
     .rehab-v7-shell #workout .routine-tool,
     .rehab-v7-shell #workout .workout-plan-card { padding: var(--v7-space-4); }
+}
+
+}
+@layer v7 {
+/* --- V7 Records --- */
+.rehab-v7-shell #records.v7-feature-records {
+    width: min(100%, var(--v7-content-max));
+    margin-inline: auto;
+    padding-inline: clamp(14px, 4vw, 24px);
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #records .md-top-app-bar {
+    min-height: 4.75rem;
+    padding: var(--v7-space-4) 0 var(--v7-space-3);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #records #recordsOverview,
+.rehab-v7-shell #records #recordsContent,
+.rehab-v7-shell #records .health-swipe-page,
+.rehab-v7-shell #records .v7-records-view-host {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rehab-v7-shell #records .health-swipe-deck.v7-records-view-host {
+    display: block;
+    overflow: visible;
+    contain: inline-size;
+    scroll-snap-type: none;
+}
+
+.rehab-v7-shell #records .health-swipe-page {
+    width: 100%;
+    transform: none;
+    opacity: 1;
+}
+
+.rehab-v7-shell #records .record-tabs,
+.rehab-v7-shell #records .v7-records-segmented {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--v7-space-1);
+    margin: 0 0 var(--v7-space-4);
+    padding: var(--v7-space-1);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface-muted);
+    box-shadow: var(--v7-shadow-1);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #records .record-tab,
+.rehab-v7-shell #records .v7-records-segment {
+    min-width: 0;
+    min-height: var(--v7-touch-min);
+    padding: var(--v7-space-2) var(--v7-space-1);
+    border: 0;
+    border-radius: var(--v7-radius-md);
+    background: transparent;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    letter-spacing: 0;
+    transition: background-color var(--v7-motion-fast) var(--v7-ease-standard), color var(--v7-motion-fast) var(--v7-ease-standard), transform var(--v7-motion-fast) var(--v7-ease-standard);
+}
+
+.rehab-v7-shell #records .record-tab .material-symbols-rounded { font-size: var(--v7-icon-sm); }
+.rehab-v7-shell #records .record-tab.active {
+    background: var(--v7-surface);
+    color: var(--v7-primary-strong);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #records .stat-grid {
+    gap: var(--v7-space-3);
+    margin-bottom: var(--v7-space-4);
+}
+
+.rehab-v7-shell #records .stat-tile,
+.rehab-v7-shell #records .md-card,
+.rehab-v7-shell #records .v7-records-surface {
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #records .stat-tile {
+    min-width: 0;
+    min-height: 8rem;
+    padding: var(--v7-space-4);
+    border-radius: var(--v7-radius-lg);
+    overflow: hidden;
+}
+
+.rehab-v7-shell #records .stat-tile .lab,
+.rehab-v7-shell #records .stat-tile .delta,
+.rehab-v7-shell #records .record-section-title,
+.rehab-v7-shell #records small { color: var(--v7-text-muted); }
+.rehab-v7-shell #records .stat-tile .val { color: var(--v7-text); letter-spacing: 0; }
+
+.rehab-v7-shell #records .records-v6-mini-chart,
+.rehab-v7-shell #records .weight-chart-wrap,
+.rehab-v7-shell #records .volume-heatmap-svg {
+    width: 100%;
+    max-width: 100%;
+    background: var(--v7-bg-subtle);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #records .weight-chart-wrap {
+    min-height: 12rem;
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    overflow: hidden;
+    touch-action: pan-y;
+}
+
+.rehab-v7-shell #records .weight-chart-stage { min-height: 10rem; }
+.rehab-v7-shell #records .weight-chart-stage:not(.is-pinching) { will-change: auto; }
+
+.rehab-v7-shell #records .weight-range-tabs,
+.rehab-v7-shell #records .weight-granularity-tabs,
+.rehab-v7-shell #records .weight-period-nav,
+.rehab-v7-shell #records .diet-goal-progress,
+.rehab-v7-shell #records .health-profile-summary,
+.rehab-v7-shell #records .day-detail-stats {
+    border-color: var(--v7-border);
+    background: var(--v7-surface-muted);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #records .calendar-card,
+.rehab-v7-shell #records .day-detail-card,
+.rehab-v7-shell #records .weight-trend-card,
+.rehab-v7-shell #records .weight-record-card,
+.rehab-v7-shell #records .weekly-summary-card,
+.rehab-v7-shell #records .health-profile-card,
+.rehab-v7-shell #records .manual-exercise-card,
+.rehab-v7-shell #records .context-ai-card {
+    border-radius: var(--v7-radius-lg);
+    padding: var(--v7-space-4);
+}
+
+.rehab-v7-shell #records .calendar-grid,
+.rehab-v7-shell #records .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.rehab-v7-shell #records .calendar-day {
+    min-width: 0;
+    border-color: var(--v7-border);
+    background: transparent;
+}
+
+.rehab-v7-shell #records .calendar-day.selected,
+.rehab-v7-shell #records .calendar-day.has-record {
+    background: var(--v7-primary-soft);
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #records .list-item,
+.rehab-v7-shell #records .day-detail-item,
+.rehab-v7-shell #records .weight-list-item,
+.rehab-v7-shell #records .history-month-group,
+.rehab-v7-shell #records .pr-board-item {
+    border-color: var(--v7-border);
+    background: var(--v7-surface);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #records .record-section-title {
+    margin: var(--v7-space-5) var(--v7-space-1) var(--v7-space-2);
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: 0.04em;
+}
+
+.rehab-v7-shell #records .context-ai-card .md-btn-filled,
+.rehab-v7-shell #records .weight-open-btn,
+.rehab-v7-shell #records .summary-ai-btn,
+.rehab-v7-shell #records .record-quick-btn {
+    box-shadow: none;
+}
+
+.rehab-v7-shell #records .empty-state {
+    min-height: 8rem;
+    border-radius: var(--v7-radius-lg);
+}
+
+@media (max-width: 390px) {
+    .rehab-v7-shell #records .record-tab {
+        gap: 2px;
+        padding-inline: 2px;
+    }
+    .rehab-v7-shell #records .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 }

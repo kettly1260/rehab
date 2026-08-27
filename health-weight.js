@@ -886,13 +886,18 @@
         },
 
         bindWeightChartPinch(wrap) {
-            if (!wrap || wrap._pinchBound) return;
-            wrap.addEventListener('touchstart', (event) => this.onWeightChartTouchStart(event), { passive: false });
-            wrap.addEventListener('touchmove', (event) => this.onWeightChartTouchMove(event), { passive: false });
-            wrap.addEventListener('touchend', (event) => this.onWeightChartTouchEnd(event), { passive: false });
-            wrap.addEventListener('touchcancel', (event) => this.onWeightChartTouchEnd(event), { passive: false });
-            wrap.addEventListener('wheel', (event) => this.onWeightChartWheel(event), { passive: false });
-            wrap._pinchBound = true;
+            if (!wrap || wrap._b) return;
+            const end = (event) => this.onWeightChartTouchEnd(event);
+            const handlers = [
+                ['touchstart', (event) => this.onWeightChartTouchStart(event)],
+                ['touchmove', (event) => this.onWeightChartTouchMove(event)],
+                ['touchend', end],
+                ['touchcancel', end],
+                ['wheel', (event) => this.onWeightChartWheel(event)]
+            ];
+            handlers.forEach(([type, handler]) => wrap.addEventListener(type, handler, { passive: false }));
+            wrap._p = handlers;
+            wrap._b = true;
         },
 
         onWeightChartTouchStart(event) {

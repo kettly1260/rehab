@@ -1215,7 +1215,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 152
+## COMPLEMENTS (same selector, disjoint properties): 158
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1671,3 +1671,21 @@ body.is-paused .fab-play
 
 .rehab-v7-shell #workout .list-item
   files: 65-v7-workout.css
+
+.rehab-v7-shell #records .health-swipe-page
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .record-tab
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .stat-grid
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .stat-tile
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .record-section-title
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .weight-chart-wrap
+  files: 66-v7-records.css
