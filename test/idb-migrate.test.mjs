@@ -103,6 +103,18 @@ test('local to idb migration validates split collection storage without extra fi
     assert.equal(Object.hasOwn(await storageIdb.get('rehab.db'), 'largeCollections'), false);
     assert.deepEqual(await storageIdb.get('rehab.db:history'), db.history);
     assert.deepEqual(await storageIdb.get('rehab.db:advice'), db.health.aiAdviceChat);
+
+    const second = await storageMigrate.migrateLocalToIdb({
+        dbKey: 'rehab.db',
+        cfgKey: 'rehab.cfg',
+        storageVersionKey: 'storageVersion',
+        migrationFailedKey: 'migration.failed',
+        targetVersion: 4
+    }, storageMigrate.createLocalAdapter());
+    assert.equal(second.ok, true);
+    assert.equal(localStorage.getItem('storageVersion'), '4');
+    assert.deepEqual(await storageIdb.get('rehab.db:history'), db.history);
+    assert.deepEqual(await storageIdb.get('rehab.db:advice'), db.health.aiAdviceChat);
 });
 
 test('idb adapter persists advice chat when advice collection store is unavailable', async () => {

@@ -3,19 +3,9 @@ import { createLifecycle } from './lifecycle.js';
 import { createAppContext } from './context.js';
 import { createRouter } from './router.js';
 import { getFeature } from './feature-registry.js';
+import { createLegacyAdapters } from '../legacy/adapters/index.js';
 
 const RUNTIME_KEY = Symbol.for('rehab.v7.runtime');
-
-function createLegacyBridge(host) {
-    return Object.freeze({
-        getUi: () => host.ui,
-        getData: () => host.data,
-        getAppRoute: () => host.appRoute,
-        getNavStack: () => host.navStack,
-        historyBack: () => host.history?.back?.(),
-        historyForward: () => host.history?.forward?.()
-    });
-}
 
 function markBottomNav(documentRef) {
     const nav = documentRef?.querySelector?.('.md-nav-rail');
@@ -35,7 +25,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
     if (host[RUNTIME_KEY]) return host[RUNTIME_KEY];
 
     const events = createEventBus();
-    const legacy = createLegacyBridge(host);
+    const legacy = createLegacyAdapters(host);
     const lifecycle = createLifecycle({ events, host });
     const context = createAppContext({ legacy, events, lifecycle, documentRef });
     const router = createRouter({ legacy, events });
@@ -68,6 +58,10 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         events,
         diagnostics: Object.freeze({
             snapshot: () => lifecycle.snapshot()
+        }),
+        compatibility: Object.freeze({
+            dataSummary: () => legacy.data.summary(),
+            storageSummary: () => legacy.storage.describe()
         }),
         dispose() {
             offMount();

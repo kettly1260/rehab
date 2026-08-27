@@ -53,6 +53,8 @@ Changing top-level feature disposes the previous scope before mounting the next.
 
 V6 remains the fallback and functional truth source until a feature phase replaces a renderer. V7 may call legacy behavior only through context/adapters. Phase 2 formalizes those adapters and data compatibility.
 
+The formal bridge now lives in `src/legacy/adapters/`. App Context receives that composed adapter, so feature modules can move from legacy renderers to V7 renderers without expanding the global API surface.
+
 ## Browser compatibility gate
 
 Browser QA uses Playwright with this preference order:
