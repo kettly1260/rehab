@@ -1,0 +1,168 @@
+/* --- V7 Primitives --- */
+.rehab-v7-shell body,
+body.rehab-v7-shell {
+    background: var(--v7-bg);
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell .v7-stack { display: grid; gap: var(--v7-space-4); }
+.rehab-v7-shell .v7-inline { display: flex; align-items: center; gap: var(--v7-space-3); min-width: 0; }
+
+.rehab-v7-shell .v7-surface,
+.rehab-v7-shell .v7-soft-glass,
+.rehab-v7-shell .v7-liquid-control {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+}
+.rehab-v7-shell .v7-surface { padding: var(--v7-space-5); }
+.rehab-v7-shell .v7-soft-glass {
+    padding: var(--v7-space-4);
+    background: color-mix(in srgb, var(--v7-surface) 90%, var(--v7-primary-soft));
+}
+.rehab-v7-shell .v7-liquid-control {
+    min-height: var(--v7-cta-height);
+    padding: 0 var(--v7-space-6);
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    box-shadow: var(--v7-shadow-2);
+}
+
+.rehab-v7-shell .v7-button,
+.rehab-v7-shell .v7-icon-button {
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    font: inherit;
+    font-weight: var(--v7-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--v7-motion-fast) var(--v7-ease-standard), border-color var(--v7-motion-fast) var(--v7-ease-standard), transform var(--v7-motion-fast) var(--v7-ease-standard);
+}
+.rehab-v7-shell .v7-button {
+    min-height: var(--v7-touch-min);
+    padding: 0 var(--v7-space-5);
+    border-radius: var(--v7-radius-pill);
+}
+.rehab-v7-shell .v7-button--primary { border-color: transparent; background: var(--v7-primary); color: var(--v7-on-primary); }
+.rehab-v7-shell .v7-button--tonal { border-color: transparent; background: var(--v7-primary-soft); color: var(--v7-primary-strong); }
+.rehab-v7-shell .v7-button:active,
+.rehab-v7-shell .v7-icon-button:active { transform: scale(0.98); }
+.rehab-v7-shell .v7-button:focus-visible,
+.rehab-v7-shell .v7-icon-button:focus-visible,
+.rehab-v7-shell .v7-tab:focus-visible,
+.rehab-v7-shell .v7-chip:focus-visible,
+.rehab-v7-shell .v7-field input:focus-visible,
+.rehab-v7-shell .v7-field select:focus-visible { outline: 3px solid var(--v7-focus); outline-offset: 2px; }
+.rehab-v7-shell .v7-icon-button {
+    display: inline-grid;
+    place-items: center;
+    width: var(--v7-touch-min);
+    min-width: var(--v7-touch-min);
+    height: var(--v7-touch-min);
+    padding: 0;
+    border-radius: 50%;
+}
+
+.rehab-v7-shell .v7-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0 var(--v7-space-3);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-surface);
+    color: var(--v7-text-muted);
+    font: inherit;
+    font-size: var(--v7-type-sm);
+    font-weight: var(--v7-weight-medium);
+}
+.rehab-v7-shell .v7-chip[aria-pressed="true"],
+.rehab-v7-shell .v7-chip.is-active { border-color: transparent; background: var(--v7-primary-soft); color: var(--v7-primary-strong); }
+
+.rehab-v7-shell .v7-field { display: grid; gap: var(--v7-space-2); color: var(--v7-text-muted); font-size: var(--v7-type-sm); }
+.rehab-v7-shell .v7-field input,
+.rehab-v7-shell .v7-field select,
+.rehab-v7-shell .v7-field textarea {
+    width: 100%;
+    min-height: var(--v7-touch-min);
+    box-sizing: border-box;
+    border: 1px solid var(--v7-border-strong);
+    border-radius: var(--v7-radius-md);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    padding: var(--v7-space-3) var(--v7-space-4);
+    font: inherit;
+}
+
+.rehab-v7-shell .v7-list-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--v7-space-3);
+    min-height: 3.5rem;
+    padding: var(--v7-space-3) var(--v7-space-4);
+    border-bottom: 1px solid var(--v7-border);
+}
+.rehab-v7-shell .v7-list-row:last-child { border-bottom: 0; }
+.rehab-v7-shell .v7-list-row__content { min-width: 0; }
+.rehab-v7-shell .v7-list-row__title { font-weight: var(--v7-weight-medium); }
+.rehab-v7-shell .v7-list-row__meta,
+.rehab-v7-shell .v7-muted { color: var(--v7-text-muted); font-size: var(--v7-type-sm); }
+
+.rehab-v7-shell .v7-tabs {
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--v7-space-1);
+    padding: var(--v7-space-1);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-surface-muted);
+}
+.rehab-v7-shell .v7-tab {
+    min-height: 2.25rem;
+    padding: 0 var(--v7-space-4);
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: transparent;
+    color: var(--v7-text-muted);
+    font: inherit;
+    font-size: var(--v7-type-sm);
+    font-weight: var(--v7-weight-medium);
+}
+.rehab-v7-shell .v7-tab[aria-selected="true"],
+.rehab-v7-shell .v7-tab.is-active { background: var(--v7-surface); color: var(--v7-text); box-shadow: var(--v7-shadow-1); }
+
+.rehab-v7-shell .v7-modal,
+.rehab-v7-shell .v7-sheet { border: 1px solid var(--v7-border); background: var(--v7-surface-raised); color: var(--v7-text); box-shadow: var(--v7-shadow-float); }
+.rehab-v7-shell .v7-modal { border-radius: var(--v7-radius-xl); padding: var(--v7-space-6); }
+.rehab-v7-shell .v7-sheet { border-radius: var(--v7-radius-xl) var(--v7-radius-xl) 0 0; padding: var(--v7-space-5); }
+
+.rehab-v7-shell .v7-bottom-nav-preview {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    min-height: var(--v7-nav-height);
+    padding: var(--v7-space-1) var(--v7-space-2);
+    border: 1px solid var(--v7-border);
+    border-radius: calc(var(--v7-nav-height) / 2);
+    background: var(--v7-surface);
+    box-shadow: var(--v7-shadow-float);
+}
+.rehab-v7-shell .v7-bottom-nav-preview__item {
+    display: grid;
+    place-items: center;
+    gap: 0.125rem;
+    min-height: var(--v7-nav-item-min);
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: transparent;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+.rehab-v7-shell .v7-bottom-nav-preview__item.is-active { background: var(--v7-primary-soft); color: var(--v7-primary-strong); }

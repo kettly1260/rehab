@@ -1,0 +1,142 @@
+/* --- V7 Design Tokens --- */
+:root.rehab-v7-shell,
+.rehab-v7-shell {
+    --v7-bg: #f4f7f5;
+    --v7-bg-subtle: #eef3f0;
+    --v7-surface: #ffffff;
+    --v7-surface-raised: #fbfdfc;
+    --v7-surface-muted: #edf2ef;
+    --v7-primary: #2b6b4a;
+    --v7-primary-strong: #1f573b;
+    --v7-primary-soft: #dfeee5;
+    --v7-on-primary: #ffffff;
+    --v7-info: #416b84;
+    --v7-info-soft: #e2edf3;
+    --v7-warning: #a26632;
+    --v7-warning-soft: #f6eadf;
+    --v7-stretch: #6f6684;
+    --v7-stretch-soft: #ece8f2;
+    --v7-danger: #a44747;
+    --v7-danger-soft: #f5e4e4;
+    --v7-text: #17201b;
+    --v7-text-muted: #66716b;
+    --v7-text-faint: #89928d;
+    --v7-border: rgba(27, 49, 38, 0.12);
+    --v7-border-strong: rgba(27, 49, 38, 0.2);
+    --v7-focus: rgba(43, 107, 74, 0.38);
+    --v7-font-sans: Inter, "Noto Sans SC", "PingFang SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --v7-type-xs: 0.75rem;
+    --v7-type-sm: 0.875rem;
+    --v7-type-md: 1rem;
+    --v7-type-lg: 1.125rem;
+    --v7-type-xl: 1.375rem;
+    --v7-type-2xl: 1.75rem;
+    --v7-type-3xl: 2.125rem;
+    --v7-leading-tight: 1.18;
+    --v7-leading-normal: 1.5;
+    --v7-weight-regular: 450;
+    --v7-weight-medium: 560;
+    --v7-weight-semibold: 650;
+    --v7-space-1: 0.25rem;
+    --v7-space-2: 0.5rem;
+    --v7-space-3: 0.75rem;
+    --v7-space-4: 1rem;
+    --v7-space-5: 1.25rem;
+    --v7-space-6: 1.5rem;
+    --v7-space-8: 2rem;
+    --v7-space-10: 2.5rem;
+    --v7-space-12: 3rem;
+    --v7-radius-sm: 0.625rem;
+    --v7-radius-md: 0.875rem;
+    --v7-radius-lg: 1.125rem;
+    --v7-radius-xl: 1.5rem;
+    --v7-radius-2xl: 1.875rem;
+    --v7-radius-pill: 999px;
+    --v7-shadow-1: 0 1px 2px rgba(26, 42, 33, 0.06), 0 5px 14px rgba(26, 42, 33, 0.04);
+    --v7-shadow-2: 0 8px 24px rgba(26, 42, 33, 0.1);
+    --v7-shadow-float: 0 10px 32px rgba(26, 42, 33, 0.15);
+    --v7-motion-fast: 120ms;
+    --v7-motion-normal: 180ms;
+    --v7-motion-slow: 260ms;
+    --v7-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --v7-ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --v7-icon-sm: 1.125rem;
+    --v7-icon-md: 1.375rem;
+    --v7-icon-lg: 1.625rem;
+    --v7-touch-min: 2.75rem;
+    --v7-cta-height: 3.5rem;
+    --v7-nav-height: 4.25rem;
+    --v7-nav-item-min: 3rem;
+    --v7-content-max: 46rem;
+    color-scheme: light;
+    font-family: var(--v7-font-sans);
+}
+
+:root.rehab-v7-shell[data-theme-mode="dark"],
+[data-theme-mode="dark"] .rehab-v7-shell {
+    --v7-bg: #101513;
+    --v7-bg-subtle: #151c18;
+    --v7-surface: #19211d;
+    --v7-surface-raised: #1d2722;
+    --v7-surface-muted: #222d27;
+    --v7-primary: #8ccca7;
+    --v7-primary-strong: #a9ddbc;
+    --v7-primary-soft: #244434;
+    --v7-on-primary: #11261a;
+    --v7-info: #9dc6dd;
+    --v7-info-soft: #263d49;
+    --v7-warning: #e7b27e;
+    --v7-warning-soft: #493522;
+    --v7-stretch: #c7bad8;
+    --v7-stretch-soft: #373143;
+    --v7-danger: #e9aaaa;
+    --v7-danger-soft: #4b2929;
+    --v7-text: #edf4ef;
+    --v7-text-muted: #aab7b0;
+    --v7-text-faint: #7f8b85;
+    --v7-border: rgba(222, 237, 228, 0.12);
+    --v7-border-strong: rgba(222, 237, 228, 0.2);
+    --v7-focus: rgba(140, 204, 167, 0.4);
+    --v7-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.18), 0 7px 18px rgba(0, 0, 0, 0.14);
+    --v7-shadow-2: 0 10px 28px rgba(0, 0, 0, 0.24);
+    --v7-shadow-float: 0 14px 36px rgba(0, 0, 0, 0.32);
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root.rehab-v7-shell:not([data-theme-mode="light"]) {
+        --v7-bg: #101513;
+        --v7-bg-subtle: #151c18;
+        --v7-surface: #19211d;
+        --v7-surface-raised: #1d2722;
+        --v7-surface-muted: #222d27;
+        --v7-primary: #8ccca7;
+        --v7-primary-strong: #a9ddbc;
+        --v7-primary-soft: #244434;
+        --v7-on-primary: #11261a;
+        --v7-info: #9dc6dd;
+        --v7-info-soft: #263d49;
+        --v7-warning: #e7b27e;
+        --v7-warning-soft: #493522;
+        --v7-stretch: #c7bad8;
+        --v7-stretch-soft: #373143;
+        --v7-danger: #e9aaaa;
+        --v7-danger-soft: #4b2929;
+        --v7-text: #edf4ef;
+        --v7-text-muted: #aab7b0;
+        --v7-text-faint: #7f8b85;
+        --v7-border: rgba(222, 237, 228, 0.12);
+        --v7-border-strong: rgba(222, 237, 228, 0.2);
+        --v7-focus: rgba(140, 204, 167, 0.4);
+        color-scheme: dark;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root.rehab-v7-shell,
+    .rehab-v7-shell {
+        --v7-motion-fast: 1ms;
+        --v7-motion-normal: 1ms;
+        --v7-motion-slow: 1ms;
+    }
+}

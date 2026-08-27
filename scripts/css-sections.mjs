@@ -57,6 +57,8 @@ export const cssSections = [
   { file: '57-weight-report.css', marker: { type: 'exact', value: '/* --- Weight Report / Chart --- */' } },
   { file: '58-skeleton.css', marker: { type: 'exact', value: '/* --- Skeleton (shimmer placeholder) --- */' } },
   { file: '59-global-training-bar.css', marker: { type: 'exact', value: '/* --- Global Training Progress Bar --- */' } },
+  { file: '60-v7-tokens.css', marker: { type: 'exact', value: '/* --- V7 Design Tokens --- */' } },
+  { file: '61-v7-primitives.css', marker: { type: 'exact', value: '/* --- V7 Primitives --- */' } },
   { file: '41-m3e-effects.css', marker: { type: 'exact', value: '/* === M3 Expressive Effects ===' } },
   { file: '40-a11y.css', marker: { type: 'exact', value: '/* --- A11y --- */' } },
 ];

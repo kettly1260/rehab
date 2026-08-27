@@ -1,7 +1,7 @@
 # css overlap report
 # real-conflict threshold: 220
 
-## REAL CONFLICTS (same selector + same property, different value): 195
+## REAL CONFLICTS (same selector + same property, different value): 199
 *
   files: 02-base.css, 36-responsive.css, 50-v6-ui.css, 40-a11y.css
     animation-duration: 1ms !important | 0.001ms !important (36-responsive.css / 50-v6-ui.css / 40-a11y.css)
@@ -993,6 +993,29 @@ to
   files: 57-weight-report.css
     animation: none | weight-chart-range-zoom var(--md-sys-motion-duration-medium, 220ms) var(--md-sys-motion-emphasized, cubic-bezier(0.2, 0, 0, 1)) both (57-weight-report.css / 57-weight-report.css)
 
+:root.rehab-v7-shell
+  files: 60-v7-tokens.css
+    --v7-motion-fast: 120ms | 1ms (60-v7-tokens.css / 60-v7-tokens.css)
+    --v7-motion-normal: 180ms | 1ms (60-v7-tokens.css / 60-v7-tokens.css)
+    --v7-motion-slow: 260ms | 1ms (60-v7-tokens.css / 60-v7-tokens.css)
+
+.rehab-v7-shell
+  files: 60-v7-tokens.css
+    --v7-motion-fast: 120ms | 1ms (60-v7-tokens.css / 60-v7-tokens.css)
+    --v7-motion-normal: 180ms | 1ms (60-v7-tokens.css / 60-v7-tokens.css)
+    --v7-motion-slow: 260ms | 1ms (60-v7-tokens.css / 60-v7-tokens.css)
+
+.rehab-v7-shell .v7-soft-glass
+  files: 61-v7-primitives.css
+    background: var(--v7-surface) | color-mix(in srgb, var(--v7-surface) 90%, var(--v7-primary-soft)) (61-v7-primitives.css / 61-v7-primitives.css)
+
+.rehab-v7-shell .v7-liquid-control
+  files: 61-v7-primitives.css
+    border-radius: var(--v7-radius-lg) | var(--v7-radius-pill) (61-v7-primitives.css / 61-v7-primitives.css)
+    background: var(--v7-surface) | var(--v7-primary) (61-v7-primitives.css / 61-v7-primitives.css)
+    color: var(--v7-text) | var(--v7-on-primary) (61-v7-primitives.css / 61-v7-primitives.css)
+    box-shadow: var(--v7-shadow-1) | var(--v7-shadow-2) (61-v7-primitives.css / 61-v7-primitives.css)
+
 ## DUPLICATES (same selector + same property + same value): 30
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
@@ -1139,7 +1162,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 133
+## COMPLEMENTS (same selector, disjoint properties): 138
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1538,3 +1561,18 @@ body.is-paused .fab-play
 
 .weight-month-head
   files: 57-weight-report.css
+
+.rehab-v7-shell .v7-surface
+  files: 61-v7-primitives.css
+
+.rehab-v7-shell .v7-button
+  files: 61-v7-primitives.css
+
+.rehab-v7-shell .v7-icon-button
+  files: 61-v7-primitives.css
+
+.rehab-v7-shell .v7-modal
+  files: 61-v7-primitives.css
+
+.rehab-v7-shell .v7-sheet
+  files: 61-v7-primitives.css

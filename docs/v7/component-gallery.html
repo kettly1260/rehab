@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN" class="rehab-v7-shell" data-theme-mode="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Rehab V7 Component Gallery</title>
+    <link rel="stylesheet" href="../../build/generated.css">
+    <style>
+        body { margin: 0; padding: 24px 18px 56px; }
+        main { max-width: 720px; margin: 0 auto; display: grid; gap: 24px; }
+        header, .gallery-section { display: grid; gap: 12px; }
+        header { gap: 8px; }
+        h1, h2, p { margin: 0; }
+        h1 { font-size: var(--v7-type-2xl); }
+        h2 { font-size: var(--v7-type-lg); }
+        .gallery-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .gallery-dialog { max-width: 360px; }
+        .gallery-sheet { max-width: 420px; }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <span class="v7-chip is-active">V7 Design System</span>
+        <h1>克制、专业、低功耗</h1>
+        <p class="v7-muted">Phase 3 固定信息层级、几何与语义颜色；真实 Glass 在 Phase 4 才启用。</p>
+    </header>
+    <section class="gallery-section">
+        <h2>Button / Chip</h2>
+        <div class="gallery-row">
+            <button class="v7-button v7-button--primary">开始训练</button>
+            <button class="v7-button v7-button--tonal">查看详情</button>
+            <button class="v7-button">稍后</button>
+            <button class="v7-chip is-active">今天</button>
+            <button class="v7-chip">本周</button>
+        </div>
+    </section>
+    <section class="gallery-section"><h2>Field</h2><label class="v7-field"><span>体重 kg</span><input value="72.4" inputmode="decimal"></label></section>
+    <section class="gallery-section">
+        <h2>Surface / List Row</h2>
+        <div class="v7-surface">
+            <div class="v7-list-row"><span>●</span><div class="v7-list-row__content"><div class="v7-list-row__title">今日训练</div><div class="v7-list-row__meta">下肢稳定 · 24 分钟</div></div><span>›</span></div>
+            <div class="v7-list-row"><span>●</span><div class="v7-list-row__content"><div class="v7-list-row__title">步行</div><div class="v7-list-row__meta">目标 6,000 步</div></div><span>58%</span></div>
+        </div>
+    </section>
+    <section class="gallery-section"><h2>Tabs</h2><div class="v7-tabs" role="tablist"><button class="v7-tab" aria-selected="true">训练</button><button class="v7-tab">体重</button><button class="v7-tab">饮食</button></div></section>
+    <section class="gallery-section"><h2>SoftGlass / LiquidControl</h2><div class="v7-soft-glass">SoftGlass 在 Phase 3 仍是静态 Surface，占位而不使用 blur。</div><button class="v7-liquid-control">主要训练动作</button></section>
+    <section class="gallery-section">
+        <h2>BottomNav geometry</h2>
+        <nav class="v7-bottom-nav-preview" aria-label="Bottom navigation">
+            <button class="v7-bottom-nav-preview__item is-active"><span>●</span><span>今日</span></button>
+            <button class="v7-bottom-nav-preview__item"><span>○</span><span>训练</span></button>
+            <button class="v7-bottom-nav-preview__item"><span>○</span><span>记录</span></button>
+            <button class="v7-bottom-nav-preview__item"><span>○</span><span>教练</span></button>
+            <button class="v7-bottom-nav-preview__item"><span>○</span><span>我的</span></button>
+        </nav>
+    </section>
+    <section class="gallery-section">
+        <h2>Modal / Sheet</h2>
+        <div class="v7-modal gallery-dialog v7-stack"><strong>确认训练计划</strong><span class="v7-muted">训练内容来自真实计划数据。</span><div class="gallery-row"><button class="v7-button">取消</button><button class="v7-button v7-button--primary">确认</button></div></div>
+        <div class="v7-sheet gallery-sheet v7-stack"><strong>选择模型</strong><div class="v7-list-row"><span>●</span><span>当前模型</span><span>✓</span></div></div>
+    </section>
+</main>
+</body>
+</html>
+

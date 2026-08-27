@@ -12,6 +12,7 @@ function layerFor(file) {
   if (file === '99-custom-overrides.css') return 'overrides';
   if (n === 32) return 'utilities';
   if (n === 1 || n === 2) return 'base';
+  if (n >= 60 && n < 70) return 'v7';
   return 'components';
 }
 
@@ -28,7 +29,7 @@ function collectSelectors(file, content, acc) {
   }
 }
 
-const chunks = ['@layer fonts, base, components, utilities, overrides;\n'];
+const chunks = ['@layer fonts, base, components, v7, utilities, overrides;\n'];
 const selectorMap = new Map();
 for (const file of cssFiles) {
   const content = await readFile(path.join(root, 'css-src', file), 'utf8');
