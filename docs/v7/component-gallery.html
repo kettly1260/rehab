@@ -61,6 +61,10 @@
         <div class="v7-sheet gallery-sheet v7-stack"><strong>选择模型</strong><div class="v7-list-row"><span>●</span><span>当前模型</span><span>✓</span></div></div>
     </section>
 </main>
+<script type="module">
+    import { createEffectsController } from '../../src/ui/effects/index.js';
+    window.galleryEffects = createEffectsController({ host: window, documentRef: document });
+</script>
 </body>
 </html>
 

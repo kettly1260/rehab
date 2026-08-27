@@ -44,7 +44,7 @@ async function startServer() {
         }
     });
     const port = await freePort();
-    await new Promise((resolve) => server.listen(port, '127.0.0.1', resolve));
+    await new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve(undefined)));
     return { server, base: `http://127.0.0.1:${port}` };
 }
 
@@ -64,6 +64,14 @@ test('Phase 3 gallery renders V7 tokens and primitives without mobile overflow',
     try {
         const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
         const page = await context.newPage();
+        await page.addInitScript(() => {
+            const original = window.requestAnimationFrame.bind(window);
+            (/** @type {any} */ (window)).__v7RafCalls = 0;
+            window.requestAnimationFrame = (callback) => {
+                (/** @type {any} */ (window)).__v7RafCalls += 1;
+                return original(callback);
+            };
+        });
         const errors = [];
         page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
         await page.goto(`${http.base}/docs/v7/component-gallery.html`, { waitUntil: 'networkidle', timeout: 60000 });
@@ -74,7 +82,10 @@ test('Phase 3 gallery renders V7 tokens and primitives without mobile overflow',
                 primary: rootStyle.getPropertyValue('--v7-primary').trim(),
                 navCount: document.querySelectorAll('.v7-bottom-nav-preview__item').length,
                 surfaceCount: document.querySelectorAll('.v7-surface, .v7-soft-glass, .v7-liquid-control').length,
-                overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth
+                overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth,
+                effectsMode: document.documentElement.dataset.v7Effects,
+                softGlassBackdrop: getComputedStyle(/** @type {Element} */ (document.querySelector('.v7-soft-glass'))).backdropFilter,
+                effectAudit: (/** @type {any} */ (window)).galleryEffects?.audit?.()
             };
         });
         assert.equal(result.background, '#f4f7f5');
@@ -82,6 +93,15 @@ test('Phase 3 gallery renders V7 tokens and primitives without mobile overflow',
         assert.equal(result.navCount, 5);
         assert.ok(result.surfaceCount >= 3);
         assert.ok(result.overflow <= 1, `horizontal overflow=${result.overflow}`);
+        assert.equal(result.effectsMode, 'balanced');
+        assert.match(result.softGlassBackdrop, /blur\(12px\)/);
+        assert.equal(result.effectAudit?.withinBudget, true);
+        await page.evaluate(() => (/** @type {any} */ (window)).galleryEffects?.setMode?.('economy'));
+        const economyBackdrop = await page.locator('.v7-soft-glass').evaluate((element) => getComputedStyle(element).backdropFilter);
+        assert.equal(economyBackdrop, 'none');
+        await page.waitForTimeout(5200);
+        const rafCalls = await page.evaluate(() => (/** @type {any} */ (window)).__v7RafCalls || 0);
+        assert.equal(rafCalls, 0, `idle gallery V7 effects scheduled ${rafCalls} RAF calls`);
         assert.deepEqual(errors, []);
         await context.close();
     } finally {

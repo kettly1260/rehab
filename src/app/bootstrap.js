@@ -4,6 +4,7 @@ import { createAppContext } from './context.js';
 import { createRouter } from './router.js';
 import { getFeature } from './feature-registry.js';
 import { createLegacyAdapters } from '../legacy/adapters/index.js';
+import { createEffectsController } from '../ui/effects/index.js';
 
 const RUNTIME_KEY = Symbol.for('rehab.v7.runtime');
 
@@ -29,6 +30,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
     const lifecycle = createLifecycle({ events, host });
     const context = createAppContext({ legacy, events, lifecycle, documentRef });
     const router = createRouter({ legacy, events });
+    const effects = createEffectsController({ host, documentRef });
     const ui = legacy.getUi();
     const originalActivate = typeof ui?._activateTab === 'function' ? ui._activateTab.bind(ui) : null;
 
@@ -56,6 +58,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         router,
         lifecycle,
         events,
+        effects,
         diagnostics: Object.freeze({
             snapshot: () => lifecycle.snapshot()
         }),
@@ -65,6 +68,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         }),
         dispose() {
             offMount();
+            effects.dispose();
             router.stop();
             lifecycle.dispose();
             ui._activateTab = originalActivate;

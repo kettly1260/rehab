@@ -1010,7 +1010,7 @@ to
     background: var(--v7-surface) | color-mix(in srgb, var(--v7-surface) 90%, var(--v7-primary-soft)) (61-v7-primitives.css / 61-v7-primitives.css)
 
 .rehab-v7-shell .v7-liquid-control
-  files: 61-v7-primitives.css
+  files: 61-v7-primitives.css, 62-v7-effects.css
     border-radius: var(--v7-radius-lg) | var(--v7-radius-pill) (61-v7-primitives.css / 61-v7-primitives.css)
     background: var(--v7-surface) | var(--v7-primary) (61-v7-primitives.css / 61-v7-primitives.css)
     color: var(--v7-text) | var(--v7-on-primary) (61-v7-primitives.css / 61-v7-primitives.css)
@@ -1162,7 +1162,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 138
+## COMPLEMENTS (same selector, disjoint properties): 143
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1576,3 +1576,18 @@ body.is-paused .fab-play
 
 .rehab-v7-shell .v7-sheet
   files: 61-v7-primitives.css
+
+.rehab-v7-shell[data-v7-effects="economy"] .v7-soft-glass
+  files: 62-v7-effects.css
+
+.rehab-v7-shell .v7-liquid-indicator
+  files: 62-v7-effects.css
+
+.rehab-v7-shell .v7-liquid-control::before
+  files: 62-v7-effects.css
+
+.rehab-v7-shell .v7-liquid-indicator::before
+  files: 62-v7-effects.css
+
+.rehab-v7-shell .v7-liquid-control[data-v7-interacting="true"]
+  files: 62-v7-effects.css

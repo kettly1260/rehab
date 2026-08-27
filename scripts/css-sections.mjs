@@ -59,6 +59,7 @@ export const cssSections = [
   { file: '59-global-training-bar.css', marker: { type: 'exact', value: '/* --- Global Training Progress Bar --- */' } },
   { file: '60-v7-tokens.css', marker: { type: 'exact', value: '/* --- V7 Design Tokens --- */' } },
   { file: '61-v7-primitives.css', marker: { type: 'exact', value: '/* --- V7 Primitives --- */' } },
+  { file: '62-v7-effects.css', marker: { type: 'exact', value: '/* --- V7 Effects --- */' } },
   { file: '41-m3e-effects.css', marker: { type: 'exact', value: '/* === M3 Expressive Effects ===' } },
   { file: '40-a11y.css', marker: { type: 'exact', value: '/* --- A11y --- */' } },
 ];

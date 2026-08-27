@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="rehab-v7-shell" data-v7-effects="balanced">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -29,6 +29,19 @@
             align-items: center;
         }
     </style>
+    <script>
+        (function preseedV7Effects() {
+            try {
+                var stored = localStorage.getItem('rehab.v7.effects.v1') || '';
+                var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+                var saveData = !!(navigator.connection && navigator.connection.saveData);
+                var mode = stored === 'economy' || reduced || saveData ? 'economy' : 'balanced';
+                document.documentElement.setAttribute('data-v7-effects', mode);
+            } catch (_) {
+                document.documentElement.setAttribute('data-v7-effects', 'balanced');
+            }
+        })();
+    </script>
     <script>
         /* APP_STARTUP_NON_BLOCKING_BOOT_BEGIN */
         (function installNonBlockingStartup() {
