@@ -21,7 +21,7 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `plan-*` domain modules | KEEP / WRAP | domain plan adapter | 2/6/7 | Preserve task IDs, plans, feedback and progression semantics |
 | `plan-ui.js` | REWRITE_UI | Today/Workout secondary UI | 6/7/11 | Keep feature operations behind adapter during migration |
 | `routine-plan.js` | KEEP domain + REWRITE_UI | Workout | 7 | Preserve action IDs and current plan state |
-| `routine-library.js` | KEEP domain + REWRITE_UI | Workout/Profile | 7/10 | Split huge renderer from library operations |
+| `routine-library.js` | KEEP domain + REWRITE_UI | Workout/Profile | 7/10 | Profile route now owns the rendered home/settings/library surfaces; library operations remain V6-compatible |
 | `workout-engine.js` | KEEP | domain workout | 7 | No algorithm rewrite |
 | `workout-state.js` | KEEP / WRAP | workout session owner | 7 | Keep journal schema/recovery; decouple from route DOM |
 | `workout-core.js` | KEEP / WRAP; V7 UI owner active | `src/features/workout` + legacy session engine | 7 | Session commands and algorithms remain stable; V7 owns visible state/classes and rebuilds from runtime state |
@@ -34,7 +34,7 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `health-diet.js`, `food-*` | KEEP domain + V7 Records UI owner | Records | 8 | Preserve food data/evidence/AI paths |
 | `health-weight.js` | KEEP calculations + V7 runtime wrapper | Records | 8 | Chart gesture handlers bind only to the visible view and unbind on route exit |
 | `health-exercise.js` | KEEP domain + V7 Records UI owner | Records/Workout | 7/8 | Preserve classification/library semantics |
-| `health-profile.js` | KEEP domain + V7 Records UI owner | Records/Profile secondary | 8/10/11 | Preserve rehab weekly/profile data |
+| `health-profile.js` | KEEP domain + V7 Records/Profile UI owner | Records/Profile secondary | 8/10/11 | Profile lazy-loads the existing editor and preserves rehab weekly/profile data |
 | `weekly-summary.js`, `report-panel.js` | KEEP + Records route owner | Records secondary routes/sheets | 8/11 | Preserve report versions |
 | `advice-panel.js` | KEEP domain/request semantics + V7 route runtime owner | Coach feature | 9 | V7 mount/unmount owns scroll listeners, visual RAF and route cleanup without aborting transport |
 | `advice-render.js`, templates/context | KEEP / WRAP | Coach service/view helpers | 9 | Preserve safe text handling and version behavior |
@@ -46,7 +46,7 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `backup.js` | KEEP / WRAP | services/storage/backup | 2/10 | Preserve archive/import safety |
 | `theme.js`, `i18n.js`, `haptics.js` | KEEP / WRAP | app/platform preferences | 3/10 | Expose through context |
 | `css-src/01..49` | KEEP where generic, progressively normalize | V7 layers/primitives/features | 3-11 | Avoid mass deletion; eliminate overlap as host modules migrate |
-| `css-src/50..56` V6 UI | REWRITE_UI | V7 feature styles | 3-11 | Today and Workout are overridden by owned V7 feature CSS; remaining pages migrate incrementally |
+| `css-src/50..56` V6 UI | REWRITE_UI | V7 feature styles | 3-11 | Today, Workout, Records, Coach and Profile are overridden by owned V7 feature CSS; remaining pages migrate incrementally |
 | scattered Glass CSS | REWRITE_UI | `src/ui/effects` | 4 | Feature CSS may consume classes/tokens but not invent backdrop rules |
 | `sw.js`, `app-update.js`, manifest | KEEP then integrate | platform/PWA | 12 | Do not redesign SW while main UI is still moving |
 | existing perf/browser/unit tests | KEEP / MERGE | V7-equivalent tests | all | Replace only when the new test covers the same contract; document replacements |

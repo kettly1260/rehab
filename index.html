@@ -47,7 +47,7 @@
         (function installNonBlockingStartup() {
             'use strict';
 
-            const releaseVersion = '432';
+            const releaseVersion = '433';
             let applicationLaunchStarted = false;
 
             function acknowledgeReleasePage() {
@@ -414,8 +414,8 @@
         })();
         /* APP_STARTUP_NON_BLOCKING_BOOT_END */
     </script>
-    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=432" as="font" type="font/woff2" crossorigin>
-    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=432">
+    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=433" as="font" type="font/woff2" crossorigin>
+    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=433">
 </head>
 <body>
     <div id="appUpdateBanner" class="app-update-banner hidden">
@@ -842,7 +842,7 @@
         (function earlyUpgradeOverlay() {
             try {
                 const url = new URL(window.location.href);
-                if (url.searchParams.get('__rehab_upgrade') !== '432') return;
+                if (url.searchParams.get('__rehab_upgrade') !== '433') return;
                 const el = document.createElement('div');
                 el.id = 'rehabUpgradeOverlay';
                 el.setAttribute('role', 'alertdialog');
@@ -862,27 +862,27 @@
         })();
     </script>
 
-    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=432"></script>
-    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=432"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=432"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data.js?v=432"></script>
-    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=432"></script>
+    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=433"></script>
+    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=433"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=433"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=433"></script>
     <div id="weightModal" class="md-modal md-modal-sheet hidden" aria-hidden="true">
         <div class="md-modal-backdrop" onclick="data.closeWeightModal()"></div>
         <div class="md-modal-card md-modal-sheet-card">
@@ -1216,7 +1216,7 @@
         const PAGE_DEPS = {
             workout: ['voice-engine','voice-cache','voice-webspeech-adapter','voice-legado-adapter','workout-voice','workout-readiness','strength-form','weekly-plan','action-history','plan-chains','plan-progression','plan-store','plan-feedback','plan-cooldown','plan-auto-adjust','plan-weekly','plan-equipment','plan-ui','workout-system','workout-pip','workout-core','workout-cardio-pure','workout-cardio','workout-engine','workout-state','swipe-actions','routine-plan','routine-library','workout-wakelock','workout-media-session','ai-store','ai-profile','ai-routing-pure','ai-routing','ai-json-pure','ai-api','search-settings','ai-task-settings'],
             'ai-coach': ['lib/virtual-core.umd','ai-store','ai-profile','ai-model-catalog-pure','ai-model-cache','ai-models','search-policy-pure','search-evidence-ui','search-store','search-registry','search-adapters','search-tool-loop','ai-routing-pure','ai-routing','ai-json-pure','ai-api','search-settings','ai-task-settings','search-settings','ai-provider-manager','ai-pricing','ai-templates','advice-template-manager','advice-rules','plan-analytics','advice-panel','coach-context','advice-attachments','advice-render','advice-prompt','advice-stream-renderer','routine-library','plan-chains','plan-progression','plan-store','plan-ai-pure','plan-ai'],
-            profile: ['data-ui-state','voice-engine','voice-cache','voice-webspeech-adapter','voice-legado-adapter','workout-voice','credential-fields','weekly-plan','backup','sync-ui','sync-adapters','sync','routine-library','goal-plan','report-version-pure','weekly-summary','plan-chains','plan-progression','plan-store','plan-equipment','plan-ui','ai-store','ai-profile','ai-model-catalog-pure','ai-model-cache','ai-models','search-policy-pure','search-evidence-ui','search-store','search-registry','search-adapters','search-tool-loop','ai-routing-pure','ai-routing','ai-json-pure','ai-api','search-settings','ai-task-settings','search-settings','ai-provider-manager'],
+            profile: ['data-ui-state','voice-engine','voice-cache','voice-webspeech-adapter','voice-legado-adapter','workout-voice','credential-fields','weekly-plan','backup','sync-ui','sync-adapters','sync','routine-library','health-profile','goal-plan','report-version-pure','weekly-summary','plan-chains','plan-progression','plan-store','plan-equipment','plan-ui','ai-store','ai-profile','ai-model-catalog-pure','ai-model-cache','ai-models','search-policy-pure','search-evidence-ui','search-store','search-registry','search-adapters','search-tool-loop','ai-routing-pure','ai-routing','ai-json-pure','ai-api','search-settings','ai-task-settings','search-settings','ai-provider-manager'],
             records: ['data-ui-state','history-view','report-version-pure','weekly-summary','search-evidence-ui','health-diet','health-weight','health-profile','health-exercise','goal-plan','routine-library','food-ai-normalizer-pure','food-evidence-pure','food-evidence','food-log','pr-tracker','volume-heatmap','action-history','report-metrics-pure','report-panel','plan-chains','plan-progression','plan-store','plan-weekly','plan-ui','ai-store','ai-profile','ai-model-catalog-pure','ai-model-cache','ai-models','search-policy-pure','search-store','search-registry','search-adapters','search-tool-loop','ai-routing-pure','ai-routing','ai-json-pure','ai-api','search-settings','ai-task-settings'],
             today: ['history-view', 'today-view-core']
         };
@@ -1399,7 +1399,7 @@
             return true;
         }
         window.claimServiceWorkerReload = claimServiceWorkerReload;
-        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v432';
+        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v433';
         void SERVICE_WORKER_CONTROLLER_RELOAD_KEY;
         function scheduleServiceWorkerRegistration() {
             if (scheduleServiceWorkerRegistration._scheduled) return;
@@ -1426,7 +1426,7 @@
                     return;
                 }
                 const script = document.createElement('script');
-                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=432') : 'app-update.js?v=432');
+                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=433') : 'app-update.js?v=433');
                 script.async = true;
                 script.dataset.rehabAppUpdate = '1';
                 script.onload = () => resolve(window.appUpdate);
@@ -1438,11 +1438,11 @@
                 try {
                     // Do not re-register / normalize while an intentional SW navigate is in flight.
                     try {
-                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '432') {
+                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '433') {
                             return;
                         }
                     } catch {}
-                    const registration = await navigator.serviceWorker.register('./sw.js?v=432', { updateViaCache: 'none' });
+                    const registration = await navigator.serviceWorker.register('./sw.js?v=433', { updateViaCache: 'none' });
                     if (!registration) return;
                     await registration.update?.();
                     // Never auto-activate a waiting worker here. Quiet registration only discovers
@@ -1459,7 +1459,7 @@
                                 return null;
                             }
                         })();
-                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '432';
+                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '433';
                         // Bare controllers are normal for legacy installs until the user applies.
                         // Only suppress the banner when the controller scriptURL is already versioned.
                         if (!alreadyCurrent) {
@@ -1531,7 +1531,7 @@
             const p = new Promise((res, rej) => {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
-                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=432`) : `css-src/${name}.css?v=432`);
+                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=433`) : `css-src/${name}.css?v=433`);
                 link.dataset.appCss = name;
                 link.onload = () => {
                     link.dataset.loaded = 'true';
@@ -1614,7 +1614,7 @@
                 };
                 if (MODULE_SCRIPTS.has(name)) s.type = 'module';
                 const ext = MJS_SCRIPTS.has(name) ? '.mjs' : '.js';
-                let href = `${name}${ext}?v=432`;
+                let href = `${name}${ext}?v=433`;
                 if (forceReload) href += `&_rl=${Date.now()}`;
                 s.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(href) : href);
                 s.onload = () => settle();
@@ -1832,8 +1832,8 @@
             ui.syncSwitchAria(document.getElementById('isAlt'));
             try {
                 const resolvedEntry = typeof window.resolveAssetUrl === 'function'
-                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=432')
-                    : 'src/app/bootstrap.js?v=432';
+                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=433')
+                    : 'src/app/bootstrap.js?v=433';
                 const entry = new URL(resolvedEntry, document.baseURI).href;
                 const v7 = await import(entry);
                 await v7.bootstrapV7?.({ host: window, documentRef: document });

@@ -1,7 +1,7 @@
 # css overlap report
 # real-conflict threshold: 220
 
-## REAL CONFLICTS (same selector + same property, different value): 214
+## REAL CONFLICTS (same selector + same property, different value): 217
 *
   files: 02-base.css, 36-responsive.css, 50-v6-ui.css, 40-a11y.css
     animation-duration: 1ms !important | 0.001ms !important (36-responsive.css / 50-v6-ui.css / 40-a11y.css)
@@ -1078,6 +1078,20 @@ to
     bottom: calc(5.75rem + env(safe-area-inset-bottom)) | calc(5.25rem + env(safe-area-inset-bottom)) (67-v7-coach.css / 67-v7-coach.css)
     border-radius: var(--v7-radius-xl) | var(--v7-radius-lg) (67-v7-coach.css / 67-v7-coach.css)
 
+.rehab-v7-shell #profile.v7-feature-profile
+  files: 68-v7-profile.css
+    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) (68-v7-profile.css / 68-v7-profile.css)
+
+.rehab-v7-shell #profile .md-top-app-bar
+  files: 68-v7-profile.css
+    margin-inline: calc(clamp(14px, 4vw, 24px) * -1) | calc(var(--v7-space-3) * -1) (68-v7-profile.css / 68-v7-profile.css)
+    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) (68-v7-profile.css / 68-v7-profile.css)
+
+.rehab-v7-shell #profile .profile-hero
+  files: 68-v7-profile.css
+    grid-template-columns: minmax(0, 1fr) minmax(180px, .9fr) | 1fr (68-v7-profile.css / 68-v7-profile.css)
+    padding: var(--v7-space-5) | var(--v7-space-4) (68-v7-profile.css / 68-v7-profile.css)
+
 ## DUPLICATES (same selector + same property + same value): 30
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
@@ -1224,7 +1238,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 160
+## COMPLEMENTS (same selector, disjoint properties): 162
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1704,3 +1718,9 @@ body.is-paused .fab-play
 
 .rehab-v7-shell #ai-coach .advice-v6-chat-list
   files: 67-v7-coach.css
+
+.rehab-v7-shell #profile .profile-stats
+  files: 68-v7-profile.css
+
+.rehab-v7-shell #profile .profile-version-footer
+  files: 68-v7-profile.css

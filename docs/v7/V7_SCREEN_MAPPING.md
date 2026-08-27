@@ -73,22 +73,22 @@ The V7 visual references define visual hierarchy only. This document maps every 
 
 | V6 function | V6 entry | V7 entry | Status | Data compatible | Notes |
 |---|---|---|---|---|---|
-| Training/health identity | Profile home | Health profile summary | Mapped / Phase 10 | Yes | Tool-like, not promotional hero |
-| Goal/body plan | Goal & body | Profile > Goals | Mapped / Phase 10 | Yes | Existing goal data |
-| Action/prescription/routine library | Library | Profile > Library | Mapped / Phase 10 | Yes | Secondary route with all editors |
-| Equipment | library | Profile > Library/Equipment | Mapped / Phase 10 | Yes | Preserve plan equipment |
-| AI providers/model/task settings | AI settings | Profile > AI | Mapped / Phase 10 | Yes | Full nested settings retained |
-| Search provider settings | AI settings | Profile > AI > Search | Mapped / Phase 10/11 | Yes | Same config |
-| Prompt templates/retry/timeout/encrypted AI sync | AI settings | Profile > AI advanced | Mapped / Phase 10/11 | Yes | Secondary route/sheet |
-| S3/WebDAV sync | Sync | Profile > Sync | Mapped / Phase 10 | Yes | Same remote schema |
-| Backup/import/export/CSV | Sync | Profile > Data & Backup | Mapped / Phase 10/11 | Yes | Import safety unchanged |
-| Sync retry/health | Sync | Profile > Sync diagnostics | Mapped / Phase 10/11 | Yes | Secondary details |
-| Voice | theme/workout settings | Profile > Voice | Mapped / Phase 10 | Yes | Same engines/config |
-| Theme | palette sheet | Profile > Appearance / global sheet | Mapped / Phase 10/11 | Yes | Dark mode retained |
-| Haptics/language | theme sheet | Profile > Preferences | Mapped / Phase 10/11 | Yes | Existing preferences retained |
-| Experiments / Xiaomi scale toggle | Experiments | Profile > Experiments | Mapped / Phase 10 | Yes | Deliberately secondary |
-| Version/update | footer | Profile > About/Update | Mapped / Phase 10 | Yes | PWA update behavior retained |
-| Debug tools | settings row | Profile > Diagnostics | Mapped / DEFER UI polish to Phase 11 | Yes | Reachable but visually de-emphasized |
+| Training/health identity | Profile home | Health profile summary | Migrated / Phase 10 | Yes | Tool-like, not promotional hero |
+| Goal/body plan | Goal & body | Profile > Goals | Migrated / Phase 10 | Yes | Existing goal data |
+| Action/prescription/routine library | Library | Profile > Library | Migrated / Phase 10 | Yes | Secondary route with all editors |
+| Equipment | library | Profile > Library/Equipment | Migrated / Phase 10 | Yes | Preserve plan equipment |
+| AI providers/model/task settings | AI settings | Profile > AI | Migrated / Phase 10 | Yes | Full nested settings retained |
+| Search provider settings | AI settings | Profile > AI > Search | Migrated / Phase 10/11 | Yes | Same config |
+| Prompt templates/retry/timeout/encrypted AI sync | AI settings | Profile > AI advanced | Migrated / Phase 10/11 | Yes | Secondary route/sheet |
+| S3/WebDAV sync | Sync | Profile > Sync | Migrated / Phase 10 | Yes | Same remote schema |
+| Backup/import/export/CSV | Sync | Profile > Data & Backup | Migrated / Phase 10/11 | Yes | Import safety unchanged |
+| Sync retry/health | Sync | Profile > Sync diagnostics | Migrated / Phase 10/11 | Yes | Secondary details |
+| Voice | theme/workout settings | Profile > Voice | Migrated / Phase 10 | Yes | Same engines/config |
+| Theme | palette sheet | Profile > Appearance / global sheet | Migrated / Phase 10/11 | Yes | Dark mode retained |
+| Haptics/language | theme sheet | Profile > Preferences | Migrated / Phase 10/11 | Yes | Existing preferences retained |
+| Experiments / Xiaomi scale toggle | Experiments | Profile > Experiments | Migrated / Phase 10 | Yes | Deliberately secondary |
+| Version/update | footer | Profile > About/Update | Migrated / Phase 10 | Yes | PWA update behavior retained |
+| Debug tools | settings row | Profile > Diagnostics | Migrated / DEFER UI polish to Phase 11 | Yes | Reachable but visually de-emphasized |
 
 ## Secondary surfaces shared across pages
 

@@ -751,6 +751,11 @@
             const goalCal = goal?.dailyCal || 0;
             return `<div class="sect-head"><span class="t">设置</span></div>
             <div class="glass-card setting-list">
+                <div class="setting-row" onclick="data.openProfileModal?.()" role="button" tabindex="0">
+                    <span class="material-symbols-rounded ico">health_and_safety</span>
+                    <div class="copy"><strong>健康档案</strong><small>基础信息 / 诊断 / 检查结果 / 偏好</small></div>
+                    <span class="material-symbols-rounded arrow">chevron_right</span>
+                </div>
                 <div class="setting-row" onclick="data.setRoutineView('ai')" role="button" tabindex="0">
                     <span class="material-symbols-rounded ico">psychology</span>
                     <div class="copy"><strong>AI 设置</strong><small>模型 / API Key</small></div>
@@ -774,6 +779,16 @@
                 <div class="setting-row" onclick="data.setRoutineView('library')" role="button" tabindex="0">
                     <span class="material-symbols-rounded ico">library_books</span>
                     <div class="copy"><strong>方案 / 动作库</strong><small>自定义动作与计划</small></div>
+                    <span class="material-symbols-rounded arrow">chevron_right</span>
+                </div>
+                <div class="setting-row" onclick="workoutVoice.openSettings()" role="button" tabindex="0">
+                    <span class="material-symbols-rounded ico">record_voice_over</span>
+                    <div class="copy"><strong>语音</strong><small>本地语音 / 在线音源 / 缓存</small></div>
+                    <span class="material-symbols-rounded arrow">chevron_right</span>
+                </div>
+                <div class="setting-row" onclick="theme.openSheet()" role="button" tabindex="0">
+                    <span class="material-symbols-rounded ico">palette</span>
+                    <div class="copy"><strong>外观与偏好</strong><small>主题 / 深色模式 / 语言 / 触感</small></div>
                     <span class="material-symbols-rounded arrow">chevron_right</span>
                 </div>
                 <div class="setting-row" onclick="data.toggleDebugTools?.()" role="button" tabindex="0">

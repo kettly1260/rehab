@@ -209,7 +209,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: block;
-    src: url("../assets/material-symbols-rounded.woff2?v=432") format("woff2");
+    src: url("../assets/material-symbols-rounded.woff2?v=433") format("woff2");
 }
 
 .material-symbols-rounded {
@@ -14142,6 +14142,175 @@ body.rehab-v7-shell {
     .rehab-v7-shell #ai-coach .advice-composer-stack {
         bottom: calc(5.25rem + env(safe-area-inset-bottom));
         border-radius: var(--v7-radius-lg);
+    }
+}
+
+}
+@layer v7 {
+/* --- V7 Profile --- */
+.rehab-v7-shell #profile.v7-feature-profile {
+    width: min(100%, var(--v7-content-max));
+    margin-inline: auto;
+    padding-inline: clamp(14px, 4vw, 24px);
+    padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #profile .md-top-app-bar {
+    margin-inline: calc(clamp(14px, 4vw, 24px) * -1);
+    padding-inline: clamp(14px, 4vw, 24px);
+}
+
+.rehab-v7-shell #profileOverview,
+.rehab-v7-shell #profileContent,
+.rehab-v7-shell #profileSettings {
+    display: grid;
+    gap: var(--v7-space-4);
+    min-width: 0;
+}
+
+.rehab-v7-shell #profile .v7-profile-surface {
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #profile .profile-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, .9fr);
+    gap: var(--v7-space-4);
+    padding: var(--v7-space-5);
+    border-radius: var(--v7-radius-xl);
+    background: var(--v7-surface);
+}
+
+.rehab-v7-shell #profile .avatar {
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    box-shadow: none;
+}
+
+.rehab-v7-shell #profile .profile-info h2,
+.rehab-v7-shell #profile .profile-stats b {
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #profile .profile-stats {
+    border-left-color: var(--v7-border);
+}
+
+.rehab-v7-shell #profile .v7-profile-setting-list {
+    overflow: hidden;
+    border-radius: var(--v7-radius-xl);
+    padding: var(--v7-space-1);
+}
+
+.rehab-v7-shell #profile .v7-profile-setting-row {
+    min-height: 64px;
+    border-radius: var(--v7-radius-md);
+    border-bottom: 1px solid var(--v7-border);
+    background: transparent;
+}
+
+.rehab-v7-shell #profile .v7-profile-setting-row:last-child {
+    border-bottom: 0;
+}
+
+.rehab-v7-shell #profile .v7-profile-setting-row:hover,
+.rehab-v7-shell #profile .v7-profile-setting-row:focus-within {
+    background: var(--v7-surface-muted);
+}
+
+.rehab-v7-shell #profile .v7-profile-setting-row .ico {
+    border-radius: var(--v7-radius-md);
+    background: var(--v7-surface-muted);
+    color: var(--v7-primary);
+}
+
+.rehab-v7-shell #profile .v7-profile-setting-row .copy strong {
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #profile .v7-profile-setting-row .copy small,
+.rehab-v7-shell #profile .v7-profile-setting-row .arrow {
+    color: var(--v7-text-muted);
+}
+
+.rehab-v7-shell #profile .v7-profile-back-row {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    min-height: 48px;
+    margin: 0;
+    padding: var(--v7-space-2) 0;
+    background: var(--v7-page);
+}
+
+.rehab-v7-shell #profile .profile-v6-back-title {
+    color: var(--v7-text);
+    letter-spacing: 0;
+}
+
+.rehab-v7-shell #profile .v7-profile-segmented {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface-muted);
+    box-shadow: none;
+}
+
+.rehab-v7-shell #profile .v7-profile-segment {
+    color: var(--v7-text-muted);
+}
+
+.rehab-v7-shell #profile .v7-profile-segment.active {
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #profile .sync-card,
+.rehab-v7-shell #profile .profile-version-footer,
+.rehab-v7-shell #profile .plan-equipment-card,
+.rehab-v7-shell #profile .weightloss-plan-card {
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #profile .v7-profile-primary-control {
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.rehab-v7-shell #profile .profile-version-footer {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.rehab-v7-shell #profile .profile-version-footer .pvf-actions {
+    justify-content: flex-start;
+}
+
+@media (max-width: 480px) {
+    .rehab-v7-shell #profile.v7-feature-profile {
+        padding-inline: var(--v7-space-3);
+    }
+
+    .rehab-v7-shell #profile .md-top-app-bar {
+        margin-inline: calc(var(--v7-space-3) * -1);
+        padding-inline: var(--v7-space-3);
+    }
+
+    .rehab-v7-shell #profile .profile-hero {
+        grid-template-columns: 1fr;
+        padding: var(--v7-space-4);
+    }
+
+    .rehab-v7-shell #profile .profile-stats {
+        border-left: 0;
+        border-top: 1px solid var(--v7-border);
+        padding: var(--v7-space-3) 0 0;
     }
 }
 
