@@ -34,6 +34,11 @@ module.exports = [
     limit: '5 KB'
   },
   {
+    name: 'v7-secondary-runtime',
+    path: 'src/ui/primitives/secondary-surfaces.js',
+    limit: '3 KB'
+  },
+  {
     name: 'deferred-storage',
     path: ['data-store-deferred.js', 'storage/idb-collections.js', 'storage/idb-advice-collections.js'],
     limit: '3.5 KB'

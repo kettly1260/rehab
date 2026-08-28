@@ -6,6 +6,7 @@ import { getFeature } from './feature-registry.js';
 import { createLegacyAdapters } from '../legacy/adapters/index.js';
 import { createEffectsController } from '../ui/effects/index.js';
 import { createBottomNavigation } from '../ui/navigation/bottom-nav.js';
+import { createSecondarySurfaceController } from '../ui/primitives/secondary-surfaces.js';
 
 const RUNTIME_KEY = Symbol.for('rehab.v7.runtime');
 
@@ -32,6 +33,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
     const context = createAppContext({ legacy, events, lifecycle, documentRef });
     const router = createRouter({ legacy, events });
     const effects = createEffectsController({ host, documentRef });
+    const secondarySurfaces = createSecondarySurfaceController({ host, documentRef });
     const ui = legacy.getUi();
     const originalActivate = typeof ui?._activateTab === 'function' ? ui._activateTab.bind(ui) : null;
 
@@ -46,6 +48,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
     router.start();
     markBottomNav(documentRef);
     const bottomNavigation = createBottomNavigation({ documentRef, events });
+    secondarySurfaces.start();
     const activePage = context.activePage;
     await lifecycle.transition(getFeature(activePage), context, { source: 'bootstrap' });
     documentRef.documentElement?.classList?.add('rehab-v7-shell');
@@ -62,8 +65,12 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         events,
         effects,
         bottomNavigation,
+        secondarySurfaces,
         diagnostics: Object.freeze({
-            snapshot: () => lifecycle.snapshot()
+            snapshot: () => ({
+                ...lifecycle.snapshot(),
+                secondarySurfaces: secondarySurfaces.snapshot()
+            })
         }),
         compatibility: Object.freeze({
             dataSummary: () => legacy.data.summary(),
@@ -72,6 +79,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         dispose() {
             offMount();
             bottomNavigation.dispose();
+            secondarySurfaces.dispose();
             effects.dispose();
             router.stop();
             lifecycle.dispose();
@@ -85,4 +93,3 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
     host.rehabV7 = runtime;
     return runtime;
 }
-

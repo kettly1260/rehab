@@ -45,6 +45,7 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `sync*` | KEEP / WRAP | services/sync | 2/10 | Preserve remote formats/conflict rules |
 | `backup.js` | KEEP / WRAP | services/storage/backup | 2/10 | Preserve archive/import safety |
 | `theme.js`, `i18n.js`, `haptics.js` | KEEP / WRAP | app/platform preferences | 3/10 | Expose through context |
+| shared modal/sheet/picker/toast/banner/state UI | WRAP; V7 visual/runtime owner active | `src/ui/primitives/secondary-surfaces.js` + `69-v7-secondary.css` | 11 | Preserve existing close callbacks, focusTrap and navStack; V7 owns decoration, scroll lock and keyboard inset |
 | `css-src/01..49` | KEEP where generic, progressively normalize | V7 layers/primitives/features | 3-11 | Avoid mass deletion; eliminate overlap as host modules migrate |
 | `css-src/50..56` V6 UI | REWRITE_UI | V7 feature styles | 3-11 | Today, Workout, Records, Coach and Profile are overridden by owned V7 feature CSS; remaining pages migrate incrementally |
 | scattered Glass CSS | REWRITE_UI | `src/ui/effects` | 4 | Feature CSS may consume classes/tokens but not invent backdrop rules |

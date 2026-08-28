@@ -92,7 +92,7 @@ The V7 visual references define visual hierarchy only. This document maps every 
 
 ## Secondary surfaces shared across pages
 
-All V6 modal/sheet/picker/loading/error/offline/toast/confirmation/attachment/permission/keyboard states map to the V7 secondary-surface system in Phase 11. No current secondary business flow is intentionally removed.
+All V6 modal/sheet/picker/loading/error/offline/toast/confirmation/attachment/permission/keyboard states are migrated to the V7 secondary-surface owner in Phase 11. Existing focusTrap, backdrop, focus return, navStack and workout-safe update semantics remain the functional owners; V7 owns shared decoration, body scroll lock, keyboard inset and restrained Surface styling. No current secondary business flow is intentionally removed.
 
 ## Mapping gate
 

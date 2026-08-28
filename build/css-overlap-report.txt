@@ -1238,7 +1238,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 162
+## COMPLEMENTS (same selector, disjoint properties): 167
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1724,3 +1724,18 @@ body.is-paused .fab-play
 
 .rehab-v7-shell #profile .profile-version-footer
   files: 68-v7-profile.css
+
+.rehab-v7-shell .advice-attachment-preview-card
+  files: 69-v7-secondary.css
+
+.rehab-v7-shell .ai-provider-manager-body
+  files: 69-v7-secondary.css
+
+.rehab-v7-shell .advice-error
+  files: 69-v7-secondary.css
+
+.rehab-v7-shell .ai-offline-note
+  files: 69-v7-secondary.css
+
+.rehab-v7-shell .summary-ai-error
+  files: 69-v7-secondary.css

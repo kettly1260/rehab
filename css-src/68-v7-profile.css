@@ -99,7 +99,7 @@
     min-height: 48px;
     margin: 0;
     padding: var(--v7-space-2) 0;
-    background: var(--v7-page);
+    background: var(--v7-bg);
 }
 
 .rehab-v7-shell #profile .profile-v6-back-title {

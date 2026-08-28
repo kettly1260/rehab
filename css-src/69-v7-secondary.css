@@ -1,0 +1,162 @@
+/* --- V7 Secondary UI --- */
+.rehab-v7-shell .v7-secondary-surface {
+    --v7-secondary-max-height: calc(100dvh - var(--v7-keyboard-inset, 0px) - env(safe-area-inset-top) - 12px);
+}
+
+html.rehab-v7-shell body .md-modal-backdrop,
+html.rehab-v7-shell body .advice-attachment-preview-backdrop {
+    background: rgb(16 23 22 / 58%);
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+.rehab-v7-shell .md-modal-card,
+.rehab-v7-shell .advice-attachment-preview-card {
+    max-height: min(var(--v7-secondary-max-height), 760px);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-xl);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-float);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell .md-modal-sheet-card {
+    width: min(100vw, 560px);
+    border-radius: var(--v7-radius-xl) var(--v7-radius-xl) 0 0;
+    padding-bottom: calc(var(--v7-space-4) + env(safe-area-inset-bottom));
+}
+
+.rehab-v7-shell .md-modal-sheet-card::before {
+    width: 36px;
+    background: var(--v7-border-strong);
+}
+
+.rehab-v7-shell .md-modal-head {
+    min-height: 44px;
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell .md-modal-head strong {
+    font-size: var(--v7-type-lg);
+    letter-spacing: 0;
+}
+
+.rehab-v7-shell .ai-provider-manager {
+    width: min(680px, 100vw);
+    background: var(--v7-bg);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-float);
+}
+
+.rehab-v7-shell .ai-provider-manager-bar {
+    border-bottom-color: var(--v7-border);
+    background: var(--v7-surface);
+}
+
+.rehab-v7-shell .ai-provider-manager-body {
+    padding-bottom: calc(var(--v7-space-6) + env(safe-area-inset-bottom) + var(--v7-keyboard-inset, 0px));
+}
+
+.rehab-v7-shell .advice-attachment-preview-card {
+    padding: var(--v7-space-3);
+}
+
+.rehab-v7-shell .advice-attachment-preview-card img {
+    border-radius: var(--v7-radius-lg);
+}
+
+.rehab-v7-shell .app-toast,
+.rehab-v7-shell .md-toast {
+    bottom: calc(96px + env(safe-area-inset-bottom) + var(--v7-keyboard-inset, 0px));
+    border: 1px solid var(--v7-border-strong);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-text);
+    color: var(--v7-bg);
+    box-shadow: var(--v7-shadow-2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell .app-toast[data-type="error"] {
+    border-color: color-mix(in srgb, var(--v7-danger) 54%, var(--v7-border));
+    background: var(--v7-danger);
+    color: var(--md-sys-on-error);
+}
+
+.rehab-v7-shell .app-toast[data-type="success"] {
+    border-color: color-mix(in srgb, var(--v7-success) 46%, var(--v7-border));
+}
+
+.rehab-v7-shell .app-toast-action {
+    background: var(--v7-bg);
+    color: var(--v7-text);
+    box-shadow: none;
+}
+
+.rehab-v7-shell .app-update-banner {
+    border: 1px solid var(--v7-border-strong);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-2);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell .empty-state,
+.rehab-v7-shell .advice-empty,
+.rehab-v7-shell .advice-error,
+.rehab-v7-shell .ai-offline-note,
+.rehab-v7-shell .summary-ai-loading,
+.rehab-v7-shell .summary-ai-error {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface-muted);
+    color: var(--v7-text-muted);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell .summary-ai-error,
+.rehab-v7-shell .advice-error {
+    border-color: color-mix(in srgb, var(--v7-danger) 42%, var(--v7-border));
+}
+
+.rehab-v7-shell .ai-offline-note {
+    border-color: color-mix(in srgb, var(--v7-warning) 42%, var(--v7-border));
+}
+
+.rehab-v7-shell .skeleton {
+    background: var(--v7-surface-muted);
+    color: transparent !important;
+    animation: none;
+}
+
+.rehab-v7-shell[data-v7-keyboard="visible"] .md-modal-sheet {
+    align-items: end;
+}
+
+.rehab-v7-shell[data-v7-keyboard="visible"] .md-modal-sheet-card,
+.rehab-v7-shell[data-v7-keyboard="visible"] .ai-provider-manager-body {
+    scroll-padding-bottom: calc(var(--v7-keyboard-inset, 0px) + var(--v7-space-4));
+}
+
+@media (max-width: 480px) {
+    .rehab-v7-shell .md-modal:not(.md-modal-sheet) {
+        place-items: end center;
+    }
+
+    .rehab-v7-shell .md-modal:not(.md-modal-sheet) > .md-modal-card {
+        width: 100vw;
+        max-height: min(var(--v7-secondary-max-height), 88dvh);
+        border-radius: var(--v7-radius-xl) var(--v7-radius-xl) 0 0;
+        padding-bottom: calc(var(--v7-space-4) + env(safe-area-inset-bottom));
+    }
+
+    .rehab-v7-shell .ai-provider-manager-body {
+        padding-inline: var(--v7-space-3);
+    }
+}

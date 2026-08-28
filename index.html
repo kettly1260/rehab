@@ -47,7 +47,7 @@
         (function installNonBlockingStartup() {
             'use strict';
 
-            const releaseVersion = '433';
+            const releaseVersion = '434';
             let applicationLaunchStarted = false;
 
             function acknowledgeReleasePage() {
@@ -414,8 +414,8 @@
         })();
         /* APP_STARTUP_NON_BLOCKING_BOOT_END */
     </script>
-    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=433" as="font" type="font/woff2" crossorigin>
-    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=433">
+    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=434" as="font" type="font/woff2" crossorigin>
+    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=434">
 </head>
 <body>
     <div id="appUpdateBanner" class="app-update-banner hidden">
@@ -842,7 +842,7 @@
         (function earlyUpgradeOverlay() {
             try {
                 const url = new URL(window.location.href);
-                if (url.searchParams.get('__rehab_upgrade') !== '433') return;
+                if (url.searchParams.get('__rehab_upgrade') !== '434') return;
                 const el = document.createElement('div');
                 el.id = 'rehabUpgradeOverlay';
                 el.setAttribute('role', 'alertdialog');
@@ -862,27 +862,27 @@
         })();
     </script>
 
-    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=433"></script>
-    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=433"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=433"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data.js?v=433"></script>
-    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=433"></script>
+    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=434"></script>
+    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=434"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=434"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=434"></script>
     <div id="weightModal" class="md-modal md-modal-sheet hidden" aria-hidden="true">
         <div class="md-modal-backdrop" onclick="data.closeWeightModal()"></div>
         <div class="md-modal-card md-modal-sheet-card">
@@ -1399,7 +1399,7 @@
             return true;
         }
         window.claimServiceWorkerReload = claimServiceWorkerReload;
-        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v433';
+        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v434';
         void SERVICE_WORKER_CONTROLLER_RELOAD_KEY;
         function scheduleServiceWorkerRegistration() {
             if (scheduleServiceWorkerRegistration._scheduled) return;
@@ -1426,7 +1426,7 @@
                     return;
                 }
                 const script = document.createElement('script');
-                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=433') : 'app-update.js?v=433');
+                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=434') : 'app-update.js?v=434');
                 script.async = true;
                 script.dataset.rehabAppUpdate = '1';
                 script.onload = () => resolve(window.appUpdate);
@@ -1438,11 +1438,11 @@
                 try {
                     // Do not re-register / normalize while an intentional SW navigate is in flight.
                     try {
-                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '433') {
+                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '434') {
                             return;
                         }
                     } catch {}
-                    const registration = await navigator.serviceWorker.register('./sw.js?v=433', { updateViaCache: 'none' });
+                    const registration = await navigator.serviceWorker.register('./sw.js?v=434', { updateViaCache: 'none' });
                     if (!registration) return;
                     await registration.update?.();
                     // Never auto-activate a waiting worker here. Quiet registration only discovers
@@ -1459,7 +1459,7 @@
                                 return null;
                             }
                         })();
-                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '433';
+                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '434';
                         // Bare controllers are normal for legacy installs until the user applies.
                         // Only suppress the banner when the controller scriptURL is already versioned.
                         if (!alreadyCurrent) {
@@ -1531,7 +1531,7 @@
             const p = new Promise((res, rej) => {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
-                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=433`) : `css-src/${name}.css?v=433`);
+                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=434`) : `css-src/${name}.css?v=434`);
                 link.dataset.appCss = name;
                 link.onload = () => {
                     link.dataset.loaded = 'true';
@@ -1614,7 +1614,7 @@
                 };
                 if (MODULE_SCRIPTS.has(name)) s.type = 'module';
                 const ext = MJS_SCRIPTS.has(name) ? '.mjs' : '.js';
-                let href = `${name}${ext}?v=433`;
+                let href = `${name}${ext}?v=434`;
                 if (forceReload) href += `&_rl=${Date.now()}`;
                 s.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(href) : href);
                 s.onload = () => settle();
@@ -1832,8 +1832,8 @@
             ui.syncSwitchAria(document.getElementById('isAlt'));
             try {
                 const resolvedEntry = typeof window.resolveAssetUrl === 'function'
-                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=433')
-                    : 'src/app/bootstrap.js?v=433';
+                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=434')
+                    : 'src/app/bootstrap.js?v=434';
                 const entry = new URL(resolvedEntry, document.baseURI).href;
                 const v7 = await import(entry);
                 await v7.bootstrapV7?.({ host: window, documentRef: document });
