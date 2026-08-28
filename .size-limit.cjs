@@ -39,6 +39,29 @@ module.exports = [
     limit: '3 KB'
   },
   {
+    name: 'v7-app-shell',
+    path: [
+      'src/app/bootstrap.js',
+      'src/app/context.js',
+      'src/app/events.js',
+      'src/app/feature-registry.js',
+      'src/app/lifecycle.js',
+      'src/app/router.js',
+      'src/features/coach/index.js',
+      'src/features/profile/index.js',
+      'src/features/records/index.js',
+      'src/features/today/index.js',
+      'src/features/workout/index.js',
+      'src/legacy/adapters/data.js',
+      'src/legacy/adapters/index.js',
+      'src/legacy/adapters/services.js',
+      'src/legacy/adapters/storage.js',
+      'src/ui/effects/index.js',
+      'src/ui/navigation/bottom-nav.js'
+    ],
+    limit: '24 KB'
+  },
+  {
     name: 'deferred-storage',
     path: ['data-store-deferred.js', 'storage/idb-collections.js', 'storage/idb-advice-collections.js'],
     limit: '3.5 KB'

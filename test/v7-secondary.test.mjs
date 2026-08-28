@@ -15,7 +15,7 @@ test('V7 secondary owner covers modal, sheet, picker, manager, preview and statu
     }
     assert.match(controllerSource, /dataset\?\.v7SecondaryState === 'permission'/);
     assert.match(bootstrapSource, /createSecondarySurfaceController/);
-    assert.match(swSource, /src\/ui\/primitives\/secondary-surfaces\.js\?v=/);
+    assert.match(swSource, /['"]src\/ui\/primitives\/secondary-surfaces\.js['"]/);
 });
 
 test('V7 secondary owner provides body lock and virtual keyboard state without replacing close semantics', () => {

@@ -49,7 +49,7 @@ This matrix records how the V6 source is treated during the staged migration. V6
 | `css-src/01..49` | KEEP where generic, progressively normalize | V7 layers/primitives/features | 3-11 | Avoid mass deletion; eliminate overlap as host modules migrate |
 | `css-src/50..56` V6 UI | REWRITE_UI | V7 feature styles | 3-11 | Today, Workout, Records, Coach and Profile are overridden by owned V7 feature CSS; remaining pages migrate incrementally |
 | scattered Glass CSS | REWRITE_UI | `src/ui/effects` | 4 | Feature CSS may consume classes/tokens but not invent backdrop rules |
-| `sw.js`, `app-update.js`, manifest | KEEP then integrate | platform/PWA | 12 | Do not redesign SW while main UI is still moving |
+| `sw.js`, `app-update.js`, manifest, `pwa-support.js` | KEEP / WRAP; V7 runtime integrated | platform/PWA | 12 | Preserve explicit update apply and cache migration; precache the V7 ESM shell, keep active-workout deferral, and expose install/update through V7 secondary banners |
 | existing perf/browser/unit tests | KEEP / MERGE | V7-equivalent tests | all | Replace only when the new test covers the same contract; document replacements |
 
 ## Rules applied to every row

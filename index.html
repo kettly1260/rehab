@@ -47,7 +47,7 @@
         (function installNonBlockingStartup() {
             'use strict';
 
-            const releaseVersion = '434';
+            const releaseVersion = '435';
             let applicationLaunchStarted = false;
 
             function acknowledgeReleasePage() {
@@ -414,10 +414,25 @@
         })();
         /* APP_STARTUP_NON_BLOCKING_BOOT_END */
     </script>
-    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=434" as="font" type="font/woff2" crossorigin>
-    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=434">
+    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=435" as="font" type="font/woff2" crossorigin>
+    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=435">
 </head>
 <body>
+    <script>
+        (function capturePwaInstallPrompt() {
+            if (window.__rehabInstallPromptBridgeInstalled) return;
+            window.__rehabInstallPromptBridgeInstalled = true;
+            window.__rehabInstallPrompt = null;
+            window.addEventListener('beforeinstallprompt', (event) => {
+                event.preventDefault();
+                window.__rehabInstallPrompt = event;
+                window.dispatchEvent(new Event('rehab:install-prompt'));
+            });
+            window.addEventListener('appinstalled', () => {
+                window.__rehabInstallPrompt = null;
+            });
+        })();
+    </script>
     <div id="appUpdateBanner" class="app-update-banner hidden">
         <span class="material-symbols-rounded">system_update</span>
         <div>
@@ -426,6 +441,15 @@
         </div>
         <button class="md-btn md-btn-tonal" onclick="appUpdate.dismiss()">&#31245;&#21518;</button>
         <button class="md-btn md-btn-filled" onclick="appUpdate.apply()">&#31435;&#21363;&#26356;&#26032;</button>
+    </div>
+    <div id="appInstallBanner" class="app-update-banner app-install-banner hidden" role="status" aria-live="polite" aria-hidden="true">
+        <span class="material-symbols-rounded">download</span>
+        <div>
+            <strong>&#23433;&#35013;&#35757;&#32451;&#21161;&#25163;</strong>
+            <small>&#23433;&#35013;&#21518;&#21487;&#20197;&#20174;&#20027;&#23631;&#24555;&#36895;&#25171;&#24320;&#65292;&#24182;&#32487;&#32493;&#20351;&#29992;&#31163;&#32447;&#21151;&#33021;&#12290;</small>
+        </div>
+        <button type="button" class="md-btn md-btn-tonal" onclick="pwaSupport.dismissInstall()">&#31245;&#21518;</button>
+        <button type="button" class="md-btn md-btn-filled" onclick="pwaSupport.install()">&#23433;&#35013;</button>
     </div>
     <audio id="silentAudio" loop preload="auto"><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAAAAA=" type="audio/wav"></audio>
     <video id="pipVideo" class="pip-video-source" muted playsinline preload="auto" aria-hidden="true"></video>
@@ -842,7 +866,7 @@
         (function earlyUpgradeOverlay() {
             try {
                 const url = new URL(window.location.href);
-                if (url.searchParams.get('__rehab_upgrade') !== '434') return;
+                if (url.searchParams.get('__rehab_upgrade') !== '435') return;
                 const el = document.createElement('div');
                 el.id = 'rehabUpgradeOverlay';
                 el.setAttribute('role', 'alertdialog');
@@ -862,27 +886,27 @@
         })();
     </script>
 
-    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=434"></script>
-    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=434"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=434"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data.js?v=434"></script>
-    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=434"></script>
+    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=435"></script>
+    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=435"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=435"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data.js?v=435"></script>
+    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=435"></script>
     <div id="weightModal" class="md-modal md-modal-sheet hidden" aria-hidden="true">
         <div class="md-modal-backdrop" onclick="data.closeWeightModal()"></div>
         <div class="md-modal-card md-modal-sheet-card">
@@ -1315,7 +1339,8 @@
                 runWhenIdle(() => {
                     Promise.allSettled([
                         loadScript('haptics'),
-                        loadScript('sheet-drag')
+                        loadScript('sheet-drag'),
+                        loadScript('pwa-support')
                     ]).catch(() => {});
                 }, { timeout: 6000 });
             }, 2000);
@@ -1399,7 +1424,7 @@
             return true;
         }
         window.claimServiceWorkerReload = claimServiceWorkerReload;
-        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v434';
+        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v435';
         void SERVICE_WORKER_CONTROLLER_RELOAD_KEY;
         function scheduleServiceWorkerRegistration() {
             if (scheduleServiceWorkerRegistration._scheduled) return;
@@ -1426,7 +1451,7 @@
                     return;
                 }
                 const script = document.createElement('script');
-                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=434') : 'app-update.js?v=434');
+                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=435') : 'app-update.js?v=435');
                 script.async = true;
                 script.dataset.rehabAppUpdate = '1';
                 script.onload = () => resolve(window.appUpdate);
@@ -1438,11 +1463,11 @@
                 try {
                     // Do not re-register / normalize while an intentional SW navigate is in flight.
                     try {
-                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '434') {
+                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '435') {
                             return;
                         }
                     } catch {}
-                    const registration = await navigator.serviceWorker.register('./sw.js?v=434', { updateViaCache: 'none' });
+                    const registration = await navigator.serviceWorker.register('./sw.js?v=435', { updateViaCache: 'none' });
                     if (!registration) return;
                     await registration.update?.();
                     // Never auto-activate a waiting worker here. Quiet registration only discovers
@@ -1459,7 +1484,7 @@
                                 return null;
                             }
                         })();
-                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '434';
+                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '435';
                         // Bare controllers are normal for legacy installs until the user applies.
                         // Only suppress the banner when the controller scriptURL is already versioned.
                         if (!alreadyCurrent) {
@@ -1531,7 +1556,7 @@
             const p = new Promise((res, rej) => {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
-                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=434`) : `css-src/${name}.css?v=434`);
+                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=435`) : `css-src/${name}.css?v=435`);
                 link.dataset.appCss = name;
                 link.onload = () => {
                     link.dataset.loaded = 'true';
@@ -1614,7 +1639,7 @@
                 };
                 if (MODULE_SCRIPTS.has(name)) s.type = 'module';
                 const ext = MJS_SCRIPTS.has(name) ? '.mjs' : '.js';
-                let href = `${name}${ext}?v=434`;
+                let href = `${name}${ext}?v=435`;
                 if (forceReload) href += `&_rl=${Date.now()}`;
                 s.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(href) : href);
                 s.onload = () => settle();
@@ -1832,8 +1857,8 @@
             ui.syncSwitchAria(document.getElementById('isAlt'));
             try {
                 const resolvedEntry = typeof window.resolveAssetUrl === 'function'
-                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=434')
-                    : 'src/app/bootstrap.js?v=434';
+                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=435')
+                    : 'src/app/bootstrap.js?v=435';
                 const entry = new URL(resolvedEntry, document.baseURI).href;
                 const v7 = await import(entry);
                 await v7.bootstrapV7?.({ host: window, documentRef: document });

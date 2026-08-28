@@ -4,11 +4,11 @@ const appUpdate = {
     waitingWorker: null,
     checking: false,
     controllerReloadBound: false,
-    swUrl: './sw.js?v=434',
-    version: '434',
+    swUrl: './sw.js?v=435',
+    version: '435',
 
     controllerReloadKey() {
-        return 'rehab-sw-controller-reload-v434';
+        return 'rehab-sw-controller-reload-v435';
     },
 
     claimControllerReload() {

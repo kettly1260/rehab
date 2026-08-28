@@ -94,6 +94,10 @@ The V7 visual references define visual hierarchy only. This document maps every 
 
 All V6 modal/sheet/picker/loading/error/offline/toast/confirmation/attachment/permission/keyboard states are migrated to the V7 secondary-surface owner in Phase 11. Existing focusTrap, backdrop, focus return, navStack and workout-safe update semantics remain the functional owners; V7 owns shared decoration, body scroll lock, keyboard inset and restrained Surface styling. No current secondary business flow is intentionally removed.
 
+## PWA runtime
+
+Manifest install, shortcut routing, offline Today closure, V7 ESM shell caching, explicit Service Worker update apply, active-workout update deferral, deep links and standalone root-back behavior are integrated in Phase 12. Install and update prompts use the shared V7 secondary banner surface; the existing storage schema, workout journal and old-cache migration protocol remain unchanged.
+
 ## Mapping gate
 
 - Inventoried V6 capabilities without a V7 entry: **0**.

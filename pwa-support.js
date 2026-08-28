@@ -8,6 +8,73 @@
         'sync.js',
         'backup.js'
     ];
+    let installPrompt = window.__rehabInstallPrompt || null;
+    let installDismissed = false;
+    let installRuntimeStarted = false;
+
+    function isStandalone() {
+        return window.matchMedia?.('(display-mode: standalone)')?.matches
+            || window.matchMedia?.('(display-mode: minimal-ui)')?.matches
+            || navigator.standalone === true;
+    }
+
+    function syncInstallBanner() {
+        const banner = document.getElementById('appInstallBanner');
+        if (!banner) return false;
+        const visible = !!installPrompt && !installDismissed && !isStandalone();
+        banner.classList.toggle('hidden', !visible);
+        banner.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        return visible;
+    }
+
+    function captureInstallPrompt() {
+        installPrompt = window.__rehabInstallPrompt || null;
+        syncInstallBanner();
+    }
+
+    function clearInstallPrompt() {
+        installPrompt = null;
+        window.__rehabInstallPrompt = null;
+        syncInstallBanner();
+    }
+
+    async function install() {
+        const prompt = installPrompt;
+        if (!prompt || typeof prompt.prompt !== 'function') return false;
+        installPrompt = null;
+        window.__rehabInstallPrompt = null;
+        await prompt.prompt();
+        const choice = await prompt.userChoice;
+        installDismissed = choice?.outcome !== 'accepted';
+        syncInstallBanner();
+        return choice?.outcome === 'accepted';
+    }
+
+    function dismissInstall() {
+        installDismissed = true;
+        clearInstallPrompt();
+    }
+
+    function handleAppInstalled() {
+        installDismissed = false;
+        clearInstallPrompt();
+    }
+
+    function startInstallRuntime() {
+        if (installRuntimeStarted) return;
+        installRuntimeStarted = true;
+        window.addEventListener('rehab:install-prompt', captureInstallPrompt);
+        window.addEventListener('appinstalled', handleAppInstalled);
+        captureInstallPrompt();
+    }
+
+    function disposeInstallRuntime() {
+        if (!installRuntimeStarted) return;
+        installRuntimeStarted = false;
+        window.removeEventListener('rehab:install-prompt', captureInstallPrompt);
+        window.removeEventListener('appinstalled', handleAppInstalled);
+        clearInstallPrompt();
+    }
 
     function resolveShortcut() {
         try {
@@ -78,5 +145,14 @@
             <div class="sync-meta-item sync-meta-wide"><strong>关键离线资源</strong><span>${status.missing.length ? safe(status.missing.join('、')) : '完整'}</span></div>`;
     }
 
-    window.pwaSupport = { openShortcut, cacheHealth, renderHealth };
+    window.pwaSupport = {
+        openShortcut,
+        cacheHealth,
+        renderHealth,
+        install,
+        dismissInstall,
+        syncInstallBanner,
+        disposeInstallRuntime
+    };
+    startInstallRuntime();
 })();
