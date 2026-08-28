@@ -27,11 +27,15 @@ export async function launchAuditBrowser(chromium, options = {}) {
     const headless = options.headless !== false;
     const explicitChannel = process.env.AUDIT_CHANNEL || '';
     const preferred = explicitChannel || options.channel || 'msedge';
+    const launchOptions = {
+        headless,
+        ...(Array.isArray(options.args) && options.args.length ? { args: options.args } : {})
+    };
     let lastError = null;
 
     try {
         return {
-            browser: await chromium.launch({ channel: preferred, headless }),
+            browser: await chromium.launch({ channel: preferred, ...launchOptions }),
             channel: preferred
         };
     } catch (error) {
@@ -42,7 +46,7 @@ export async function launchAuditBrowser(chromium, options = {}) {
     for (const executablePath of systemChromiumCandidates()) {
         try {
             return {
-                browser: await chromium.launch({ executablePath, headless }),
+                browser: await chromium.launch({ executablePath, ...launchOptions }),
                 channel: path.basename(executablePath).replace(/\.exe$/i, '') + '-system'
             };
         } catch (error) {
@@ -52,11 +56,10 @@ export async function launchAuditBrowser(chromium, options = {}) {
 
     try {
         return {
-            browser: await chromium.launch({ headless }),
+            browser: await chromium.launch(launchOptions),
             channel: 'chromium'
         };
     } catch (error) {
         throw lastError || error;
     }
 }
-

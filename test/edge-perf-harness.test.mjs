@@ -5,7 +5,11 @@ import { readFile } from 'node:fs/promises';
 const source = await readFile(new URL('../scripts/edge-perf-smoke.mjs', import.meta.url), 'utf8');
 
 test('edge perf smoke excludes known third-party security injection from localhost measurements', () => {
-    assert.match(source, /Network\.setBlockedURLs/);
+    assert.match(source, /context\.route\(\/kaspersky-labs/);
     assert.match(source, /kaspersky-labs\.com/);
     assert.match(source, /blockedExternalPatterns/);
+    assert.match(source, /requestfailed/);
+    assert.match(source, /requestFailures\.push/);
+    assert.match(source, /gpuDisabled:\s*true/);
+    assert.match(source, /--disable-gpu/);
 });

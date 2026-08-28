@@ -5,6 +5,9 @@
   "scripts": {
     "build:css": "node scripts/build-css.mjs",
     "perf:edge": "node scripts/edge-perf-smoke.mjs",
+    "perf:render": "node scripts/v7-render-perf.mjs --suite=render",
+    "perf:lifecycle": "node --test --test-force-exit test/route-lifecycle-leak.browser.test.mjs",
+    "perf:effects": "node scripts/v7-render-perf.mjs --suite=effects",
     "icons": "node scripts/collect-icons.mjs",
     "bump": "node scripts/bump-version.js",
     "version": "node scripts/bump-version.js && git add index.html sw.js scripts/ build/",

@@ -67,8 +67,9 @@ test('edge performance smoke script is available as an explicit npm script', () 
 
     assert.equal(existsSync(scriptPath), true);
     assert.equal(packageJson.scripts['perf:edge'], 'node scripts/edge-perf-smoke.mjs');
-    assert.match(script, /Runtime\.consoleAPICalled/);
+    assert.match(script, /page\.on\('console'/);
     assert.match(script, /console errors:/);
+    assert.match(script, /request failures:/);
 });
 
 test('material symbols use a preloaded local font without a delayed remote swap', () => {
