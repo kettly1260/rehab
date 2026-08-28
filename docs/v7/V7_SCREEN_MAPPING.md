@@ -102,4 +102,4 @@ Manifest install, shortcut routing, offline Today closure, V7 ESM shell caching,
 
 - Inventoried V6 capabilities without a V7 entry: **0**.
 - Explicitly deferred capability: **Debug/diagnostics primary-page polish only**; the route remains reachable and its functionality is retained.
-- Data compatibility assumption: all mappings initially read/write through the existing V6 store/schema until Phase 2 adapters are proven equivalent.
+- Data compatibility conclusion: all migrated entries continue to read/write through the verified V6-compatible adapters, store names and schema; no V7-only user-data format was introduced.

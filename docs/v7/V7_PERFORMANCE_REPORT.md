@@ -8,7 +8,7 @@ Phase 13 desktop automation passed on August 28, 2026. Android thermal and batte
 
 The V6 reference is commit `ae1194b17be420a6ec6ecf8b70d1cb358a28bc7b`. Its recorded GPU-off `perf:edge` baseline is 27 scripts, 38 resources, 0 Long Tasks, 772 KB transfer and 126.5 ms `boot:first-render`. The baseline did not measure route rendering or Android power.
 
-The final V7 GPU-off boot smoke reported 45 scripts, 50 resources, 0 Long Tasks, 884 KB transfer and 60.7 ms `boot:first-render`. Script/resource transfer increased because the V7 ESM shell is now part of the offline-capable startup graph. The timing is directionally better, but the final harness uses Playwright instead of the unstable raw CDP page socket, so the boot duration is not treated as a strict apples-to-apples benchmark.
+The final acceptance rerun reported 45 scripts, 50 resources, 0 Long Tasks, 884 KB transfer and 77.9 ms `boot:first-render`; the earlier Phase 13 run recorded 60.7 ms. Script/resource transfer increased because the V7 ESM shell is now part of the offline-capable startup graph. Both V7 timings are directionally better than the recorded baseline, but the final harness uses Playwright instead of the unstable raw CDP page socket, so the boot duration is not treated as a strict apples-to-apples benchmark.
 
 ## Test method
 
@@ -26,12 +26,12 @@ System Edge `151.0.4129.107` used ANGLE D3D11 on Intel UHD Graphics. The table r
 | Path | Long Task ms | LoAF ms | Frame p95 ms | DOM nodes | Active RAF | Timers (timeout/interval) |
 |---|---:|---:|---:|---:|---:|---:|
 | Today idle | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
-| Today scroll | 0 | 0 | 4.4 | 1584 | 1 | 0 / 1 |
-| Tab switching | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
-| Workout idle | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
-| Workout running | 94 | 99 | 4.3 | 1599 | 1 | 1 / 4 |
-| Records chart/scroll | 0 | 0 | 4.3 | 1653 | 1 | 0 / 1 |
-| Coach streaming | 0 | 0 | 4.3 | 1701 | 1 | 0 / 1 |
+| Today scroll | 0 | 0 | 12.5 | 1584 | 1 | 0 / 1 |
+| Tab switching | 0 | 0 | 12.4 | 1584 | 1 | 0 / 1 |
+| Workout idle | 0 | 0 | 8.3 | 1584 | 1 | 0 / 1 |
+| Workout running | 65 | 70 | 8.4 | 1599 | 1 | 1 / 5 |
+| Records chart/scroll | 0 | 0 | 8.5 | 1653 | 1 | 0 / 1 |
+| Coach streaming | 0 | 0 | 8.3 | 1701 | 1 | 0 / 1 |
 | Profile scroll | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
 | Modal/Sheet | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
 
@@ -39,7 +39,7 @@ The one active RAF in settled samples is the app/runtime proxy count after the h
 
 ## Balanced and economy
 
-Today idle, Records chart/scroll, Coach streaming, Modal/Sheet and Workout running were compared in both modes. Both modes had 0 settled visible/nested V7 backdrops, 0 running animations and 0 permanent `will-change` in all sampled paths. Economy Workout had 0 Long Task and 0 LoAF; balanced Workout recorded 59 ms Long Task and 64 ms LoAF in its independent session. This is evidence that economy does not add visual work, not a claim of Android battery or thermal improvement.
+Today idle, Records chart/scroll, Coach streaming, Modal/Sheet and Workout running were compared in both modes. Both modes had 0 settled visible/nested V7 backdrops, 0 running animations and 0 permanent `will-change` in all sampled paths. In the final effects rerun both balanced and economy Workout recorded 0 Long Task and 0 LoAF, with frame p95 of 8.3 ms and 8.4 ms respectively. This is evidence that economy does not add visual work, not a claim of Android battery or thermal improvement.
 
 ## Lifecycle cleanup
 
@@ -47,9 +47,9 @@ The 20-round GPU-on route test passed. Cold-to-warm lazy loading added persisten
 
 | Resource proxy | Round 1 | Round 20 | Growth |
 |---|---:|---:|---:|
-| Window listeners | 53 | 53 | 0 |
-| Document listeners | 37 | 37 | 0 |
-| Timeouts | 4 | 2 | -2 |
+| Window listeners | 57 | 57 | 0 |
+| Document listeners | 41 | 41 | 0 |
+| Timeouts | 3 | 2 | -1 |
 | Intervals | 2 | 2 | 0 |
 | MutationObserver | 5 | 5 | 0 |
 | ResizeObserver | 45 | 45 | 0 |
