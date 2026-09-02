@@ -1,0 +1,47 @@
+name: Clean and Sync All Branches to Alt Account
+
+on:
+  push:
+    # 监听所有分支的推送
+    branches:
+      - '**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 必须拉取完整提交历史才能重写全部分支
+
+      - name: Install git-filter-repo
+        run: |
+          pip install git-filter-repo
+
+      - name: Rewrite git history & push all branches
+        env:
+          ALT_TOKEN: ${{ secrets.ALT_GITHUB_TOKEN }}
+          # 请将下方替换为你小号的实际信息
+          ALT_USERNAME: "onestao"
+          ALT_REPO: "rehab"
+          ALT_EMAIL: "269083498+onestao@users.noreply.github.com"
+        run: |
+          # 1. 抓取远程所有分支到本地 tracking 分支，确保分支完整
+          for branch in $(git branch -r | grep -v '\->' | grep -v 'origin/HEAD'); do
+            git branch --track ${branch#origin/} $branch 2>/dev/null || true
+          done
+
+          # 2. 从所有历史中彻底抹除 .github 目录（避免小号仓库看到同步脚本）
+          git-filter-repo --path .github --invert-paths --force
+
+          # 3. 彻底重写所有提交的 Author 和 Committer，换为小号信息
+          # 无论是谁提交的、历史多久，全部清洗成小号
+          git-filter-repo \
+            --name-callback "return b'${ALT_USERNAME}'" \
+            --email-callback "return b'${ALT_EMAIL}'" \
+            --force
+
+          # 4. 配置小号远程仓库地址并推送所有分支
+          git remote add alt https://${ALT_TOKEN}@github.com/${ALT_USERNAME}/${ALT_REPO}.git
+          git push alt --all --force
