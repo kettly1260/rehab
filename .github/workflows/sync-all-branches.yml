@@ -2,7 +2,6 @@ name: Clean and Sync All Branches to Alt Account
 
 on:
   push:
-    # 监听所有分支的推送
     branches:
       - '**'
 
@@ -13,7 +12,9 @@ jobs:
       - name: Checkout repository with full history
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 必须拉取完整历史
+          fetch-depth: 0
+          # 关键配置 1：防止 actions/checkout 注入默认的 github-actions[bot] 鉴权头
+          persist-credentials: false
 
       - name: Install git-filter-repo
         run: |
@@ -26,20 +27,24 @@ jobs:
           ALT_REPO: ${{ secrets.ALT_REPO }}
           ALT_EMAIL: ${{ secrets.ALT_EMAIL }}
         run: |
-          # 1. 抓取并追踪远程的所有分支
+          # 关键配置 2：彻底清除本地 git 配置中可能残留的 extraheader
+          git config --global --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+
+          # 1. 追踪所有远程分支
           for branch in $(git branch -r | grep -v '\->' | grep -v 'origin/HEAD'); do
             git branch --track ${branch#origin/} $branch 2>/dev/null || true
           done
 
-          # 2. 从所有历史中彻底抹除 .github 目录，同时将作者/提交者身份重写为小号
-          # （两条规则合并执行，速度更快且只重写一次 Git 对象）
+          # 2. 清理目录并重写提交历史
           git-filter-repo \
             --path .github --invert-paths \
             --name-callback "return b'''${ALT_USERNAME}'''" \
             --email-callback "return b'''${ALT_EMAIL}'''" \
             --force
 
-          # 3. 配置小号远程仓库并强制推送所有分支
-          # git-filter-repo 会在运行后清空所有 remote，因此这里直接放心 add 即可
-          git remote add alt "https://${ALT_TOKEN}@github.com/${ALT_USERNAME}/${ALT_REPO}.git"
+          # 3. 使用小号凭据配置远程地址
+          git remote add alt "https://${ALT_USERNAME}:${ALT_TOKEN}@github.com/${ALT_USERNAME}/${ALT_REPO}.git"
+
+          # 4. 推送所有分支
           git push alt --all --force
