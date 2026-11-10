@@ -1296,6 +1296,44 @@ const advicePanel = {
         return (this._adviceAttachments || []).some(att => att?.kind === 'image' && att.status !== 'failed') ? 'advice.vision' : 'advice.chat';
     },
 
+    resolveAdviceTaskModel(options = {}) {
+        if (typeof options === 'string') {
+            options = { prompt: options };
+        }
+        if (options && typeof options === 'object' && options.model && options.model !== '__current__') {
+            return options.model;
+        }
+        const aiInstance = typeof ai !== 'undefined' ? ai : (typeof window !== 'undefined' ? window.ai : null);
+        const hasImage = !!(
+            options?.hasImage ||
+            (Array.isArray(options?.attachments) && options.attachments.some(att => att && (att.kind === 'image' || att.type === 'image') && att.status !== 'failed')) ||
+            (typeof this.advicePickerTaskId === 'function' && this.advicePickerTaskId() === 'advice.vision') ||
+            (Array.isArray(this._adviceAttachments) && this._adviceAttachments.some(att => att && att.kind === 'image' && att.status !== 'failed'))
+        );
+        const taskId = options?.taskId || (hasImage ? 'advice.vision' : 'advice.chat');
+        const routeOverride = (typeof window !== 'undefined' && window.aiRoutingPure?.manualFallbackTarget?.(options?.routeOverride)) || options?.routeOverride || null;
+
+        let routedModel = '';
+        if (aiInstance) {
+            if (typeof aiInstance.resolveTaskConfig === 'function') {
+                const effective = aiInstance.resolveTaskConfig(taskId, routeOverride);
+                routedModel = effective?.model || '';
+            } else if (typeof aiInstance.getEffectiveConfig === 'function') {
+                const effective = aiInstance.getEffectiveConfig();
+                routedModel = effective?.model || '';
+            } else if (aiInstance.cfg) {
+                routedModel = aiInstance.cfg.model || '';
+            }
+        }
+        if (routedModel && routedModel !== '__current__') {
+            return routedModel;
+        }
+        const fallback = (this.adviceModel && this.adviceModel !== '__current__' ? this.adviceModel : '')
+            || (typeof window !== 'undefined' && window.advicePanel?.adviceModel && window.advicePanel.adviceModel !== '__current__' ? window.advicePanel.adviceModel : '')
+            || (aiInstance?.cfg?.model && aiInstance.cfg.model !== '__current__' ? aiInstance.cfg.model : '');
+        return fallback;
+    },
+
     refreshAdviceModelChip() {
         const chip = document.querySelector('.advice-model-chip');
         if (!chip) return;
@@ -2278,7 +2316,9 @@ const advicePanel = {
         }
         const attachments = attachmentPayload
             ? attachmentPayload.attachments.slice()
-            : ((!promptOverride && !options?.skipUserMessage) ? (this._adviceAttachments || []).filter(att => att && att.status !== 'failed').slice() : []);
+            : (Array.isArray(options?.attachments)
+                ? options.attachments.filter(att => att && att.status !== 'failed').slice()
+                : (!options?.skipUserMessage ? (this._adviceAttachments || []).filter(att => att && att.status !== 'failed').slice() : []));
         const effectivePrompt = prompt || (attachments.some(att => att.kind === 'image') ? '请结合附件内容进行分析，并给出可执行建议。' : '请分析附件内容，并给出可执行建议。');
         const urls = Array.isArray(options?.userProvidedUrls)
             ? (Object.isFrozen(options.userProvidedUrls) ? options.userProvidedUrls : (window.searchToolLoop?.normalizeUserProvidedUrls?.(options.userProvidedUrls) || []))
@@ -2380,17 +2420,18 @@ const advicePanel = {
         this.save();
         requestAnimationFrame(() => {
             if (!this._adviceUserScrollPaused && this._adviceFollowStream) {
-                this.scrollAdviceToLatest(true);
+                this.scrollAdviceToLatest?.(true);
             }
         });
         this._activeStreamRenderer = null;
         this._streamRenderers = this._streamRenderers || {};
         this.setAdviceStreamUiState('streaming');
         let requestMessages = [];
+        let baseMessages = null;
         let hasStreamedContent = false;
         try {
             const contextMode = ['auto', 'light', 'none'].includes(options?.contextMode || this.adviceContextMode) ? (options?.contextMode || this.adviceContextMode) : 'auto';
-            const baseMessages = this.buildAdviceMessages(effectivePrompt, model, { contextMode });
+            baseMessages = this.buildAdviceMessages(effectivePrompt, model, { contextMode });
             const messages = this.applyAdviceAttachmentsToMessages?.(baseMessages, attachments) || baseMessages;
             requestMessages = messages;
             const outputTokenBudget = Math.max(2400, Number(this.ADVICE_OUTPUT_TOKEN_BUDGET || advicePanel.ADVICE_OUTPUT_TOKEN_BUDGET) || 8192);
@@ -2580,7 +2621,8 @@ const advicePanel = {
                 pending: false,
                 deleted: false,
                 updatedAt: Date.now(),
-                ...(searchEvidence.length ? { searchEvidence } : {})
+                ...(searchEvidence.length ? { searchEvidence } : {}),
+                ...(baseMessages?.contextEvidence ? { contextEvidence: baseMessages.contextEvidence } : {})
             };
             window.errorBus?.event?.('advice.request', 'success', {
                 provider,
@@ -2610,7 +2652,7 @@ const advicePanel = {
                     }
                 }
                 if (!this._adviceUserScrollPaused && this._adviceFollowStream) {
-                    this.scrollAdviceToLatest(true);
+                    this.scrollAdviceToLatest?.(true);
                 }
             });
         } catch (e) {
@@ -2644,7 +2686,8 @@ const advicePanel = {
                     replyToId,
                     versionIdx: baseVersionIdx,
                     versionActive: options?.versionActive !== false,
-                    versionPinned: !!options?.versionPinned
+                    versionPinned: !!options?.versionPinned,
+                    ...(baseMessages?.contextEvidence ? { contextEvidence: baseMessages.contextEvidence } : {})
                 };
                 if (idx >= 0) this.db.health.aiAdviceChat[idx] = stopped;
                 else this.db.health.aiAdviceChat.push(stopped);
@@ -2668,7 +2711,7 @@ const advicePanel = {
                         delete this._streamRenderers[pendingId];
                     }
                     if (!this._adviceUserScrollPaused && this._adviceFollowStream) {
-                        this.scrollAdviceToLatest(true);
+                        this.scrollAdviceToLatest?.(true);
                     }
                 });
                 return;
@@ -2727,7 +2770,7 @@ const advicePanel = {
             this.save();
             requestAnimationFrame(() => {
                 if (!this._adviceUserScrollPaused && this._adviceFollowStream) {
-                    this.scrollAdviceToLatest(true);
+                    this.scrollAdviceToLatest?.(true);
                 }
             });
         } finally {
@@ -3129,6 +3172,19 @@ const advicePanel = {
         const searchQuery = this.escapeHtml(rawSearchQuery);
         const searchOpen = !!this.adviceSearchOpen || !!this.adviceSearchQuery;
         const modeItems = 'auto,自动,auto_awesome|light,轻量,compress|none,仅提问,short_text'.split('|').map(item => item.split(','));
+        let previewEvidence = null;
+        if (ctxOpen) {
+            try {
+                let currentPrompt = '';
+                const inputEl = typeof document !== 'undefined' ? (document.getElementById('advicePrompt') || document.getElementById('adviceEditPrompt')) : null;
+                if (inputEl && typeof inputEl.value === 'string') currentPrompt = inputEl.value.trim();
+                else if (typeof this._adviceDraft === 'string') currentPrompt = this._adviceDraft.trim();
+                const activeModel = this.resolveAdviceTaskModel ? this.resolveAdviceTaskModel() : (typeof ai !== 'undefined' ? (ai.resolveTaskConfig ? ai.resolveTaskConfig(this.advicePickerTaskId?.() || 'advice.chat')?.model : ai.cfg?.model) : (this.adviceModel !== '__current__' ? this.adviceModel : ''));
+                previewEvidence = typeof this.getAdviceContextEvidence === 'function' ? this.getAdviceContextEvidence({ prompt: currentPrompt, model: activeModel }) : null;
+            } catch (e) {
+                previewEvidence = null;
+            }
+        }
         return `
             <div class="advice-filter-row">
                 <div class="advice-range-tabs" role="group" aria-label="对话时间范围">${[['today','今日'],['week','7天'],['month','30天'],['all','全部']].map(([key, label]) => `<button class="advice-pill ${range === key ? 'active' : ''}" onclick="data.setAdviceRange('${key}')" type="button" aria-pressed="${range === key}">${label}</button>`).join('')}</div>
@@ -3165,6 +3221,21 @@ const advicePanel = {
                     <small>数据维度</small>
                 <div class="advice-context-toggles">${[['diet','饮食','restaurant'],['training','训练','fitness_center'],['weight','体重','monitor_weight'],['goal','目标','flag']].map(([key, label, icon]) => `<button class="advice-pill ${contexts[key] ? 'active' : ''}" onclick="data.toggleAdviceContext('${key}')" type="button" aria-pressed="${contexts[key]}"><span class="material-symbols-rounded">${icon}</span>${label}</button>`).join('')}</div>
                 </div>
+                <div class="advice-context-section advice-context-preview-section">
+                    <small>本次请求预估携带依据</small>
+                    <div class="advice-context-preview-content">
+                        ${previewEvidence ? `
+                            <div class="advice-evidence-summary">范围：${this.escapeHtml(previewEvidence.rangeLabel || range)} · 模式：${this.escapeHtml(contextModeLabel)}</div>
+                            <div class="advice-evidence-chips">
+                                <span class="advice-evidence-chip">计划: ${previewEvidence.counts?.dailyPlans ?? previewEvidence.counts?.pastAndTodayPlans ?? 0}</span>
+                                <span class="advice-evidence-chip">训练: ${previewEvidence.counts?.history ?? previewEvidence.counts?.targetHistory ?? 0}</span>
+                                <span class="advice-evidence-chip">饮食: ${previewEvidence.counts?.foods ?? previewEvidence.counts?.targetFoods ?? 0}</span>
+                                <span class="advice-evidence-chip">体重: ${previewEvidence.counts?.weights ?? previewEvidence.counts?.targetWeights ?? 0}</span>
+                            </div>
+                            ${previewEvidence.truncations?.length ? `<div class="advice-evidence-truncation">${previewEvidence.truncations.map(t => `<small>${this.escapeHtml(t)}</small>`).join('')}</div>` : ''}
+                        ` : '<small class="advice-context-hint">当前上下文为空或未附带数据</small>'}
+                    </div>
+                </div>
                 <small class="advice-context-hint">自动会按问题重点和模型预算裁剪；维度开关是可使用数据上限。</small>
             </div>` : ''}
         `;
@@ -3190,13 +3261,22 @@ const advicePanel = {
         const latest = sorted.length ? sorted[sorted.length - 1] : null;
         const bodyWeight = latest ? Number(latest.weight) : 0;
         const dailyPlans = this.db?.dailyPlans || [];
-        const today = new Date().toISOString().slice(0, 10);
+        const history = this.db?.history || [];
+        const exerciseLogs = this.db?.health?.exerciseLogs || [];
+        const today = typeof this.logicalDateKey === 'function' ? this.logicalDateKey() : (this.dateKey ? this.dateKey(new Date()) : new Date().toISOString().slice(0, 10));
         const weekDeficit = this.buildPlanAnalytics?.().metrics?.weekDeficit;
+        const dietGoal = this.db?.health?.dietGoal || {};
+        const todayFoods = typeof this.todayFoodLogs === 'function'
+            ? this.todayFoodLogs()
+            : (this.db?.health?.foodLogs || []).filter(f => !f.deleted && (f.date === today || String(f.date || '').slice(0, 10) === today));
+        const foodRecordCount = todayFoods.length;
 
         const diagCtx = {
             macros, bodyWeight, goalType,
-            dailyPlans, today, weekDeficit,
+            dailyPlans, history, exerciseLogs, today, weekDeficit,
             weights: sorted,
+            foodRecordCount,
+            dietGoal
         };
         const diag = this.diagnoseInsight?.(diagCtx) || null;
         const analytics = this.buildPlanAnalytics?.() || {};

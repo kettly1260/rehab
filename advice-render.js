@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 function escapeHtml(s) {
     return String(s ?? '')
         .replace(/&/g, '&amp;')
@@ -434,6 +434,7 @@ Object.assign(advicePanel, {
         const limitNotice = limitedByTokens ? '<div class="advice-limit-notice"><span class="material-symbols-rounded">data_thresholding</span>回复达到模型输出上限，结尾可能不完整。可点击重试，或直接输入“继续”。</div>' : '';
         const stoppedNotice = msg.stopped ? '<div class="advice-stopped-notice"><span class="material-symbols-rounded">stop</span>已停止生成，已保留上方部分回复。</div>' : '';
         const sourceTrail = window.searchEvidenceUi?.sourceTrail?.(msg.searchEvidence, escapeHtml) || '';
+        const contextEvidenceTrail = this.renderContextEvidence?.(msg.contextEvidence, escapeHtml) || '';
         const actions = msg.role === 'assistant'
             ? `<div class="advice-bubble-actions" aria-label="AI 回答操作">
                 <button class="advice-action-btn" onclick="data.copyAdviceMessage(${msg.idx}, this.closest('.advice-bubble')?.dataset.adviceId || '')" type="button" aria-label="复制" title="复制"><span class="material-symbols-rounded">content_copy</span></button>
@@ -463,9 +464,42 @@ Object.assign(advicePanel, {
             ${stoppedNotice}
             ${errorRecovery}
             ${sourceTrail}
+            ${contextEvidenceTrail}
             ${longMessageToggle}
             ${routineActions}
             ${actions}
         </div>`;
     },
+
+    renderContextEvidence(ev, esc = escapeHtml) {
+        if (!ev || typeof ev !== 'object') return '';
+        const rangeText = ev.rangeLabel || ev.range || '分析范围';
+        const dateSpan = ev.startDate && ev.endDate ? `${ev.startDate} 至 ${ev.endDate}` : '';
+        const counts = ev.counts || {};
+        const details = [];
+        if (counts.history != null && counts.history > 0) details.push(`训练记录 ${counts.history} 条`);
+        if (counts.dailyPlans != null && counts.dailyPlans > 0) details.push(`训练计划 ${counts.dailyPlans} 份`);
+        if (counts.futureDailyPlans != null && counts.futureDailyPlans > 0) details.push(`未来安排 ${counts.futureDailyPlans} 份`);
+        if (counts.foods != null && counts.foods > 0) details.push(`饮食记录 ${counts.foods} 条`);
+        if (counts.weights != null && counts.weights > 0) details.push(`体重记录 ${counts.weights} 条`);
+        if (counts.exerciseLogs != null && counts.exerciseLogs > 0) details.push(`手动运动 ${counts.exerciseLogs} 条`);
+        if (counts.rehabWeekly != null && counts.rehabWeekly > 0) details.push(`康复处方 ${counts.rehabWeekly} 周`);
+        if (!details.length) details.push('无关联记录');
+        const truncations = Array.isArray(ev.truncations) && ev.truncations.length
+            ? `<div class="advice-evidence-truncation">${ev.truncations.map(t => `<div>⚠️ ${esc(t)}</div>`).join('')}</div>`
+            : '';
+        return `<details class="advice-evidence-card">
+            <summary class="advice-evidence-summary">
+                <span class="material-symbols-rounded">manage_search</span>
+                <span>数据依据：${esc(rangeText)}${dateSpan ? `（${esc(dateSpan)}）` : ''}</span>
+                <span class="material-symbols-rounded advice-evidence-arrow">expand_more</span>
+            </summary>
+            <div class="advice-evidence-body">
+                <div class="advice-evidence-chips">
+                    ${details.map(d => `<span class="advice-evidence-chip">${esc(d)}</span>`).join('')}
+                </div>
+                ${truncations}
+            </div>
+        </details>`;
+    }
 });

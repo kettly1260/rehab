@@ -2,16 +2,22 @@
 .rehab-v7-shell #today.v7-feature-today {
     width: min(100%, var(--v7-content-max));
     margin-inline: auto;
-    padding-inline: clamp(14px, 4vw, 24px);
+    padding: 0 var(--v7-page-gutter) calc(var(--v7-nav-height) + var(--v7-space-6) + env(safe-area-inset-bottom));
     box-sizing: border-box;
     background: transparent;
     color: var(--v7-text);
 }
 
+.rehab-v7-shell #today.v7-feature-today.active {
+    display: flex;
+    flex-direction: column;
+}
+
 .rehab-v7-shell #today .today-v6-appbar {
     position: relative;
-    min-height: 5.25rem;
-    padding: var(--v7-space-4) 0 var(--v7-space-3);
+    order: 1;
+    min-height: 6.5rem;
+    padding: 1.25rem 0 0.75rem;
     border: 0;
     background: transparent;
     box-shadow: none;
@@ -19,17 +25,60 @@
     backdrop-filter: none;
 }
 
-.rehab-v7-shell #today .today-v6-greet { display: grid; gap: 0.2rem; }
-.rehab-v7-shell #today .today-v6-greet-line { color: var(--v7-text); font-size: var(--v7-type-2xl); font-weight: var(--v7-weight-semibold); letter-spacing: -0.025em; }
-.rehab-v7-shell #today .today-v6-greet-sub { color: var(--v7-text-muted); font-size: var(--v7-type-sm); }
-.rehab-v7-shell #today #syncStatus { border-color: var(--v7-border); background: var(--v7-surface); color: var(--v7-text-muted); box-shadow: none; }
+.rehab-v7-shell #today .today-v6-appbar .bar-trailing {
+    display: none;
+}
 
-.rehab-v7-shell #today #todayOverview,
-.rehab-v7-shell #today #todayQuickActions,
-.rehab-v7-shell #today #todayPlanStatus,
-.rehab-v7-shell #today #todayDietStatus,
-.rehab-v7-shell #today #todayTimeline,
-.rehab-v7-shell #today #todayAiCard { margin-block: 0 var(--v7-space-5); }
+.rehab-v7-shell #today .today-v6-greet {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.rehab-v7-shell #today .today-v6-greet-line {
+    color: var(--v7-text);
+    font-size: var(--v7-type-2xl);
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: -0.025em;
+    line-height: var(--v7-leading-tight);
+}
+
+.rehab-v7-shell #today .today-v6-greet-sub {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-md);
+}
+
+.rehab-v7-shell #today #todayOverview {
+    order: 2;
+    margin-bottom: 0.625rem;
+}
+
+.rehab-v7-shell #today #todayPlanStatus {
+    order: 3;
+    margin-bottom: 0.5rem;
+}
+
+.rehab-v7-shell #today #todayDietStatus {
+    order: 4;
+    margin-bottom: 0.5rem;
+}
+
+.rehab-v7-shell #today #todayTimeline {
+    order: 5;
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+}
+
+.rehab-v7-shell #today #todayQuickActions {
+    order: 6;
+    margin-bottom: var(--v7-section-gap);
+}
+
+.rehab-v7-shell #today #todayAiCard {
+    order: 7;
+    display: grid;
+    gap: var(--v7-space-4);
+}
 
 .rehab-v7-shell #today .hero,
 .rehab-v7-shell #today .glass-card,
@@ -44,89 +93,483 @@
     backdrop-filter: none;
 }
 
-.rehab-v7-shell #today .hero { padding: var(--v7-space-5); overflow: hidden; }
-.rehab-v7-shell #today .glass-card { padding: var(--v7-space-5); }
+.rehab-v7-shell #today .hero,
+.rehab-v7-shell #today .glass-card {
+    padding: var(--v7-space-4);
+}
+
 .rehab-v7-shell #today .hero::before,
 .rehab-v7-shell #today .glass-card::before,
 .rehab-v7-shell #today .hero-motion-aura,
-.rehab-v7-shell #today .ring-motion-aura { display: none !important; }
-
-.rehab-v7-shell #today .hero-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--v7-space-3); }
-.rehab-v7-shell #today .hero-label { color: var(--v7-text-muted); font-size: var(--v7-type-xs); font-weight: var(--v7-weight-medium); letter-spacing: 0.04em; }
-.rehab-v7-shell #today .hero-title { margin-top: var(--v7-space-1); max-width: 15em; color: var(--v7-text); font-size: var(--v7-type-xl); font-weight: var(--v7-weight-semibold); line-height: var(--v7-leading-tight); }
-
-.rehab-v7-shell #today .rings { display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); align-items: center; gap: var(--v7-space-4); margin-top: var(--v7-space-5); }
-.rehab-v7-shell #today .ring-divider { width: 1px; height: 3.25rem; background: var(--v7-border); }
-.rehab-v7-shell #today .ring {
-    width: 100%;
-    min-width: 0;
-    min-height: 5.5rem;
-    border: 0;
-    border-radius: var(--v7-radius-lg);
-    background: var(--v7-bg-subtle);
-    box-shadow: none;
-    color: var(--v7-text);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+.rehab-v7-shell #today .ring-motion-aura {
+    display: none !important;
 }
-.rehab-v7-shell #today .ring > div { display: grid; gap: 0.1rem; }
-.rehab-v7-shell #today .ring b { font-size: var(--v7-type-xl); }
-.rehab-v7-shell #today .ring small,
-.rehab-v7-shell #today .ring em { color: var(--v7-text-muted); font-size: var(--v7-type-xs); font-style: normal; }
 
-.rehab-v7-shell #today .sect-head { display: flex; align-items: center; justify-content: space-between; gap: var(--v7-space-3); margin: 0 0 var(--v7-space-2); padding: 0 var(--v7-space-1); }
-.rehab-v7-shell #today .sect-head .t { color: var(--v7-text); font-size: var(--v7-type-md); font-weight: var(--v7-weight-semibold); }
-.rehab-v7-shell #today .sect-head .a { min-height: var(--v7-touch-min); border: 0; background: transparent; color: var(--v7-primary); font: inherit; font-size: var(--v7-type-sm); }
+.rehab-v7-shell #today .today-readiness-card {
+    height: 9.625rem;
+    min-height: 9.625rem;
+    padding: 0.875rem 1.0625rem 0.625rem;
+    box-sizing: border-box;
+}
 
-.rehab-v7-shell #today .quick-dock { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--v7-space-2); }
-.rehab-v7-shell #today .record-quick-btn {
+.rehab-v7-shell #today .hero-label {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-sm);
+    font-weight: var(--v7-weight-regular);
+}
+
+.rehab-v7-shell #today .today-readiness-main {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.125rem;
+}
+
+.rehab-v7-shell #today .today-readiness-score {
+    color: var(--v7-primary);
+    font-size: 2.375rem;
+    font-weight: var(--v7-weight-semibold);
+    line-height: 1;
+}
+
+.rehab-v7-shell #today .today-readiness-status {
+    color: var(--v7-text);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #today .today-readiness-head p {
+    margin: 0.125rem 0 0 3.875rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    line-height: 1.35;
+}
+
+.rehab-v7-shell #today .today-readiness-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--v7-space-3);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--v7-row-divider);
+}
+
+.rehab-v7-shell #today .today-readiness-meta span {
+    display: grid;
+    gap: 0.0625rem;
     min-width: 0;
-    min-height: 4.4rem;
+}
+
+.rehab-v7-shell #today .today-readiness-meta small {
+    overflow: hidden;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today .today-readiness-meta b {
+    overflow: hidden;
+    color: var(--v7-text);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today .sect-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v7-space-3);
+    min-height: 1.5rem;
+    margin: 0 0 0.5rem;
+    padding: 0 0.25rem;
+}
+
+.rehab-v7-shell #today .sect-head .t {
+    color: var(--v7-text);
+    font-size: var(--v7-type-xl);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #today .sect-head .a {
+    min-height: 2rem;
+    padding: 0 0.25rem;
+    border: 0;
+    background: transparent;
+    color: var(--v7-primary);
+    font: inherit;
+    font-size: var(--v7-type-sm);
+}
+
+.rehab-v7-shell #today .today-plan-head-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #today .today-weekly-plan-btn {
+    min-height: 2rem;
+    padding: 0 0.375rem;
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: transparent;
+    color: var(--v7-text-muted);
+    font: inherit;
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-medium);
+}
+
+.rehab-v7-shell #today .today-weekly-plan-btn:focus-visible {
+    outline: 2px solid var(--v7-focus);
+    outline-offset: 1px;
+}
+
+.rehab-v7-shell #today .today-plan-switcher {
+    display: flex;
+    gap: 0.375rem;
+    margin: -0.125rem 0 0.5rem;
+    padding: 0 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.rehab-v7-shell #today .today-plan-switcher::-webkit-scrollbar { display: none; }
+
+.rehab-v7-shell #today .today-plan-switcher button {
+    flex: 0 0 auto;
+    min-height: 2rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-surface);
+    color: var(--v7-text-muted);
+    font: inherit;
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-medium);
+}
+
+.rehab-v7-shell #today .today-plan-switcher button.is-active {
+    border-color: color-mix(in srgb, var(--v7-primary) 28%, var(--v7-border));
+    background: color-mix(in srgb, var(--v7-primary-soft) 72%, var(--v7-surface));
+    color: var(--v7-primary-strong);
+}
+
+.rehab-v7-shell #today .today-plan-list {
+    height: 11.125rem;
+    min-height: 0;
+    padding: 0.375rem 1rem 0.5rem;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.rehab-v7-shell #today .today-plan-row {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    min-height: 2.875rem;
+    height: 2.875rem;
+    padding: 0.25rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--v7-row-divider);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+}
+
+.rehab-v7-shell #today .today-plan-row:last-of-type {
+    border-bottom: 0;
+}
+
+.rehab-v7-shell #today .today-plan-index {
     display: grid;
     place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--v7-primary-soft) 62%, var(--v7-surface));
+    color: var(--v7-primary-strong);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #today .today-plan-index .material-symbols-rounded {
+    font-size: 1rem;
+}
+
+.rehab-v7-shell #today .today-plan-copy {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #today .today-plan-copy b {
+    overflow: hidden;
+    color: var(--v7-text);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today .today-plan-copy small,
+.rehab-v7-shell #today .today-plan-state {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #today .today-plan-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today .today-plan-state {
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today .today-plan-row.is-current .today-plan-state,
+.rehab-v7-shell #today .today-plan-row.is-done .today-plan-state {
+    color: var(--v7-primary);
+}
+
+.rehab-v7-shell #today .today-plan-more {
+    width: 100%;
+    min-height: 2rem;
+    border: 0;
+    background: transparent;
+    color: var(--v7-primary);
+    font: inherit;
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #today .today-plan-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--v7-space-3);
+    padding-top: 0.375rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #today .today-plan-empty {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: var(--v7-space-4);
+    min-height: 7rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.rehab-v7-shell #today .today-plan-empty .pn {
+    color: var(--v7-text);
+    font-size: var(--v7-type-lg);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #today .today-plan-empty .plan-meta {
+    max-width: 15rem;
+    margin-top: 0.375rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-sm);
+    line-height: 1.45;
+    margin-bottom: 0;
+}
+
+.rehab-v7-shell #today .today-plan-empty .plan-actions {
+    display: grid;
     gap: 0.25rem;
-    padding: var(--v7-space-2);
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    justify-content: start;
+}
+
+.rehab-v7-shell #today .today-plan-empty .md-btn {
+    min-height: 2.25rem;
+    height: 2.25rem;
+    padding-inline: 0.75rem;
+    font-size: var(--v7-type-sm);
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today .today-status-strip {
+    min-height: 5.75rem;
+    padding: 0.75rem 1rem 0.625rem;
+    box-sizing: border-box;
+}
+
+.rehab-v7-shell #today .today-status-label {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-sm);
+}
+
+.rehab-v7-shell #today .today-status-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--v7-space-3);
+    margin-top: 0.5rem;
+}
+
+.rehab-v7-shell #today .today-status-metrics span {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #today .today-status-metrics b {
+    color: var(--v7-text);
+    font-size: 1.375rem;
+    font-weight: var(--v7-weight-semibold);
+    line-height: 1;
+}
+
+.rehab-v7-shell #today .today-status-metrics small {
+    overflow: hidden;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today .today-trend-card {
+    min-height: 5.625rem;
+    padding: 0.75rem 1rem 0.5rem;
+    box-sizing: border-box;
+}
+
+.rehab-v7-shell #today .today-trend-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v7-space-3);
+}
+
+.rehab-v7-shell #today .today-trend-head b {
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #today .today-trend-head span {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #today .today-trend-chart {
+    display: flex;
+    align-items: end;
+    gap: 0.375rem;
+    width: 100%;
+    height: 3rem;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.125rem 0;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--v7-row-divider);
+}
+
+.rehab-v7-shell #today .today-trend-chart i {
+    flex: 1;
+    height: max(2px, var(--v));
+    max-height: 100%;
+    border-radius: var(--v7-radius-pill) var(--v7-radius-pill) 0 0;
+    background: var(--v7-primary);
+    opacity: 0.72;
+}
+
+.rehab-v7-shell #today .today-trend-empty {
+    display: grid;
+    place-items: center;
+    min-height: 3rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #today .today-primary-launch {
+    justify-self: center;
+    width: min(18.375rem, calc(100% - 4rem));
+    min-height: var(--v7-cta-height);
+    margin: -1rem 0 0;
+    border-color: transparent;
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    box-shadow: var(--v7-shadow-2);
+    font-size: var(--v7-type-lg);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #today .today-primary-launch .material-symbols-rounded {
+    font-size: 1.125rem;
+}
+
+.rehab-v7-shell #today .today-quick-section {
+    padding-top: 0.125rem;
+}
+
+.rehab-v7-shell #today .quick-dock {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.375rem;
+}
+
+.rehab-v7-shell #today .record-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding: 0.25rem 0.375rem;
     border: 1px solid var(--v7-border);
-    border-radius: var(--v7-radius-lg);
+    border-radius: var(--v7-radius-pill);
     background: var(--v7-surface);
     color: var(--v7-text-muted);
     box-shadow: none;
+    font: inherit;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
 }
-.rehab-v7-shell #today .record-quick-btn .material-symbols-rounded { color: var(--v7-primary); font-size: var(--v7-icon-md); }
-.rehab-v7-shell #today .record-quick-btn span:last-child { font-size: var(--v7-type-xs); font-weight: var(--v7-weight-medium); }
 
-.rehab-v7-shell #today .plan-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--v7-space-3); }
-.rehab-v7-shell #today .pt { color: var(--v7-primary); font-size: var(--v7-type-xs); font-weight: var(--v7-weight-semibold); }
-.rehab-v7-shell #today .pn { margin-top: 0.2rem; color: var(--v7-text); font-size: var(--v7-type-lg); font-weight: var(--v7-weight-semibold); }
-.rehab-v7-shell #today .plan-chip,
-.rehab-v7-shell #today .streak-chip { border: 0; border-radius: var(--v7-radius-pill); background: var(--v7-primary-soft); color: var(--v7-primary-strong); box-shadow: none; }
-.rehab-v7-shell #today .seg-bar { overflow: hidden; margin-block: var(--v7-space-4); border-radius: var(--v7-radius-pill); background: var(--v7-surface-muted); }
-.rehab-v7-shell #today .seg { background: var(--v7-border-strong); }
-.rehab-v7-shell #today .seg.done { background: var(--v7-primary); }
-.rehab-v7-shell #today .seg.cur { background: var(--v7-info); }
-.rehab-v7-shell #today .plan-meta { color: var(--v7-text-muted); font-size: var(--v7-type-sm); }
-.rehab-v7-shell #today .plan-actions { display: flex; flex-wrap: wrap; gap: var(--v7-space-2); margin-top: var(--v7-space-4); }
+.rehab-v7-shell #today .record-quick-btn .material-symbols-rounded {
+    color: var(--v7-primary);
+    font-size: 1rem;
+}
 
-.rehab-v7-shell #today .calorie-head .num { color: var(--v7-text); font-size: var(--v7-type-2xl); font-weight: var(--v7-weight-semibold); }
-.rehab-v7-shell #today .calorie-head .unit,
-.rehab-v7-shell #today .calorie-head .lab { color: var(--v7-text-muted); }
-.rehab-v7-shell #today .stack-bar { background: var(--v7-surface-muted); box-shadow: none; }
-.rehab-v7-shell #today .macros { gap: var(--v7-space-2); }
-.rehab-v7-shell #today .macro { border: 0; background: transparent; }
+.rehab-v7-shell #today .record-quick-btn span:last-child {
+    overflow: hidden;
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-medium);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #today #todayAiCard > .md-card,
+.rehab-v7-shell #today #todayAiCard > .glass-card {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-lg);
+    background: var(--v7-surface);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #today .today-timeline-card,
+.rehab-v7-shell #today .today-timeline-empty {
+    margin: 0;
+}
 
 .rehab-v7-shell #today .v7-today-primary-cta {
     border-color: transparent;
     border-radius: var(--v7-radius-pill);
     background: var(--v7-primary);
     color: var(--v7-on-primary);
-    box-shadow: var(--v7-shadow-1);
 }
 
 @media (max-width: 390px) {
-    .rehab-v7-shell #today .quick-dock { gap: 6px; }
-    .rehab-v7-shell #today .record-quick-btn { min-height: 4rem; padding-inline: 4px; }
-    .rehab-v7-shell #today .rings { gap: var(--v7-space-2); }
+    .rehab-v7-shell #today .today-readiness-head p {
+        margin-left: 0;
+    }
 }
-

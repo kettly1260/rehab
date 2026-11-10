@@ -71,12 +71,23 @@ test('V7 secondary surfaces preserve nested back, focus, backdrop, scroll lock a
             bodyOverflow: document.body.style.overflow,
             backdrop: getComputedStyle(document.querySelector('#voiceSettingsSheet .md-modal-backdrop')).backdropFilter,
             cardBackdrop: getComputedStyle(document.querySelector('#voiceSettingsSheet .md-modal-card')).backdropFilter,
-            focusInside: document.querySelector('#voiceSettingsSheet')?.contains(document.activeElement)
+            focusInside: document.querySelector('#voiceSettingsSheet')?.contains(document.activeElement),
+            effectAudit: window.rehabV7.effects.audit()
         }));
-        assert.deepEqual(sheet, {
-            kind: 'sheet', role: 'dialog', modal: 'true', bodyOverflow: 'hidden',
-            backdrop: 'none', cardBackdrop: 'none', focusInside: true
-        });
+        assert.equal(sheet.kind, 'sheet');
+        assert.equal(sheet.role, 'dialog');
+        assert.equal(sheet.modal, 'true');
+        assert.equal(sheet.bodyOverflow, 'hidden');
+        assert.match(sheet.backdrop, /blur\(6px\)/);
+        assert.equal(sheet.cardBackdrop, 'none');
+        assert.equal(sheet.focusInside, true);
+        assert.equal(sheet.effectAudit?.nestedBackdropCandidates, 0);
+        assert.ok(sheet.effectAudit?.visibleBackdropCandidates <= 2);
+        assert.equal(sheet.effectAudit?.withinBudget, true);
+        await page.evaluate(() => window.rehabV7.effects.setMode('economy'));
+        assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('#voiceSettingsSheet .md-modal-backdrop')).backdropFilter), 'none');
+        await page.evaluate(() => window.rehabV7.effects.setMode('balanced'));
+        await page.screenshot({ path: path.join(evidenceRoot, 'voice-sheet-390x844.png'), fullPage: false });
 
         await page.evaluate(() => window.workoutVoice.openImportDialog());
         await page.waitForSelector('#voiceImportDialog:not(.hidden)');
@@ -99,6 +110,7 @@ test('V7 secondary surfaces preserve nested back, focus, backdrop, scroll lock a
             });
         });
         await page.waitForSelector('.md-modal[data-rl-modal="1"][data-v7-secondary="modal"]');
+        await page.screenshot({ path: path.join(evidenceRoot, 'modal-390x844.png'), fullPage: false });
         await page.locator('.md-modal[data-rl-modal="1"] .md-modal-backdrop').click({ position: { x: 4, y: 4 } });
         await page.waitForFunction(() => !document.querySelector('.md-modal[data-rl-modal="1"]'));
 
@@ -109,7 +121,7 @@ test('V7 secondary surfaces preserve nested back, focus, backdrop, scroll lock a
             banner.setAttribute('aria-hidden', 'false');
             const preview = document.createElement('div');
             preview.id = 'v7AttachmentPreview';
-            preview.className = 'advice-attachment-preview';
+            preview.className = 'advice-attachment-preview hidden';
             preview.innerHTML = '<div class="advice-attachment-preview-backdrop"></div><div class="advice-attachment-preview-card"><button data-modal-close type="button">关闭</button></div>';
             document.body.appendChild(preview);
             const states = [
@@ -145,6 +157,20 @@ test('V7 secondary surfaces preserve nested back, focus, backdrop, scroll lock a
             toast: 'toast', banner: 'banner', preview: 'preview', loading: 'loading', empty: 'empty',
             error: 'error', offline: 'offline', permission: 'permission', picker: 'picker', keyboard: 'hidden', overflow: 0
         });
+        const bannerGeometry = await page.evaluate(() => {
+            const banner = document.getElementById('appUpdateBanner');
+            const buttons = [...banner.querySelectorAll('.md-btn')].map((button) => button.getBoundingClientRect());
+            const rect = banner.getBoundingClientRect();
+            return {
+                height: rect.height,
+                buttonY: buttons.map((value) => value.y),
+                buttonHeight: buttons.map((value) => value.height)
+            };
+        });
+        assert.ok(bannerGeometry.height <= 110, `update banner height=${bannerGeometry.height}`);
+        assert.ok(Math.abs(bannerGeometry.buttonY[0] - bannerGeometry.buttonY[1]) <= 1);
+        assert.ok(bannerGeometry.buttonHeight.every((value) => value <= 38));
+        await page.screenshot({ path: path.join(evidenceRoot, 'banner-toast-390x844.png'), fullPage: false });
         await page.evaluate(() => {
             document.getElementById('appUpdateBanner')?.classList.add('hidden');
             document.getElementById('appToast')?.classList.remove('show');
@@ -153,8 +179,48 @@ test('V7 secondary surfaces preserve nested back, focus, backdrop, scroll lock a
         await page.waitForFunction(() => Number.parseFloat(getComputedStyle(document.getElementById('appToast')).opacity) === 0);
         await page.locator('#profile .theme-trigger').click();
         await page.waitForSelector('#themeSheet:not(.hidden)');
-        await page.screenshot({ path: path.join(evidenceRoot, 'secondary-390x844.png'), fullPage: true });
+        await page.screenshot({ path: path.join(evidenceRoot, 'theme-sheet-390x844.png'), fullPage: false });
         await page.locator('#themeSheet [data-modal-close]').click();
+
+        await page.evaluate(async () => {
+            const nav = [...document.querySelectorAll('.nav-item')].find((item) => item.dataset.v7Page === 'ai-coach');
+            await window.ui.tab('ai-coach', nav);
+        });
+        await page.waitForFunction(() => window.rehabV7?.lifecycle?.activeId === 'ai-coach' && typeof window.data?.openAdviceModelPicker === 'function', null, { timeout: 30000 });
+        await page.evaluate(() => window.data.openAdviceModelPicker());
+        await page.waitForSelector('#aiModelPickerSheet:not(.hidden)');
+        await page.screenshot({ path: path.join(evidenceRoot, 'model-picker-390x844.png'), fullPage: false });
+        await page.evaluate(() => window.data.closeAdviceModelPicker());
+        await page.evaluate(async () => {
+            const file = new File(['secondary attachment'], 'plan-note.txt', { type: 'text/plain' });
+            await window.data.handleAdviceSelectedFiles([file], 'file');
+        });
+        await page.waitForSelector('#ai-coach .advice-attachment-chip');
+        await page.screenshot({ path: path.join(evidenceRoot, 'attachments-390x844.png'), fullPage: false });
+        await page.evaluate(() => window.data.clearAdviceAttachments());
+
+        await page.evaluate(async () => {
+            const nav = [...document.querySelectorAll('.nav-item')].find((item) => item.dataset.v7Page === 'profile');
+            await window.ui.tab('profile', nav);
+        });
+        await page.waitForFunction(() => window.rehabV7?.lifecycle?.activeId === 'profile' && typeof window.searchSettings?.open === 'function', null, { timeout: 30000 });
+        await page.evaluate(() => {
+            window.data.setRoutineView('ai');
+            window.searchSettings.open();
+        });
+        await page.waitForSelector('#searchProviderManager:not(.hidden)');
+        const managerLayer = await page.evaluate(() => ({
+            manager: Number(getComputedStyle(document.querySelector('#searchProviderManager')).zIndex || 0),
+            nav: Number(getComputedStyle(document.querySelector('.v7-bottom-nav')).zIndex || 0),
+            navVisibility: getComputedStyle(document.querySelector('.v7-bottom-nav')).visibility,
+            managerBottom: document.querySelector('#searchProviderManager').getBoundingClientRect().bottom,
+            viewportBottom: innerHeight
+        }));
+        assert.ok(managerLayer.manager > managerLayer.nav);
+        assert.equal(managerLayer.navVisibility, 'hidden');
+        assert.ok(managerLayer.managerBottom >= managerLayer.viewportBottom - 1);
+        await page.screenshot({ path: path.join(evidenceRoot, 'search-manager-390x844.png'), fullPage: false });
+        await page.evaluate(() => window.searchSettings.close());
         assert.deepEqual(errors, []);
         await context.close();
     } finally {

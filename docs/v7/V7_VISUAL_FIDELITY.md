@@ -2,65 +2,75 @@
 
 ## Status
 
-Final browser visual QA passed on August 28, 2026 in system Edge `151.0.4129.107` at the required 390 x 844 viewport. The retained evidence is under `docs/v7/qa-390x844/`.
+**PASS — repaired references 5 / 5 usable; five main pages and shared secondary UI completed the visual-recovery gates on August 29, 2026.**
 
-The flow under test was: app boot -> each primary route and required visual state -> expected V7 surface renders without runtime errors, page-level horizontal overflow, keyboard obstruction or modal/back-stack failure.
+Browser plugin/IAB was not available in this agent environment, so the documented system Edge + Playwright fallback was used. The primary visual viewport was 390 x 844.
 
-## Reference availability
+## Reference recovery
 
-The five files under `docs/v7/visuals/` were used as the intended hierarchy references. `v7-profile.svg` renders normally. The embedded JPEG payloads in `v7-today.svg`, `v7-workout.svg`, `v7-records.svg` and `v7-coach.svg` do not decode in Edge and render as broken-image placeholders. Those four files therefore cannot support a pixel-level comparison. Their page intent, the taskbook constraints and the working Profile reference were used together with the final browser evidence; this limitation is not treated as visual parity proof.
+The original recovery baseline correctly stopped when four SVG payloads were unreadable. That blocker was later cleared by repaired repository reference assets. The repaired five SVGs were each opened through localhost in system Edge, rasterized at 390 x 844 and inspected with `view_image`; HTTP/SVG presence alone was not accepted as proof.
 
-## Evidence set
-
-| State | Browser evidence | Result |
+| Reference | Retained raster evidence | Final gate |
 |---|---|---|
-| Today | `qa-390x844/01-today.png` | Pass |
-| Workout idle | `qa-390x844/02-workout-idle.png` | Pass |
-| Workout running | `qa-390x844/03-workout-running.png` | Pass |
-| Records | `qa-390x844/04-records.png` | Pass |
-| Coach | `qa-390x844/05-coach.png` | Pass |
-| Profile | `qa-390x844/06-profile.png` | Pass |
-| Dark mode | `qa-390x844/07-dark.png` | Pass |
-| Balanced effects | `qa-390x844/08-balanced.png` | Pass |
-| Economy effects | `qa-390x844/09-economy.png` | Pass |
-| Modal/Sheet | `qa-390x844/10-modal-sheet.png` | Pass |
+| Today | `.tmp/v7-r1/reference-today.png` | PASS |
+| Workout | `.tmp/v7-r1/reference-workout.png` | PASS |
+| Records | `.tmp/v7-r1/reference-records.png` | PASS |
+| Coach | `.tmp/v7-r1/reference-coach.png` | PASS |
+| Profile | `.tmp/v7-r1/reference-profile.png` | PASS |
 
-All ten captures reported `documentWidth = 390`, no page-level horizontal overflow and no page errors. The audit ignores offscreen children only when they belong to an explicit horizontal `overflow-x: auto|scroll` owner.
+The reference examples define hierarchy, geometry and visual density. Their illustrative health values are not product data and were not copied into runtime fixtures.
 
-## Page comparison and intentional differences
+## Page-by-page visual gate
 
-| Page | Reference direction | Final result | Intentional difference / retained behavior |
-|---|---|---|---|
-| Today | Calm daily hierarchy and restrained green emphasis | Compact header, real status, quick actions and current-plan Surface hierarchy | Real V6 plan/diet/history density is retained instead of replacing it with illustrative placeholder metrics |
-| Workout | Timer-first session focus with one dominant action | Idle and running states keep the timer dominant; Play/Pause is the only Liquid primary control | Preset scroller, speed, set/rest counters and journal-backed engine controls remain visible because they are functional V6 requirements |
-| Records | Data-first summary and clear chart | Real production weight renderer, segmented subview and readable chart are used | The final page exposes the production data model rather than a static reference chart |
-| Coach | Quiet conversation surface and compact composer | Production empty state, range controls, composer and quick suggestions render without fake history | No fabricated messages were inserted for the final evidence; streaming/history behavior is covered by browser tests |
-| Profile | Health dossier/tool page, not a promotional hero | The render closely follows the available reference: identity summary, metrics and dense settings rows | All retained V6 settings remain reachable, so the final page is denser than the reference crop |
+Each main page followed the required sequence: repaired reference -> real 390 x 844 browser render -> screenshot -> `view_image` -> mismatch ledger -> fix -> repeat. A page was not passed merely because it opened or had no console errors.
 
-## Visual checklist
+| Page | Representative final evidence | Result |
+|---|---|---|
+| Today | `.tmp/v7-today/today-empty-390x844.png`, `.tmp/v7-today/today-populated-390x844.png` | PASS |
+| Workout | `.tmp/v7-workout/workout-idle-390x844.png`, `.tmp/v7-workout/workout-running-390x844.png` | PASS |
+| Records | `.tmp/v7-records/records-overview-390x844.png` | PASS |
+| Coach | `.tmp/v7-coach/coach-390x844.png` | PASS |
+| Profile | `.tmp/v7-profile/profile-390x844.png` | PASS |
 
-- Header rhythm, type scale and whitespace remain consistent across all five primary pages.
-- Content hierarchy uses solid Surface cards; Glass is limited to navigation, selected controls and key interaction states.
-- Bottom navigation active geometry remains stable and does not cover final interactive content.
-- Primary CTA geometry is consistent; Workout reserves Liquid interaction for Play/Pause.
-- Icon weight, borders and shadows are restrained; green is used for status/action emphasis rather than as a full-page palette.
-- Records uses the real chart renderer with readable axes/line contrast.
-- Dark mode preserves legibility and surface separation.
-- Balanced and economy settle to the same layout; economy removes effect cost without changing information hierarchy.
-- At a 390 x 500 keyboard viewport, the Coach prompt remained focused with its bottom at 107 px, inside the viewport.
-- Escape closed the sampled modal, and the sheet respected the mobile safe area and dimmed backdrop.
+The detailed 10+ item mismatch ledgers and intentional deviations are recorded in `V7_VISUAL_RECOVERY_REPORT.md`.
 
-## Compatibility checks
+## Theme fidelity
 
-| Check | Result |
-|---|---|
-| Page errors | 0 |
-| Deep link `#/records/weight` | Records active, Weight subview active |
-| Browser back | Returned to Today at `#/today` |
-| Modal Escape | Closed |
-| Keyboard viewport | Focused input remained visible |
-| Workout running state | WORK state, timer/counters and controls rendered |
+The R0 fixed-green regression was reproduced before repair: Material primary changed for blue, purple, custom and dark states while V7 remained green. R2 removed that second palette and bridged V7 semantic roles to `theme.js`.
 
-## Remaining risk
+Final browser coverage includes preset green/light and custom rose (`#b63868`)/dark on all five pages. The stable dark screenshots were inspected after the view-transition completed:
 
-Pixel-level fidelity for Today, Workout, Records and Coach cannot be asserted until the four malformed reference SVG image payloads are repaired or replaced. Android physical-device thermal, battery and viewport behavior remains `BLOCKED_EXTERNAL_DEVICE` and is governed by `V7_ANDROID_TEST_PLAN.md`.
+- `.tmp/v7-theme-matrix/today-rose-dark-390x844.png`
+- `.tmp/v7-theme-matrix/workout-rose-dark-390x844.png`
+- `.tmp/v7-theme-matrix/records-rose-dark-390x844.png`
+- `.tmp/v7-theme-matrix/ai-coach-rose-dark-390x844.png`
+- `.tmp/v7-theme-matrix/profile-rose-dark-390x844.png`
+
+The matrix verifies accent response, neutral Surface treatment, readable foreground/background contrast, independent semantic danger color, Liquid nav response, primary CTA response where present, <=1px horizontal overflow and zero nested V7 backdrop candidates.
+
+## Effects fidelity
+
+Full, Balanced and Economy retain identical layout geometry. Final evidence:
+
+- `.tmp/v7-effects/effects-full-390x844.png`
+- `.tmp/v7-effects/effects-balanced-390x844.png`
+- `.tmp/v7-effects/effects-economy-390x844.png`
+
+Full adds only short interaction/temporary-overlay richness; Balanced is the normal phone mode; Economy removes V7 filter/backdrop work. Static Full and Balanced screenshots are intentionally close because the stronger Full Liquid highlight is interaction-only and is asserted by the browser test rather than left running in an idle frame.
+
+## Secondary UI fidelity
+
+Theme Sheet, Voice Sheet, generic modal, AI Model Picker, Search Provider Manager, toast/update banner, attachment composer state and Workout Advanced were all inspected as real application flows. Final evidence is retained under `.tmp/v7-secondary/` plus `.tmp/v7-workout/workout-advanced-390x844.png`.
+
+R11 fixed the visible legacy leaks found during this pass: an unresolved `ANIMATION` icon ligature, Search Manager/Bottom Nav z-order conflict, oversized update-banner actions and Workout Advanced's floating CTA overlap. Existing close/focus/back-stack/business owners were preserved.
+
+## Intentional deviations from illustrative references
+
+- No mocked OS status bar is rendered inside the web app.
+- No fake recovery score, sleep, stress or pain value is synthesized when the product has no authoritative value; explicit `待评估` / `未记录` states are used.
+- Existing real product functions that are denser than the design references remain reachable through compact primary entries or secondary surfaces instead of being deleted.
+- The restored Today `3-7天` recent-plan entry and conditional multi-plan selector are intentionally compact additions required by the V6 function inventory.
+
+## Final gate conclusion
+
+The repaired references are readable 5 / 5, the five main pages have passed manual screenshot review in the required mobile viewport, theme fidelity has passed in light/dark and two accent families, and secondary surfaces no longer visibly fall back to the old Glass-heavy system. Functional and performance closure are documented separately; physical Android thermal/battery validation remains an external-device task rather than a visual-fidelity blocker.

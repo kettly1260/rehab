@@ -3,11 +3,17 @@
     --v7-secondary-max-height: calc(100dvh - var(--v7-keyboard-inset, 0px) - env(safe-area-inset-top) - 12px);
 }
 
+html.rehab-v7-shell body.v7-secondary-open .md-nav-rail.v7-bottom-nav {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
 html.rehab-v7-shell body .md-modal-backdrop,
 html.rehab-v7-shell body .advice-attachment-preview-backdrop {
     background: rgb(16 23 22 / 58%);
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
 
 .rehab-v7-shell .md-modal-card,
@@ -43,8 +49,23 @@ html.rehab-v7-shell body .advice-attachment-preview-backdrop {
     letter-spacing: 0;
 }
 
+.rehab-v7-shell .theme-effects-mark {
+    width: 24px;
+    height: 24px;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    border-radius: 50%;
+    background: var(--v7-primary-soft);
+    color: var(--v7-primary-strong);
+    font-size: 10px;
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: -0.02em;
+}
+
 .rehab-v7-shell .ai-provider-manager {
     width: min(680px, 100vw);
+    z-index: 340;
     background: var(--v7-bg);
     color: var(--v7-text);
     box-shadow: var(--v7-shadow-float);
@@ -96,6 +117,9 @@ html.rehab-v7-shell body .advice-attachment-preview-backdrop {
 }
 
 .rehab-v7-shell .app-update-banner {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: var(--v7-space-2);
+    padding: 0.625rem 0.75rem;
     border: 1px solid var(--v7-border-strong);
     border-radius: var(--v7-radius-lg);
     background: var(--v7-surface);
@@ -103,6 +127,44 @@ html.rehab-v7-shell body .advice-attachment-preview-backdrop {
     box-shadow: var(--v7-shadow-2);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+}
+
+.rehab-v7-shell .app-update-banner > .md-btn {
+    width: max-content;
+    min-width: 0;
+    min-height: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0 0.7rem;
+    border-radius: var(--v7-radius-pill);
+    font-size: var(--v7-type-xs);
+    white-space: nowrap;
+    justify-self: end;
+    flex: none;
+}
+
+.rehab-v7-shell .app-update-banner small {
+    line-height: 1.35;
+}
+
+.rehab-v7-shell .app-update-banner > .material-symbols-rounded {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.rehab-v7-shell .app-update-banner > div {
+    grid-column: 2 / -1;
+    grid-row: 1;
+}
+
+.rehab-v7-shell .app-update-banner > .md-btn-tonal {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.rehab-v7-shell .app-update-banner > .md-btn-filled {
+    grid-column: 4;
+    grid-row: 2;
 }
 
 .rehab-v7-shell .empty-state,

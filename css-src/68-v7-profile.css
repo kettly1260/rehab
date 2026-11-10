@@ -164,3 +164,362 @@
         padding: var(--v7-space-3) 0 0;
     }
 }
+
+/* --- R9 reference recovery: identity, health dossier and grouped services --- */
+.rehab-v7-shell #profile.v7-feature-profile {
+    padding: 0 var(--v7-space-4) calc(4.6rem + env(safe-area-inset-bottom));
+}
+
+.rehab-v7-shell #profile .md-top-app-bar {
+    min-height: 4.85rem;
+    margin: 0;
+    padding: 1.45rem var(--v7-space-2) var(--v7-space-3);
+    align-items: flex-start;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #profile .md-top-app-bar .bar-leading {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+
+.rehab-v7-shell #profile .md-top-app-bar .app-icon { display: none; }
+
+.rehab-v7-shell #profile .md-top-app-bar .app-title {
+    color: var(--v7-text);
+    font-size: var(--v7-type-2xl);
+    font-weight: var(--v7-weight-semibold);
+    line-height: var(--v7-leading-tight);
+    letter-spacing: -0.025em;
+}
+
+.rehab-v7-shell #profile .theme-trigger {
+    width: 2.35rem;
+    height: 2.35rem;
+    min-width: 2.35rem;
+    min-height: 2.35rem;
+    margin-top: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--v7-surface-muted);
+    color: var(--v7-text);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #profile .theme-trigger > * { display: none; }
+
+.rehab-v7-shell #profile .theme-trigger::before {
+    content: '⋯';
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.rehab-v7-shell #profileOverview {
+    display: block;
+}
+
+.rehab-v7-shell #profile .v7-profile-home {
+    display: grid;
+    gap: 0.875rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #profile .v7-profile-card {
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-xl);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-card {
+    min-height: 7.85rem;
+    margin-bottom: var(--v7-space-2);
+    padding: var(--v7-space-4) var(--v7-space-4) var(--v7-space-2);
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-main {
+    display: grid;
+    grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--v7-space-3);
+}
+
+.rehab-v7-shell #profile .v7-profile-avatar {
+    width: 3.25rem;
+    height: 3.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--v7-primary-soft);
+    color: var(--v7-primary-strong);
+    font-size: var(--v7-type-xl);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-copy {
+    min-width: 0;
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-copy h2 {
+    margin: 0;
+    color: var(--v7-text);
+    font-size: var(--v7-type-xl);
+    font-weight: var(--v7-weight-semibold);
+    line-height: var(--v7-leading-tight);
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-copy p {
+    margin: 0.25rem 0 0;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    line-height: var(--v7-leading-normal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rehab-v7-shell #profile .v7-profile-edit {
+    min-height: 2rem;
+    padding: 0.35rem 0.9rem;
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-primary-soft);
+    color: var(--v7-primary-strong);
+    font: inherit;
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    margin-top: 0.375rem;
+    padding-top: 0.375rem;
+    border-top: 1px solid var(--v7-row-divider);
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-stats > span {
+    min-width: 0;
+    display: grid;
+    gap: 0.1rem;
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-stats small,
+.rehab-v7-shell #profile .v7-profile-health-metrics small,
+.rehab-v7-shell #profile .v7-profile-status-card > small {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #profile .v7-profile-identity-stats b {
+    color: var(--v7-text);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #profile .v7-profile-section-title {
+    margin: 0 var(--v7-space-1) calc(var(--v7-space-2) * -1);
+    color: var(--v7-text);
+    font-size: var(--v7-type-xl);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #profile .v7-profile-health-card {
+    min-height: 6.95rem;
+    margin-bottom: var(--v7-space-2);
+    padding: var(--v7-space-4) var(--v7-space-4) var(--v7-space-2);
+}
+
+.rehab-v7-shell #profile .v7-profile-health-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--v7-space-3);
+}
+
+.rehab-v7-shell #profile .v7-profile-health-metrics > span {
+    min-width: 0;
+    display: grid;
+    gap: 0.2rem;
+}
+
+.rehab-v7-shell #profile .v7-profile-health-metrics b {
+    color: var(--v7-text);
+    font-size: var(--v7-type-2xl);
+    font-weight: var(--v7-weight-medium);
+    line-height: 1.05;
+}
+
+.rehab-v7-shell #profile .v7-profile-health-metrics b em {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    font-style: normal;
+    font-weight: var(--v7-weight-regular);
+}
+
+.rehab-v7-shell #profile .v7-profile-health-metrics > span:last-child b {
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+    line-height: 1.4;
+}
+
+.rehab-v7-shell #profile .v7-profile-health-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v7-space-3);
+    margin-top: 0.375rem;
+    padding-top: 0.375rem;
+    border-top: 1px solid var(--v7-row-divider);
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #profile .v7-profile-health-footer button {
+    flex: none;
+    min-height: 1.8rem;
+    border: 0;
+    background: transparent;
+    color: var(--v7-primary);
+    font: inherit;
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #profile .v7-profile-service-list {
+    overflow: hidden;
+    padding: 0 var(--v7-space-4);
+}
+
+.rehab-v7-shell #profile .v7-profile-service-row,
+.rehab-v7-shell #profile .v7-profile-more-settings > summary {
+    width: 100%;
+    min-height: var(--v7-touch-min);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v7-space-3);
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--v7-row-divider);
+    background: transparent;
+    color: var(--v7-text);
+    font: inherit;
+    text-align: left;
+    list-style: none;
+}
+
+.rehab-v7-shell #profile .v7-profile-service-row > span,
+.rehab-v7-shell #profile .v7-profile-more-settings > summary > span {
+    min-width: 0;
+    display: grid;
+    gap: 0.1rem;
+}
+
+.rehab-v7-shell #profile .v7-profile-service-row b,
+.rehab-v7-shell #profile .v7-profile-more-settings > summary b {
+    color: var(--v7-text);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #profile .v7-profile-service-row small,
+.rehab-v7-shell #profile .v7-profile-more-settings > summary small {
+    color: var(--v7-text-muted);
+    font-size: 0.625rem;
+}
+
+.rehab-v7-shell #profile .v7-profile-service-row > em,
+.rehab-v7-shell #profile .v7-profile-more-settings > summary > em {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-lg);
+    font-style: normal;
+}
+
+.rehab-v7-shell #profile .v7-profile-more-settings > summary::-webkit-details-marker { display: none; }
+.rehab-v7-shell #profile .v7-profile-more-settings > summary { border-bottom: 0; cursor: pointer; }
+.rehab-v7-shell #profile .v7-profile-more-settings[open] > summary { border-bottom: 1px solid var(--v7-row-divider); }
+.rehab-v7-shell #profile .v7-profile-more-settings[open] > summary > em { transform: rotate(90deg); }
+
+.rehab-v7-shell #profile .v7-profile-more-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--v7-space-2);
+    padding: var(--v7-space-3) 0 var(--v7-space-4);
+}
+
+.rehab-v7-shell #profile .v7-profile-more-actions button {
+    min-height: var(--v7-touch-min);
+    padding: var(--v7-space-2);
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-md);
+    background: var(--v7-surface-muted);
+    color: var(--v7-text);
+    font: inherit;
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #profile .v7-profile-status-card {
+    min-height: 4rem;
+    padding: 0.375rem var(--v7-space-4);
+}
+
+.rehab-v7-shell #profile .v7-profile-status-card > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+    gap: var(--v7-space-3);
+    margin-top: var(--v7-space-1);
+}
+
+.rehab-v7-shell #profile .v7-profile-status-card span {
+    display: grid;
+    gap: 0.1rem;
+}
+
+.rehab-v7-shell #profile .v7-profile-status-card b {
+    color: var(--v7-text);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #profile .v7-profile-status-card span small {
+    color: var(--v7-text-muted);
+    font-size: 0.625rem;
+}
+
+.rehab-v7-shell #profile .v7-profile-status-card button {
+    min-height: 1.9rem;
+    border: 0;
+    background: transparent;
+    color: var(--v7-primary);
+    font: inherit;
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-semibold);
+}
+
+@media (max-width: 390px) {
+    .rehab-v7-shell #profile.v7-feature-profile { padding-inline: var(--v7-space-4); }
+    .rehab-v7-shell #profile .md-top-app-bar { padding-inline: var(--v7-space-2); }
+}
+
+.rehab-v7-shell[data-v7-effects="full"] #themeSheet [data-v7-effects-mode="full"],
+.rehab-v7-shell[data-v7-effects="balanced"] #themeSheet [data-v7-effects-mode="balanced"],
+.rehab-v7-shell[data-v7-effects="economy"] #themeSheet [data-v7-effects-mode="economy"] {
+    border-color: transparent;
+    background: var(--v7-primary-soft);
+    color: var(--v7-primary-strong);
+}

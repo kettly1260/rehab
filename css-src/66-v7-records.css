@@ -210,3 +210,385 @@
     }
     .rehab-v7-shell #records .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Visual recovery default overview. Real weight/diet/training/calendar views remain below this owner. */
+.rehab-v7-shell #records.v7-feature-records {
+    padding: 0 var(--v7-page-gutter) calc(var(--v7-nav-height) + var(--v7-space-6) + env(safe-area-inset-bottom));
+}
+
+.rehab-v7-shell #records .md-top-app-bar {
+    position: relative;
+    min-height: 6.5rem;
+    padding: 1.25rem 0 0.75rem;
+}
+
+.rehab-v7-shell #records .md-top-app-bar .bar-leading {
+    display: block;
+}
+
+.rehab-v7-shell #records .md-top-app-bar .app-icon {
+    display: none;
+}
+
+.rehab-v7-shell #records .md-top-app-bar .app-title {
+    color: var(--v7-text);
+    font-size: var(--v7-type-2xl);
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: -0.025em;
+    line-height: var(--v7-leading-tight);
+}
+
+.rehab-v7-shell #records .v7-records-period-button,
+.rehab-v7-shell #records .v7-records-overview-link {
+    position: absolute;
+    right: 0;
+    top: 1.35rem;
+    min-width: 8rem;
+    min-height: 2.25rem;
+    padding: 0 1rem;
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: color-mix(in srgb, var(--v7-surface-muted) 78%, var(--v7-surface));
+    color: var(--v7-text);
+    font: inherit;
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-medium);
+}
+
+.rehab-v7-shell #records .v7-records-overview-link {
+    min-width: 4.5rem;
+    color: var(--v7-primary-strong);
+}
+
+.rehab-v7-shell #records[data-v7-records-overview="true"] #recordsOverview,
+.rehab-v7-shell #records[data-v7-records-overview="true"] #recordsContent {
+    display: none;
+}
+
+.rehab-v7-shell #records[data-v7-records-overview="false"] .v7-records-overview-shell {
+    display: none;
+}
+
+.rehab-v7-shell #records .v7-records-overview-shell {
+    display: grid;
+    gap: 1rem;
+}
+
+.rehab-v7-shell #records .v7-records-summary,
+.rehab-v7-shell #records .v7-records-trend-card,
+.rehab-v7-shell #records .v7-records-calendar-card,
+.rehab-v7-shell #records .v7-records-recent-card {
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #records .v7-records-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    height: 7rem;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #records .v7-records-summary > span {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto;
+    align-content: start;
+    min-width: 0;
+    padding: 0 0.75rem;
+    border-right: 1px solid var(--v7-row-divider);
+}
+
+.rehab-v7-shell #records .v7-records-summary > span:first-child {
+    padding-left: 0;
+}
+
+.rehab-v7-shell #records .v7-records-summary > span:last-child {
+    padding-right: 0;
+    border-right: 0;
+}
+
+.rehab-v7-shell #records .v7-records-summary small {
+    grid-column: 1 / -1;
+    margin-bottom: 0.25rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #records .v7-records-summary b {
+    align-self: end;
+    font-size: 1.75rem;
+    font-weight: var(--v7-weight-semibold);
+    line-height: 1;
+}
+
+.rehab-v7-shell #records .v7-records-summary em {
+    align-self: end;
+    margin-left: 0.25rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    font-style: normal;
+}
+
+.rehab-v7-shell #records .v7-records-summary i {
+    grid-column: 1 / -1;
+    margin-top: 0.45rem;
+    color: var(--v7-primary);
+    font-size: var(--v7-type-xs);
+    font-style: normal;
+}
+
+.rehab-v7-shell #records .v7-records-summary i.is-negative {
+    color: var(--v7-warning);
+}
+
+.rehab-v7-shell #records .v7-records-trend-card {
+    height: 12.125rem;
+    padding: 0.875rem 1rem 0.625rem;
+    box-sizing: border-box;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #records .v7-records-card-head,
+.rehab-v7-shell #records .v7-records-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v7-space-3);
+}
+
+.rehab-v7-shell #records .v7-records-card-head b,
+.rehab-v7-shell #records .v7-records-section-head b {
+    color: var(--v7-text);
+    font-size: var(--v7-type-xl);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #records .v7-records-card-head span,
+.rehab-v7-shell #records .v7-records-card-head button,
+.rehab-v7-shell #records .v7-records-section-head button {
+    border: 0;
+    background: transparent;
+    color: var(--v7-text-muted);
+    font: inherit;
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #records .v7-records-card-head button,
+.rehab-v7-shell #records .v7-records-section-head button {
+    color: var(--v7-primary);
+}
+
+.rehab-v7-shell #records .v7-records-trend-svg {
+    display: block;
+    width: 100%;
+    height: 6.875rem;
+    margin-top: 0.375rem;
+}
+
+.rehab-v7-shell #records .v7-records-trend-area {
+    fill: color-mix(in srgb, var(--v7-primary-soft) 62%, transparent);
+}
+
+.rehab-v7-shell #records .v7-records-trend-grid line {
+    stroke: var(--v7-row-divider);
+    stroke-width: 1;
+}
+
+.rehab-v7-shell #records .v7-records-trend-line {
+    fill: none;
+    stroke: var(--v7-primary);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.25;
+}
+
+.rehab-v7-shell #records .v7-records-trend-svg circle {
+    fill: var(--v7-primary);
+}
+
+.rehab-v7-shell #records .v7-records-trend-svg circle.is-zero {
+    opacity: 0.3;
+}
+
+.rehab-v7-shell #records .v7-records-trend-labels,
+.rehab-v7-shell #records .v7-records-calendar-weekdays,
+.rehab-v7-shell #records .v7-records-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    text-align: center;
+}
+
+.rehab-v7-shell #records .v7-records-trend-labels {
+    margin-top: -0.875rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #records .v7-records-trend-labels .is-current {
+    color: var(--v7-primary);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #records .v7-records-calendar-card {
+    height: 8.625rem;
+    padding: 0.875rem 1rem 0.75rem;
+    box-sizing: border-box;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #records .v7-records-calendar-weekdays {
+    margin-top: 0.75rem;
+    color: var(--v7-text-muted);
+}
+
+.rehab-v7-shell #records .v7-records-calendar-weekdays b {
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-regular);
+}
+
+.rehab-v7-shell #records .v7-records-calendar-days {
+    row-gap: 0.375rem;
+    margin-top: 0.375rem;
+}
+
+.rehab-v7-shell #records .v7-records-calendar-days span {
+    position: relative;
+    display: grid;
+    place-items: center;
+    justify-self: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    color: var(--v7-text);
+    font-size: var(--v7-type-md);
+}
+
+.rehab-v7-shell #records .v7-records-calendar-days span.has-record::after {
+    content: "";
+    position: absolute;
+    bottom: 0.1rem;
+    width: 0.22rem;
+    height: 0.22rem;
+    border-radius: 50%;
+    background: var(--v7-primary);
+}
+
+.rehab-v7-shell #records .v7-records-calendar-days span.is-today {
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #records .v7-records-calendar-days span.is-today::after {
+    display: none;
+}
+
+.rehab-v7-shell #records .v7-records-recent-section {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.rehab-v7-shell #records .v7-records-section-head {
+    padding: 0 0.25rem;
+}
+
+.rehab-v7-shell #records .v7-records-recent-card {
+    padding: 0.35rem 1rem;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #records .v7-records-recent-row {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 3.75rem;
+    border-bottom: 1px solid var(--v7-row-divider);
+}
+
+.rehab-v7-shell #records .v7-records-recent-row:last-child {
+    border-bottom: 0;
+}
+
+.rehab-v7-shell #records .v7-records-recent-icon {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--v7-primary-soft) 70%, var(--v7-surface));
+    color: var(--v7-primary-strong);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #records .v7-records-recent-icon.is-secondary {
+    background: var(--v7-info-soft);
+    color: var(--v7-info);
+}
+
+.rehab-v7-shell #records .v7-records-recent-row > span:last-child {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #records .v7-records-recent-row b {
+    overflow: hidden;
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #records .v7-records-recent-row small,
+.rehab-v7-shell #records .v7-records-empty {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+}
+
+.rehab-v7-shell #records .v7-records-empty {
+    display: grid;
+    place-items: center;
+    min-height: 5rem;
+}
+
+.rehab-v7-shell #records .v7-records-subnav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.375rem;
+    margin-top: 2rem;
+    padding-bottom: 0.75rem;
+}
+
+.rehab-v7-shell #records .v7-records-subnav button {
+    min-height: 2.5rem;
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-pill);
+    background: var(--v7-surface);
+    color: var(--v7-text-muted);
+    font: inherit;
+    font-size: var(--v7-type-sm);
+}
+
+/* Deep-linked real V6 record views: compact their chrome without changing data/functions. */
+.rehab-v7-shell #records[data-v7-records-overview="false"] .record-tabs,
+.rehab-v7-shell #records[data-v7-records-overview="false"] .v7-records-segmented {
+    position: relative;
+    top: auto;
+    min-height: 2.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: var(--v7-radius-pill);
+    box-shadow: none;
+}
+
+.rehab-v7-shell #records[data-v7-records-overview="false"] .record-tab,
+.rehab-v7-shell #records[data-v7-records-overview="false"] .v7-records-segment {
+    min-height: 2.25rem;
+    padding: 0.25rem;
+}

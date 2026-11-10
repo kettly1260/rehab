@@ -44,14 +44,34 @@
         return start;
     }
 
+    function getHistoryDate(h, parseFn) {
+        if (h && h.dayKey) {
+            const match = String(h.dayKey).match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+            if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0);
+        }
+        if (typeof window !== 'undefined' && typeof window.data?.historyDayKey === 'function') {
+            const k = window.data.historyDayKey(h);
+            if (k) {
+                const match = String(k).match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+                if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0);
+            }
+        }
+        const d = parseFn ? parseFn(h?.date) : new Date(h?.date || Date.now());
+        if (d && !Number.isNaN(d.getTime())) {
+            if (d.getHours() < 4) d.setDate(d.getDate() - 1);
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+        }
+        return d;
+    }
+
     window.dataWeeklySummary = {
         weeklyTrainingSummaryForRange(start, end) {
             const hist = this.activeRecords(this.db.history || []).filter(h => {
-                const d = this.parseHistoryDate(h.date);
+                const d = getHistoryDate(h, this.parseHistoryDate?.bind(this));
                 return d >= start && d < end;
             });
             const ex = this.activeRecords(this.db.health.exerciseLogs || []).filter(e => {
-                const d = new Date(e.date);
+                const d = getHistoryDate(e, dStr => new Date(dStr));
                 return d >= start && d < end;
             });
             const minutes = Math.round(hist.reduce((s, h) => s + (h.duration || 0) / 60, 0))
@@ -65,7 +85,43 @@
             hist.forEach(h => this.historyNames(h).forEach(n => counts[n] = (counts[n] || 0) + 1));
             ex.forEach(e => { const n = this.exerciseLabel(e.type, e); counts[n] = (counts[n] || 0) + 1; });
             const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0]?.[0] || '—';
-            return { total: hist.length + ex.length, minutes, cal, top, sets, avgRpe };
+            const dateSet = new Set();
+            hist.forEach(h => {
+                const k = this.historyDayKey ? this.historyDayKey(h) : (h.dayKey || (h.date ? String(h.date).slice(0, 10) : ''));
+                if (k) dateSet.add(k);
+            });
+            ex.forEach(e => {
+                const k = e.date ? String(e.date).slice(0, 10) : '';
+                if (k) dateSet.add(k);
+            });
+            const trainingDays = dateSet.size;
+            const sessionSet = new Set();
+            let legacySessionCount = 0;
+            let hasLegacyRecords = false;
+            hist.forEach(h => {
+                if (h.sessionId) sessionSet.add(h.sessionId);
+                else { hasLegacyRecords = true; legacySessionCount += 1; }
+            });
+            const sessionCount = sessionSet.size + legacySessionCount + ex.length;
+            let actionCount = 0;
+            hist.forEach(h => {
+                if (Array.isArray(h.actions) && h.actions.length) actionCount += h.actions.length;
+                else actionCount += 1;
+            });
+            actionCount += ex.length;
+            return {
+                total: hist.length + ex.length,
+                sessionCount,
+                actionCount,
+                trainingDays,
+                hasLegacyRecords,
+                sessionScopeNote: hasLegacyRecords ? '包含未记录会话ID的历史条目，已按单条统计' : '按训练会话聚合',
+                minutes,
+                cal,
+                top,
+                sets,
+                avgRpe
+            };
         },
 
         weeklyTrainingSummary(offsetWeeks = 0) {
@@ -199,10 +255,21 @@
             previousStart.setDate(previousStart.getDate() - 7);
             const cur = this.weeklyTrainingSummaryForRange(currentStart, currentEnd);
             const prev = this.weeklyTrainingSummaryForRange(previousStart, currentStart);
+            if (cur.trainingDays === 0 || (cur.minutes === 0 && (cur.sessionCount === 0 || cur.total === 0))) {
+                return {
+                    cur, prev, minuteDelta: cur.minutes - prev.minutes, loadSpike: 0, highRpe: false, fatigue: false, deload: false,
+                    level: '数据不足',
+                    hint: '本周暂无训练记录，请记录训练后再查看疲劳与恢复建议。',
+                    weekKey: isoWeekKey(currentStart),
+                    weekStart: dateKey(currentStart),
+                    weekEnd: dateKey(new Date(currentEnd.getTime() - 86400000))
+                };
+            }
             const minuteDelta = cur.minutes - prev.minutes;
             const loadSpike = prev.minutes > 0 ? cur.minutes / prev.minutes : (cur.minutes > 90 ? 2 : 1);
             const highRpe = cur.avgRpe >= 8.5;
-            const fatigue = highRpe || loadSpike >= 1.5 || cur.total >= 6;
+            const frequencyHigh = (cur.sessionCount > 0 ? cur.sessionCount >= 5 : (cur.trainingDays >= 5 || cur.total >= 6));
+            const fatigue = highRpe || (loadSpike >= 1.5 && cur.minutes >= 60) || (frequencyHigh && cur.minutes >= 90);
             const deload = fatigue && (cur.minutes >= 180 || highRpe);
             const level = deload ? '建议降载' : fatigue ? '注意恢复' : '节奏正常';
             const hint = deload
@@ -220,7 +287,11 @@
             const focusMap = { completion: '完成率', fatigue: '疲劳', deload: '降载', diet: '饮食', weight: '体重' };
             const focusStr = Array.isArray(prefs.focus) && prefs.focus.length ? prefs.focus.map(f => focusMap[f] || f).join('、') : '完成率、疲劳、降载';
             const context = this.buildPeriodReportContext?.(insight.weekStart, insight.weekEnd) || '';
-            return `请基于 ${insight.weekStart} 至 ${insight.weekEnd} 的训练、饮食、体重和计划完成情况，做一份周总结。重点分析：${focusStr}。当前本地训练摘要：该周 ${insight.cur.total} 次训练，${insight.cur.minutes} 分钟，较前一周 ${insight.minuteDelta >= 0 ? '+' : ''}${insight.minuteDelta} 分钟，平均 RPE ${insight.cur.avgRpe ? insight.cur.avgRpe.toFixed(1) : '暂无'}，初步判断：${insight.level}。请严格基于下面的周期数据，不要编造不存在的数据。${prefs.customNote ? '\n用户补充：' + prefs.customNote : ''}\n\n${context}`;
+            const cur = insight.cur;
+            const countDesc = (cur.sessionCount > 0)
+                ? `${cur.sessionCount} 次训练（${cur.actionCount || cur.total} 个动作，训练 ${cur.trainingDays} 天）`
+                : `${cur.total} 条训练记录（训练 ${cur.trainingDays} 天）`;
+            return `请基于 ${insight.weekStart} 至 ${insight.weekEnd} 的训练、饮食、体重和计划完成情况，做一份周总结。重点分析：${focusStr}。当前本地训练摘要：该周 ${countDesc}，${insight.cur.minutes} 分钟，较前一周 ${insight.minuteDelta >= 0 ? '+' : ''}${insight.minuteDelta} 分钟，平均 RPE ${insight.cur.avgRpe ? insight.cur.avgRpe.toFixed(1) : '暂无'}，初步判断：${insight.level}。请严格基于下面的周期数据，不要编造不存在的数据。${prefs.customNote ? '\n用户补充：' + prefs.customNote : ''}\n\n${context}`;
         },
 
         weeklyAiPrompt() {
@@ -231,10 +302,11 @@
             const hasAi = !!(this.db?.aiProfiles?.length && (this.db.aiActiveId || this.db.aiProfiles[0]?.id)) || !!(window.ai && ai.cfg?.enabled);
             const insight = this.weeklyFatigueInsight();
             const safe = this.escapeHtml.bind(this);
+            const sessionTotal = insight.cur.sessionCount != null ? insight.cur.sessionCount : insight.cur.total;
             return `<div class="md-card weekly-ai-insight-card">
                 <div class="context-ai-head"><div><span class="cardio-kicker">AI 周总结</span><h3>${safe(insight.level)}</h3><small>${safe(insight.hint)}</small></div><span class="context-ai-icon material-symbols-rounded">tips_and_updates</span></div>
                 <div class="record-overview-stats">
-                    <div class="record-overview-stat"><b>${insight.cur.total}</b><small>本周训练</small></div>
+                    <div class="record-overview-stat"><b>${sessionTotal}</b><small>本周训练(${insight.cur.actionCount || insight.cur.total}项)</small></div>
                     <div class="record-overview-stat"><b>${insight.cur.minutes}</b><small>分钟</small></div>
                     <div class="record-overview-stat"><b>${insight.cur.avgRpe ? insight.cur.avgRpe.toFixed(1) : '--'}</b><small>平均 RPE</small></div>
                 </div>
@@ -253,11 +325,11 @@
             const lastMonday = new Date(monday); lastMonday.setDate(lastMonday.getDate() - 7);
             const summarize = (start, end) => {
                 const hist = this.activeRecords(this.db.history || []).filter(h => {
-                    const d = this.parseHistoryDate(h.date);
+                    const d = getHistoryDate(h, this.parseHistoryDate?.bind(this));
                     return d >= start && d < end;
                 });
                 const ex = this.activeRecords(this.db.health.exerciseLogs || []).filter(e => {
-                    const d = new Date(e.date);
+                    const d = getHistoryDate(e, dStr => new Date(dStr));
                     return d >= start && d < end;
                 });
                 const total = hist.length + ex.length;
@@ -311,7 +383,7 @@
                 <h3>${safe(insight.level)}</h3>
                 <small>${safe(insight.hint)}</small>
                 <div class="summary-stats">
-                    <div class="summary-stat"><strong>${insight.cur.total}</strong><small>本周训练</small></div>
+                    <div class="summary-stat"><strong>${insight.cur.sessionCount != null ? insight.cur.sessionCount : insight.cur.total}</strong><small>本周训练</small></div>
                     <div class="summary-stat"><strong>${insight.cur.minutes}</strong><small>分钟</small></div>
                     <div class="summary-stat"><strong>${insight.cur.avgRpe ? insight.cur.avgRpe.toFixed(1) : '--'}</strong><small>平均 RPE</small></div>
                 </div>
@@ -324,11 +396,11 @@
             </div>
             <div class="summary-glass-card">
                 <div class="summary-kicker">周概览</div>
-                <h3>${insight.cur.total} 次训练 · ${insight.cur.minutes} 分钟</h3>
-                <small>较前一周 ${dt(insight.cur.minutes, insight.prev.minutes)} 分钟 · ${insight.cur.cal} kcal</small>
+                <h3>${insight.cur.sessionCount != null ? insight.cur.sessionCount : insight.cur.total} 次训练 · ${insight.cur.minutes} 分钟</h3>
+                <small>${insight.cur.actionCount && insight.cur.actionCount !== (insight.cur.sessionCount != null ? insight.cur.sessionCount : insight.cur.total) ? `共 ${insight.cur.actionCount} 个动作项 · ` : ''}较前一周 ${dt(insight.cur.minutes, insight.prev.minutes)} 分钟 · ${insight.cur.cal} kcal</small>
                 <div class="summary-stats">
                     <div class="summary-stat"><strong>${insight.cur.cal}</strong><small>消耗 kcal</small></div>
-                    <div class="summary-stat"><strong>${dt(insight.cur.total, insight.prev.total)}</strong><small>较前周</small></div>
+                    <div class="summary-stat"><strong>${dt(insight.cur.sessionCount != null ? insight.cur.sessionCount : insight.cur.total, insight.prev.sessionCount != null ? insight.prev.sessionCount : insight.prev.total)}</strong><small>较前周</small></div>
                     <div class="summary-stat"><strong>${safe(insight.cur.top)}</strong><small>最常练</small></div>
                 </div>
             </div>`;
@@ -534,14 +606,25 @@
             const monthStart = new Date(year, month - 1, 1);
             const nextMonth = new Date(year, month, 1);
             const hist = this.activeRecords(this.db.history || []).filter(h => {
-                const d = this.parseHistoryDate(h.date);
+                const d = getHistoryDate(h, this.parseHistoryDate?.bind(this));
                 return d >= monthStart && d < nextMonth;
             });
             const ex = this.activeRecords(this.db.health.exerciseLogs || []).filter(e => {
-                const d = new Date(e.date);
+                const d = getHistoryDate(e, dStr => new Date(dStr));
                 return d >= monthStart && d < nextMonth;
             });
-            const total = hist.length + ex.length;
+            const sessionSet = new Set();
+            let legacySessionCount = 0;
+            let actionCount = 0;
+            hist.forEach(h => {
+                if (h.sessionId) sessionSet.add(h.sessionId);
+                else legacySessionCount += 1;
+                if (Array.isArray(h.actions) && h.actions.length) actionCount += h.actions.length;
+                else actionCount += 1;
+            });
+            const sessionCount = sessionSet.size + legacySessionCount + ex.length;
+            actionCount += ex.length;
+            const total = sessionCount;
             const minutes = Math.round(hist.reduce((s, h) => s + (h.duration || 0) / 60, 0))
                           + ex.reduce((s, e) => s + (e.minutes || 0), 0);
             const cal = Math.round(hist.reduce((s, h) => s + (h.cardio?.calories || 0), 0)
@@ -555,10 +638,10 @@
             const top3 = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 3);
             const daysInMonth = new Date(year, month, 0).getDate();
             const daysWithTraining = new Set([
-                ...hist.map(h => this.parseHistoryDate(h.date)?.toDateString()),
-                ...ex.map(e => new Date(e.date)?.toDateString())
+                ...hist.map(h => getHistoryDate(h, this.parseHistoryDate?.bind(this))?.toDateString()),
+                ...ex.map(e => getHistoryDate(e, dStr => new Date(dStr))?.toDateString())
             ].filter(Boolean)).size;
-            return { total, minutes, cal, sets, avgRpe, top3, daysInMonth, daysWithTraining, monthKey: key, monthLabel: `${year}年${month}月` };
+            return { total, sessionCount, actionCount, minutes, cal, sets, avgRpe, top3, daysInMonth, daysWithTraining, monthKey: key, monthLabel: `${year}年${month}月` };
         },
 
         monthlySummaryAiPrompt(monthKey) {
@@ -568,7 +651,7 @@
             const start = `${year}-${String(month).padStart(2, '0')}-01`;
             const end = dateKey(new Date(year, month, 0));
             const context = this.buildPeriodReportContext?.(start, end) || '';
-            return `请总结我${m.monthLabel}的训练、饮食和体重变化，并给出下一个月建议。当前本地训练摘要：${m.monthLabel}共 ${m.total} 次训练，${m.minutes} 分钟，${m.daysWithTraining}/${m.daysInMonth} 天有训练记录，总组数 ${m.sets}，平均 RPE ${m.avgRpe ? m.avgRpe.toFixed(1) : '暂无'}，消耗 ${m.cal} kcal，高频动作：${top}。请严格基于下面的周期数据，不要编造不存在的数据。\n\n${context}`;
+            return `请总结我${m.monthLabel}的训练、饮食和体重变化，并给出下一个月建议。当前本地训练摘要：${m.monthLabel}共 ${m.sessionCount} 次训练（${m.actionCount} 个动作项），${m.minutes} 分钟，${m.daysWithTraining}/${m.daysInMonth} 天有训练记录，总组数 ${m.sets}，平均 RPE ${m.avgRpe ? m.avgRpe.toFixed(1) : '暂无'}，消耗 ${m.cal} kcal，高频动作：${top}。请严格基于下面的周期数据，不要编造不存在的数据。\n\n${context}`;
         },
 
         renderMonthlySummarySheetBody(monthKey) {

@@ -142,12 +142,10 @@
         },
 
         _ensureReadyDeferred() {
-            if (this._readyPromise) return this._readyPromise;
-            this._readyPromise = new Promise((resolve, reject) => {
-                this._resolveReady = resolve;
-                this._rejectReady = reject;
-            });
-            return this._readyPromise;
+            return this._readyPromise || (this._readyPromise = new Promise((res, rej) => {
+                this._resolveReady = res;
+                this._rejectReady = rej;
+            }));
         },
 
         /**
@@ -156,7 +154,6 @@
          */
         async ensureDataReady() {
             if (this._readyState === 'ready') return true;
-            if (this._readyState === 'failed') return false;
             this._ensureReadyDeferred();
             try {
                 await this._readyPromise;
@@ -246,11 +243,12 @@
         },
 
         async init() {
+            if (this._readyState === 'ready' || this._readyState === 'failed') {
+                this._readyPromise = this._resolveReady = this._rejectReady = null;
+                this._readyWaiters = Object.create(null);
+            }
             this._readyState = 'pending';
-            this._readyPromise = null;
-            this._resolveReady = null;
-            this._rejectReady = null;
-            this._readyWaiters = Object.create(null);
+            this._readyWaiters = this._readyWaiters || Object.create(null);
             this._ensureReadyDeferred();
 
             const started = Date.now();

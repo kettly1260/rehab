@@ -2,9 +2,37 @@
 const workoutEngine = {
     state: null,
     skipOverride: null,
+    _runToken: 0,
+
+    isRunActive(runToken) {
+        return (
+            typeof workout !== 'undefined' &&
+            !!workout.isPlaying &&
+            !!this.state &&
+            this._runToken === runToken &&
+            this.state._runToken === runToken
+        );
+    },
 
     currentActions() {
-        return (data._planActions ? data._planActions() : data.activeRecords(data.db.actions || [])).filter(a => !a.libOnly);
+        if (typeof workout !== 'undefined' && workout?.isPlaying && Array.isArray(workout._workoutActionsSnapshot) && workout._workoutActionsSnapshot.length > 0) {
+            return workout._workoutActionsSnapshot;
+        }
+        const list = (data._planActions ? data._planActions() : data.activeRecords(data.db.actions || [])).filter(a => !a.libOnly);
+        const filter = window.data?._activeWorkoutIntentFilter;
+        if (filter === 'recovery' || filter === 'stretch') {
+            const kindFn = window.actionKind || window.data?.actionKind || ((action = {}) => {
+                const text = [action.nature, action.category, action.type, action.phase, action.name].filter(Boolean).join(' ');
+                if (/stretch|cooldown|release|拉伸|放松|伸展/i.test(text) || action.phase === 'cooldown') return 'stretch';
+                if (/recover|rehab|mobility|康复|活动度|激活/i.test(text)) return 'recovery';
+                return 'strength';
+            });
+            if (typeof window !== 'undefined' && !window.actionKind) window.actionKind = kindFn;
+            if (typeof kindFn === 'function') {
+                return list.filter(a => kindFn(a) === filter);
+            }
+        }
+        return list;
     },
 
     createInitialState() {
@@ -17,7 +45,8 @@ const workoutEngine = {
             phaseLeft: null,
             phaseSub: '',
             phaseStatus: '',
-            activeAction: null
+            activeAction: null,
+            _runToken: this._runToken || 0
         };
     },
 
@@ -72,8 +101,8 @@ const workoutEngine = {
         if (subEl && labels.subText) subEl.innerText = labels.subText;
     },
 
-    transition(phase, patch = {}) {
-        if (!this.state) return;
+    transition(phase, patch = {}, runToken = this._runToken) {
+        if (!this.state || (runToken != null && !this.isRunActive(runToken))) return false;
         const previousPhase = this.state.phase || '';
         Object.assign(this.state, patch, { phase });
         this.syncPanelLabels(phase);
@@ -103,11 +132,11 @@ const workoutEngine = {
         } catch {}
     },
 
-    applySkipOverride() {
-        if (!this.skipOverride) return false;
+    applySkipOverride(runToken = this._runToken) {
+        if (!this.skipOverride || !this.isRunActive(runToken)) return false;
         const { phase, patch } = this.skipOverride;
         this.skipOverride = null;
-        this.transition(phase, patch);
+        this.transition(phase, patch, runToken);
         return true;
     },
 
@@ -169,25 +198,31 @@ const workoutEngine = {
         return true;
     },
 
-    async start() {
-        this.state = this.createInitialState();
+    async start(token) {
+        if (!token || token !== this._runToken || !this.state) {
+            this._runToken = (this._runToken || 0) + 1;
+            if (typeof workout !== 'undefined') workout._runToken = this._runToken;
+            this.state = this.createInitialState();
+            this.state._runToken = this._runToken;
+        }
+        const runToken = this._runToken;
         const firstAction = this.currentActions()[0] || null;
         window.errorBus?.event?.('workout.engine', 'start', { actionCount: this.currentActions().length, hasFirstAction: !!firstAction });
         if (firstAction) {
             this.state.activeAction = JSON.parse(JSON.stringify(firstAction));
             this.syncPanelLabels('intro');
         }
-        await this.run();
+        await this.run(runToken);
     },
 
-    async run() {
+    async run(runToken = this._runToken) {
         const actions = this.currentActions();
-        while (workout.isPlaying && this.state && this.state.actionIndex < actions.length) {
+        while (this.isRunActive(runToken) && this.state.actionIndex < actions.length) {
             const action = actions[this.state.actionIndex];
             this.state.activeAction = JSON.parse(JSON.stringify(action));
             if (window.workoutState) workoutState.markActive();
-            await this.stepAction(action);
-            if (!workout.isPlaying) return;
+            await this.stepAction(action, runToken);
+            if (!this.isRunActive(runToken)) return;
             if (this.state.phase === 'completed') {
                 this.state.actionIndex++;
                 this.state.setIndex = 0;
@@ -196,14 +231,15 @@ const workoutEngine = {
                 this.state.phase = 'intro';
             }
         }
-        if (workout.isPlaying) workout.finish();
+        if (this.isRunActive(runToken)) workout.finish();
     },
 
-    async stepAction(action) {
+    async stepAction(action, runToken = this._runToken) {
+        if (!this.isRunActive(runToken)) return;
         if ((action.sets|0) < 1 || ((action.reps|0) <= 0 && (action.work|0) <= 0)) {
             window.errorBus?.event?.('workout.engine', 'invalidActionSkipped', { actionIndex: this.state?.actionIndex || 0, sets: action?.sets || 0, reps: action?.reps || 0, work: action?.work || 0 });
             window.toast?.show?.(`「${action.name || '未命名'}」参数不完整（组数/次数/时长为0），已跳过`, 'error');
-            this.transition('completed');
+            this.transition('completed', {}, runToken);
             return;
         }
         // 计时/保持类动作可能 reps=0 + work>0，引擎需要至少 1 次循环
@@ -227,132 +263,145 @@ const workoutEngine = {
         }
         const nextAction = actions[this.state.actionIndex + 1];
         workout._nextActionName = nextAction?.name || '';
-        while (workout.isPlaying && this.state.actionIndex < actions.length) {
+        while (this.isRunActive(runToken) && this.state.actionIndex < actions.length) {
             if (this.state.phase === 'intro') {
                 await workout.speak(`下一项：${action.name}`);
-                if (this.applySkipOverride()) continue;
-                this.transition('announceSet');
+                if (!this.isRunActive(runToken)) return;
+                if (this.applySkipOverride(runToken)) continue;
+                this.transition('announceSet', {}, runToken);
                 continue;
             }
             if (this.state.setIndex >= action.sets) {
-                this.transition('actionBreak');
+                this.transition('actionBreak', {}, runToken);
             }
             if (this.state.phase === 'announceSet') {
                 document.getElementById('curSet').innerText = this.state.setIndex + 1;
                 document.getElementById('totalSet').innerText = action.sets;
                 if (sides[this.state.sideIndex]) await workout.speak(`${sides[this.state.sideIndex]}开始`);
                 else if (action.sets > 1) await workout.speak(`第${this.state.setIndex + 1}组`);
-                if (this.applySkipOverride()) continue;
-                this.transition('announceRep');
+                if (!this.isRunActive(runToken)) return;
+                if (this.applySkipOverride(runToken)) continue;
+                this.transition('announceRep', {}, runToken);
                 continue;
             }
             if (this.state.phase === 'announceRep') {
                 if (this.state.repIndex >= action.reps) {
-                    this.transition('afterReps');
+                    this.transition('afterReps', {}, runToken);
                     continue;
                 }
                 document.getElementById('curRep').innerText = this.state.repIndex + 1;
                 document.getElementById('totalRep').innerText = action.reps;
                 await workout.speak(`第${this.state.repIndex + 1}次`);
-                if (this.applySkipOverride()) continue;
-                this.transition('hold');
+                if (!this.isRunActive(runToken)) return;
+                if (this.applySkipOverride(runToken)) continue;
+                this.transition('hold', {}, runToken);
                 continue;
             }
             if (this.state.phase === 'hold') {
-                await this.runCount(action.work, action.name, 'HOLD', 'restAfterRep');
+                await this.runCount(action.work, action.name, 'HOLD', 'restAfterRep', runToken);
+                if (!this.isRunActive(runToken)) return;
                 continue;
             }
             if (this.state.phase === 'restAfterRep') {
                 this.state.repIndex++;
                 if (this.state.repIndex < action.reps) {
                     if (this.restSeconds(action, 'repRest') <= 0) {
-                        this.transition('announceRep');
+                        this.transition('announceRep', {}, runToken);
                         continue;
                     }
                     await workout.speak('放松');
-                    if (this.applySkipOverride()) continue;
-                    this.transition('repRest');
+                    if (!this.isRunActive(runToken)) return;
+                    if (this.applySkipOverride(runToken)) continue;
+                    this.transition('repRest', {}, runToken);
                     continue;
                 }
-                this.transition('afterReps');
+                this.transition('afterReps', {}, runToken);
                 continue;
             }
             if (this.state.phase === 'repRest') {
-                await this.runCount(action.repRest, '放松休息', 'REST', 'announceRep');
+                await this.runCount(action.repRest, '放松休息', 'REST', 'announceRep', runToken);
+                if (!this.isRunActive(runToken)) return;
                 continue;
             }
             if (this.state.phase === 'afterReps') {
                 if (action.isAlt && this.state.sideIndex === 0) {
                     if (this.restSeconds(action, 'switchRest') <= 0) {
-                        this.transition('switchSide', { sideIndex: 1, repIndex: 0 });
+                        this.transition('switchSide', { sideIndex: 1, repIndex: 0 }, runToken);
                         continue;
                     }
                     await workout.speak('准备换边');
-                    if (this.applySkipOverride()) continue;
-                    this.transition('switchRest');
+                    if (!this.isRunActive(runToken)) return;
+                    if (this.applySkipOverride(runToken)) continue;
+                    this.transition('switchRest', {}, runToken);
                 } else {
                     this.state.sideIndex = 0;
                     this.state.repIndex = 0;
                     this.state.setIndex++;
                     window.haptics?.success?.();
-                    this.transition(this.state.setIndex < action.sets ? 'setRest' : 'actionBreak');
+                    this.transition(this.state.setIndex < action.sets ? 'setRest' : 'actionBreak', {}, runToken);
                 }
                 continue;
             }
             if (this.state.phase === 'switchRest') {
-                await this.runCount(action.switchRest, '请切换侧向', 'SWITCH', 'switchSide');
+                await this.runCount(action.switchRest, '请切换侧向', 'SWITCH', 'switchSide', runToken);
+                if (!this.isRunActive(runToken)) return;
                 continue;
             }
             if (this.state.phase === 'switchSide') {
                 this.state.sideIndex = 1;
                 this.state.repIndex = 0;
-                this.transition('announceSet');
+                this.transition('announceSet', {}, runToken);
                 continue;
             }
             if (this.state.phase === 'setRest') {
                 if (this.state.setIndex >= action.sets) {
-                    this.transition('actionBreak');
+                    this.transition('actionBreak', {}, runToken);
                     continue;
                 }
                 workout.openSetReview(action.name, this.state.setIndex, action.reps);
                 if (this.restSeconds(action, 'actionRest') <= 0) {
-                    this.transition('nextSet');
+                    this.transition('nextSet', {}, runToken);
                     continue;
                 }
                 await workout.speak('组间休息');
-                if (this.applySkipOverride()) continue;
-                await this.runCount(action.actionRest, '稍作休息', 'SET REST', 'nextSet');
+                if (!this.isRunActive(runToken)) return;
+                if (this.applySkipOverride(runToken)) continue;
+                await this.runCount(action.actionRest, '稍作休息', 'SET REST', 'nextSet', runToken);
+                if (!this.isRunActive(runToken)) return;
                 continue;
             }
             if (this.state.phase === 'nextSet') {
                 this.state.sideIndex = 0;
                 this.state.repIndex = 0;
-                this.transition('announceSet');
+                this.transition('announceSet', {}, runToken);
                 continue;
             }
             if (this.state.phase === 'actionBreak') {
                 if (this.state.actionIndex < actions.length - 1) {
                     if (this.restSeconds(action, 'groupRest') <= 0) {
-                        this.transition('completed');
+                        this.transition('completed', {}, runToken);
                         return;
                     }
                     await workout.speak('更换动作');
-                    if (this.applySkipOverride()) continue;
-                    await this.runCount(action.groupRest, '下一项准备', 'BREAK', 'completed');
+                    if (!this.isRunActive(runToken)) return;
+                    if (this.applySkipOverride(runToken)) continue;
+                    await this.runCount(action.groupRest, '下一项准备', 'BREAK', 'completed', runToken);
+                    if (!this.isRunActive(runToken)) return;
                     return;
                 }
-                this.transition('completed');
+                this.transition('completed', {}, runToken);
                 return;
             }
             return;
         }
     },
 
-    async runCount(sec, sub, status, nextPhase) {
+    async runCount(sec, sub, status, nextPhase, runToken = this._runToken) {
+        if (!this.isRunActive(runToken)) return;
         const fallback = Number(sec);
         const remaining = Number.isFinite(this.state.phaseLeft) ? this.state.phaseLeft : (Number.isFinite(fallback) ? Math.max(0, fallback) : 0);
         if (remaining <= 0) {
-            if (workout.isPlaying) this.transition(nextPhase, { phaseLeft: null, phaseSub: '', phaseStatus: '' });
+            if (this.isRunActive(runToken)) this.transition(nextPhase, { phaseLeft: null, phaseSub: '', phaseStatus: '' }, runToken);
             return;
         }
         this.state.phaseLeft = remaining;
@@ -362,9 +411,10 @@ const workoutEngine = {
         workout._phaseSub = sub;
         workout._phaseStatus = status;
         workout._phaseLastTick = Date.now();
-        await workout.count(remaining, sub, status);
-        if (this.applySkipOverride()) return;
-        if (workout.isPlaying) this.transition(nextPhase, { phaseLeft: null, phaseSub: '', phaseStatus: '' });
+        await workout.count(remaining, sub, status, runToken);
+        if (!this.isRunActive(runToken)) return;
+        if (this.applySkipOverride(runToken)) return;
+        if (this.isRunActive(runToken)) this.transition(nextPhase, { phaseLeft: null, phaseSub: '', phaseStatus: '' }, runToken);
     },
 
     compensateElapsed(delta) {
@@ -390,7 +440,10 @@ const workoutEngine = {
 
     restore(snapshot, labels, updatedAt) {
         if (!snapshot) return;
+        this._runToken = (this._runToken || 0) + 1;
+        if (typeof workout !== 'undefined') workout._runToken = this._runToken;
         this.state = JSON.parse(JSON.stringify(snapshot));
+        this.state._runToken = this._runToken;
         if (!this.state.activeAction) {
             this.state.activeAction = JSON.parse(JSON.stringify(this.currentActions()[this.state.actionIndex] || null));
         }
@@ -410,7 +463,7 @@ const workoutEngine = {
     },
 
     resume() {
-        setTimeout(() => this.run(), 0);
+        setTimeout(() => this.run(this._runToken), 0);
     }
 };
 

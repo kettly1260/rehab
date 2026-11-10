@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* global theme */
 import assert from 'node:assert/strict';
 import { createReadStream, existsSync } from 'node:fs';
 import { mkdir, stat } from 'node:fs/promises';
@@ -102,6 +103,90 @@ test('V7 Workout keeps a running session across route unmount and rebuilds the v
         assert.equal(visual.pipVisible, true);
         assert.equal(visual.recoveryEntry, true);
         assert.ok(visual.overflow <= 1);
+
+        await page.evaluate(() => {
+            theme.setPreset('green');
+            theme.setMode('light');
+            window.data.db.actions = [
+                { id: 'v7-idle-1', name: '深蹲', phase: 'main', nature: 'training', sets: 3, reps: 8, work: 5, repRest: 0, actionRest: 45, groupRest: 0, isAlt: false, libOnly: false, deleted: false, updatedAt: Date.now() },
+                { id: 'v7-idle-2', name: '坐姿划船', phase: 'main', nature: 'training', sets: 3, reps: 10, work: 5, repRest: 0, actionRest: 45, groupRest: 0, isAlt: false, libOnly: false, deleted: false, updatedAt: Date.now() + 1 },
+                { id: 'v7-idle-3', name: '臀桥', phase: 'main', nature: 'recovery', sets: 3, reps: 12, work: 4, repRest: 0, actionRest: 30, groupRest: 0, isAlt: false, libOnly: false, deleted: false, updatedAt: Date.now() + 2 }
+            ];
+            window.data.render('workout');
+            window.dispatchEvent(new CustomEvent('workout:state', { detail: { status: 'idle' } }));
+        });
+        await page.waitForFunction(() => document.querySelectorAll('#workout .v7-workout-plan-row').length === 3, null, { timeout: 10000 });
+        await page.evaluate(() => {
+            const root = document.getElementById('workout');
+            if (root) root.scrollTop = 0;
+        });
+        await page.waitForTimeout(300);
+        const idleVisual = await page.evaluate(() => {
+            const root = document.getElementById('workout');
+            const readiness = document.querySelector('#workout .v7-workout-readiness-card');
+            const plan = document.querySelector('#workout .v7-workout-plan-card');
+            const strip = document.querySelector('#workout .v7-workout-session-strip');
+            const play = document.getElementById('playBtn');
+            const nav = document.querySelector('.md-nav-rail.v7-bottom-nav');
+            const timer = document.querySelector('#workout .timer-panel');
+            const rect = (node) => node ? node.getBoundingClientRect() : null;
+            const playRect = rect(play);
+            const navRect = rect(nav);
+            return {
+                state: root?.dataset.v7WorkoutState,
+                readiness: rect(readiness),
+                plan: rect(plan),
+                strip: rect(strip),
+                play: playRect,
+                nav: navRect,
+                timerDisplay: timer ? getComputedStyle(timer).display : '',
+                modeLabels: [...document.querySelectorAll('#workout .v7-workout-mode-tabs button')].map((button) => button.textContent?.trim()),
+                planRows: document.querySelectorAll('#workout .v7-workout-plan-row').length,
+                overlap: playRect && navRect ? Math.max(0, playRect.bottom - navRect.top) : 0,
+                overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth
+            };
+        });
+        assert.equal(idleVisual.state, 'idle');
+        assert.equal(idleVisual.timerDisplay, 'none');
+        assert.deepEqual(idleVisual.modeLabels, ['力量', '有氧', '康复', '拉伸']);
+        assert.equal(idleVisual.planRows, 3);
+        assert.ok(idleVisual.readiness?.height >= 128 && idleVisual.readiness?.height <= 142, `idle readiness height=${idleVisual.readiness?.height}`);
+        assert.ok(idleVisual.plan?.height >= 246 && idleVisual.plan?.height <= 258, `idle plan height=${idleVisual.plan?.height}`);
+        assert.ok(idleVisual.strip?.height >= 68 && idleVisual.strip?.height <= 76, `idle summary height=${idleVisual.strip?.height}`);
+        assert.ok(idleVisual.overlap <= 1, `idle play/nav overlap=${idleVisual.overlap}`);
+        assert.ok(idleVisual.overflow <= 1);
+        await page.screenshot({ path: path.join(evidenceRoot, 'workout-idle-390x844.png'), fullPage: false });
+
+        await page.locator('#workout .v7-workout-mode-tabs button[data-v7-workout-mode="recovery"]').click();
+        await page.waitForFunction(() => document.querySelector('#workout .v7-workout-mode-tabs button[data-v7-workout-mode="recovery"]')?.getAttribute('aria-selected') === 'true');
+        await page.locator('#workout .v7-workout-mode-tabs button[data-v7-workout-mode="strength"]').click();
+        await page.waitForFunction(() => document.querySelector('#workout .v7-workout-mode-tabs button[data-v7-workout-mode="strength"]')?.getAttribute('aria-selected') === 'true');
+
+        await page.evaluate(() => document.querySelector('#workout [data-v7-workout-editor-toggle]')?.click());
+        await page.waitForFunction(() => document.querySelector('#workout')?.dataset.v7WorkoutEditor === 'open');
+        const advanced = await page.evaluate(() => {
+            const card = document.querySelector('#workout #strengthCard');
+            const controls = document.querySelector('#workout .workout-controls');
+            card?.scrollIntoView?.({ block: 'start' });
+            return {
+                visible: card?.getClientRects().length > 0,
+                backdrop: card ? getComputedStyle(card).backdropFilter : '',
+                controlsPosition: controls ? getComputedStyle(controls).position : '',
+                overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth
+            };
+        });
+        assert.equal(advanced.visible, true);
+        assert.equal(advanced.backdrop, 'none');
+        assert.equal(advanced.controlsPosition, 'static');
+        assert.ok(advanced.overflow <= 1);
+        await page.waitForTimeout(120);
+        await page.screenshot({ path: path.join(evidenceRoot, 'workout-advanced-390x844.png'), fullPage: false });
+        await page.evaluate(() => {
+            document.querySelector('#workout [data-v7-workout-editor-toggle]')?.click();
+            const root = document.getElementById('workout');
+            if (root) root.scrollTop = 0;
+        });
+        await page.waitForFunction(() => document.querySelector('#workout')?.dataset.v7WorkoutEditor === 'closed');
 
         const started = await page.evaluate(async () => {
             window.alert = () => {};

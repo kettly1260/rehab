@@ -92,17 +92,25 @@ Object.assign(workout, {
     },
 
     async acquireWakeLock() {
-        if (window.workoutWakeLock?.request) return window.workoutWakeLock.request();
+        if (window.workoutWakeLock?.request) return window.workoutWakeLock.request(this._runToken);
         if (!('wakeLock' in navigator)) return;
+        const runToken = this._runToken;
         try {
-            this.wakeLock = await navigator.wakeLock.request('screen');
+            const lock = await navigator.wakeLock.request('screen');
+            if (!this.isPlaying || this._runToken !== runToken) {
+                lock?.release?.().catch(() => {});
+                return;
+            }
+            this.wakeLock = lock;
+            this._wakeLockRunToken = runToken;
         } catch (e) { console.warn('Wake Lock unavailable', e); }
     },
 
     releaseWakeLock() {
-        if (window.workoutWakeLock?.release) { window.workoutWakeLock.release(); return; }
+        if (window.workoutWakeLock?.release) { window.workoutWakeLock.release(this._runToken); return; }
         if (this.wakeLock) this.wakeLock.release().catch(() => {});
         this.wakeLock = null;
+        this._wakeLockRunToken = null;
     },
 
     setupMediaSession() {
@@ -130,7 +138,7 @@ Object.assign(workout, {
         if (this._audioListenerBound) return;
         this._audioListenerBound = true;
         document.addEventListener('visibilitychange', () => {
-            if (!this.isPlaying) return;
+            if (!this.isPlaying || this._disarmBackGuard) return;
             if (!document.hidden) this.acquireWakeLock();
             audio.play().catch(()=>{});
             window.speechSynthesis.resume();
@@ -152,7 +160,7 @@ Object.assign(workout, {
         if (this._backGuardBound) return;
         this._backGuardBound = true;
         window.addEventListener('beforeunload', (e) => {
-            if (!this.isPlaying) return;
+            if (!this.isPlaying || this._disarmBackGuard) return;
             e.preventDefault();
             e.returnValue = '训练正在进行，退出会中断后台播放。';
         });

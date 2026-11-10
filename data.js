@@ -112,7 +112,6 @@ const LAZY_RECORD_OPENERS = {
     }
 };
 
-/** Plan UI methods exposed by first-paint hard onclick before plan-ui loads. */
 const LAZY_PLAN_OPENERS = [
     'openNewPlanSheet',
     'openPlanTaskDrawer',
@@ -289,7 +288,6 @@ function attachPlanFeatureGate() {
 }
 
 function attachPlanAliases() {
-    // Weekly dock: never silent no-op; load plan-ui (pulls plan-weekly) then open once.
     data.openPlanWeeklySheet = data.openPlanWeeklySheet || async function (...args) {
         if (typeof window.planWeekly?.open === 'function') {
             return window.planWeekly.open.apply(window.planWeekly, args);
@@ -297,7 +295,6 @@ function attachPlanAliases() {
         if (!data.beginActionBusy?.('openPlanWeeklySheet', '加载中')) return;
         try {
             if (typeof window.loadAppScript === 'function') {
-                // plan-ui lists plan-weekly as prerequisite; either path is fine.
                 try {
                     await window.loadAppScript('plan-weekly');
                 } catch {

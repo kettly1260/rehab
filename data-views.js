@@ -31,12 +31,8 @@
         if (slotId === 'todayQuickActions') return staticQuickDockPlaceholder();
         if (slotId === 'todayOverview') {
             return `<div class="hero today-shell-skeleton" aria-busy="true">
-                <div class="hero-head"><div><div class="hero-label">今日概览</div><div class="hero-title">加载中</div></div></div>
-                <div class="rings">
-                    <div class="ring ring-diet is-placeholder" aria-hidden="true"><div><b>--</b><small>摄入</small><em>准备中</em></div></div>
-                    <span class="ring-divider" aria-hidden="true"></span>
-                    <div class="ring ring-train is-placeholder" aria-hidden="true"><div><b>--</b><small>训练</small><em>准备中</em></div></div>
-                </div>
+                <div class="hero-label">今日恢复</div><div class="today-readiness-main"><strong class="today-readiness-score">--</strong><span class="today-readiness-status">加载中</span></div>
+                <div class="today-readiness-meta"><span><small>连续训练</small><b>--</b></span><span><small>疼痛反馈</small><b>--</b></span><span><small>计划完成</small><b>--</b></span></div>
             </div>`;
         }
         if (slotId === 'todayPlanStatus') {
@@ -47,16 +43,10 @@
                 </div>`;
         }
         if (slotId === 'todayDietStatus') {
-            return `<div class="sect-head"><span class="t">饮食摄入</span></div>
-                <div class="glass-card today-shell-skeleton" aria-busy="true">
-                    <div class="calorie-head"><div><span class="num">--</span><span class="unit">kcal</span></div></div>
-                    <div class="plan-meta"><span>饮食摘要加载中</span></div>
-                </div>`;
+            return `<div class="glass-card today-status-strip today-shell-skeleton" aria-busy="true"><div class="today-status-label">今日状态</div><div class="today-status-metrics"><span><b>--</b><small>计划任务</small></span><span><b>--</b><small>摄入 kcal</small></span><span><b>--</b><small>蛋白</small></span></div></div>`;
         }
         if (slotId === 'todayTimeline') {
-            return `<div class="md-card today-timeline-card today-shell-skeleton" aria-busy="true">
-                <div class="today-timeline-header"><span class="material-symbols-rounded">timeline</span><strong>今日时间线</strong><small>加载中</small></div>
-            </div>`;
+            return `<div class="glass-card today-trend-card today-shell-skeleton" aria-busy="true"><div class="today-trend-head"><b>训练完成趋势</b><span>加载中</span></div><div class="today-trend-empty">准备趋势数据</div></div>`;
         }
         if (slotId === 'todayAiCard') {
             return `<div class="md-card today-shell-skeleton" aria-busy="true" style="padding:16px">
@@ -137,10 +127,12 @@
             fillTodaySlot(quickActions, ctx.renderTodayActionDock?.() || '', 'todayQuickActions');
             fillTodaySlot(planStatus, ctx.renderTodayV6PlanCard?.() || '', 'todayPlanStatus');
             fillTodaySlot(dietStatus, ctx.renderTodayV6DietCard?.() || '', 'todayDietStatus');
-            fillTodaySlot(timeline, ctx.renderTodayTimeline?.() || '', 'todayTimeline');
+            const trendHtml = `${ctx.renderTodayCompletionTrend?.() || ''}${ctx.renderTodayPrimaryAction?.() || ''}`;
+            fillTodaySlot(timeline, trendHtml || ctx.renderTodayTimeline?.() || '', 'todayTimeline');
 
             if (aiCard) {
-                let aiHtml = ctx.renderTodayAiReminder?.() || ctx.renderContextAiCard?.('today') || '';
+                let aiHtml = ctx.renderTodayTimeline?.() || '';
+                aiHtml += ctx.renderTodayAiReminder?.() || ctx.renderContextAiCard?.('today') || '';
                 if (ctx.renderWeeklyAiInsightCard) aiHtml += ctx.renderWeeklyAiInsightCard();
                 fillTodaySlot(aiCard, aiHtml, 'todayAiCard');
             }

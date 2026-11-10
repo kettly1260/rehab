@@ -31,8 +31,8 @@
 }
 
 .rehab-v7-shell #workout .timer-panel {
-    min-height: 17.5rem;
-    padding: var(--v7-space-6) var(--v7-space-5) var(--v7-space-5);
+    min-height: 16rem;
+    padding: var(--v7-space-6) var(--v7-space-4) var(--v7-space-5);
     border-radius: var(--v7-radius-xl);
     overflow: hidden;
     isolation: isolate;
@@ -58,7 +58,7 @@
 .rehab-v7-shell #workout .timer-panel #mainTime {
     margin: var(--v7-space-3) 0 var(--v7-space-2);
     color: var(--v7-text);
-    font-size: 5rem;
+    font-size: 4.5rem;
     font-weight: var(--v7-weight-regular);
     line-height: 1;
     letter-spacing: 0;
@@ -147,7 +147,7 @@
 .rehab-v7-shell #workout .routine-tool,
 .rehab-v7-shell #workout .workout-plan-card {
     border-radius: var(--v7-radius-lg);
-    padding: var(--v7-space-5);
+    padding: var(--v7-space-4);
 }
 
 .rehab-v7-shell #workout .rate-row,
@@ -245,13 +245,520 @@
 .rehab-v7-shell #workout[data-v7-workout-state="error"] .timer-panel { border-color: color-mix(in srgb, var(--v7-danger) 55%, var(--v7-border)); }
 
 @media (max-width: 390px) {
-    .rehab-v7-shell #workout .timer-panel { min-height: 16rem; padding-inline: var(--v7-space-4); }
-    .rehab-v7-shell #workout .timer-panel #mainTime { font-size: 4.5rem; }
     .rehab-v7-shell #workout .mode-tab { padding-inline: var(--v7-space-1); font-size: var(--v7-type-xs); }
     .rehab-v7-shell #workout .mode-tab .material-symbols-rounded { font-size: var(--v7-icon-sm); }
-    .rehab-v7-shell #workout .input-card,
-    .rehab-v7-shell #workout .cardio-card,
-    .rehab-v7-shell #workout .strength-log-card,
-    .rehab-v7-shell #workout .routine-tool,
-    .rehab-v7-shell #workout .workout-plan-card { padding: var(--v7-space-4); }
+}
+
+/* Visual recovery anatomy: idle planning and running session are intentionally separate. */
+.rehab-v7-shell #workout.v7-feature-workout {
+    padding: 0 var(--v7-page-gutter) calc(var(--v7-nav-height) + var(--v7-space-6) + env(safe-area-inset-bottom));
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > * {
+    order: 10;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > .workout-only-bar {
+    order: 1;
+    min-height: 6.5rem;
+    padding: 1.25rem 0 0.75rem;
+}
+
+.rehab-v7-shell #workout .workout-only-bar .bar-leading {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.rehab-v7-shell #workout .workout-only-bar .app-icon {
+    display: none;
+}
+
+.rehab-v7-shell #workout .workout-only-bar .app-title {
+    color: var(--v7-text);
+    font-size: var(--v7-type-2xl);
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: -0.025em;
+    line-height: var(--v7-leading-tight);
+}
+
+.rehab-v7-shell #workout .workout-page-subtitle {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-regular);
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > .v7-workout-idle-shell {
+    order: 2;
+    display: none;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active[data-v7-workout-state="idle"] > .v7-workout-idle-shell {
+    display: grid;
+    gap: 0;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active[data-v7-workout-state="strength-logging"] > .v7-workout-idle-shell {
+    display: grid;
+    gap: 0;
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-card,
+.rehab-v7-shell #workout .v7-workout-plan-card,
+.rehab-v7-shell #workout .v7-workout-session-strip,
+.rehab-v7-shell #workout .v7-workout-running-context {
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: var(--v7-shadow-1);
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-card {
+    height: 8.375rem;
+    padding: 0.875rem 1.0625rem 0.625rem;
+    box-sizing: border-box;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #workout .v7-workout-kicker {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-sm);
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-main {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.125rem;
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-main > strong {
+    color: var(--v7-primary);
+    font-size: 2.375rem;
+    font-weight: var(--v7-weight-semibold);
+    line-height: 1;
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-main > div {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-main b {
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-main small {
+    overflow: hidden;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--v7-space-3);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--v7-row-divider);
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-meta span,
+.rehab-v7-shell #workout .v7-workout-session-strip span {
+    display: grid;
+    min-width: 0;
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-meta small,
+.rehab-v7-shell #workout .v7-workout-session-strip small,
+.rehab-v7-shell #workout .v7-workout-session-strip em {
+    overflow: hidden;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    font-style: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #workout .v7-workout-readiness-meta b {
+    overflow: hidden;
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #workout .v7-workout-mode-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.1875rem;
+    height: 2.75rem;
+    margin-top: 0.625rem;
+    padding: 0.1875rem;
+    border: 1px solid var(--v7-border);
+    border-radius: var(--v7-radius-pill);
+    background: color-mix(in srgb, var(--v7-surface-muted) 72%, var(--v7-surface));
+    box-sizing: border-box;
+}
+
+.rehab-v7-shell #workout .v7-workout-mode-tabs button {
+    min-width: 0;
+    border: 0;
+    border-radius: var(--v7-radius-pill);
+    background: transparent;
+    color: var(--v7-text-muted);
+    font: inherit;
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-medium);
+}
+
+.rehab-v7-shell #workout .v7-workout-mode-tabs button[aria-selected="true"] {
+    background: var(--v7-surface);
+    color: var(--v7-primary-strong);
+    box-shadow: 0 1px 3px rgba(26, 42, 33, 0.06);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-preview {
+    margin-top: 0.875rem;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--v7-space-3);
+    min-height: 1.75rem;
+    padding: 0 0.25rem;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-head > b {
+    font-size: var(--v7-type-xl);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-head > span {
+    color: var(--v7-primary);
+    font-size: var(--v7-type-sm);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-head button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+    text-underline-offset: 0.15em;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-card {
+    height: 15.75rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem 0.625rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-list {
+    min-height: 11.25rem;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-row {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.625rem;
+    height: 3.75rem;
+    border-bottom: 1px solid var(--v7-row-divider);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-row:last-child {
+    border-bottom: 0;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-index {
+    display: grid;
+    place-items: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--v7-primary-soft) 62%, var(--v7-surface));
+    color: var(--v7-primary-strong);
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-row > span:nth-child(2) {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-row b {
+    overflow: hidden;
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-row small,
+.rehab-v7-shell #workout .v7-workout-plan-row em {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    font-style: normal;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-row:first-child em {
+    color: var(--v7-primary);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-empty {
+    display: grid;
+    place-items: center;
+    min-height: 9.5rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-sm);
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-progress {
+    position: relative;
+    height: 2.25rem;
+    padding-top: 0.625rem;
+    box-sizing: border-box;
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-progress::before {
+    content: "";
+    position: absolute;
+    top: 0.5rem;
+    left: 0;
+    right: 0;
+    height: 0.5rem;
+    border-radius: var(--v7-radius-pill);
+    background: color-mix(in srgb, var(--v7-surface-muted) 84%, var(--v7-surface));
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-progress i {
+    position: absolute;
+    top: 0.5rem;
+    left: 0;
+    width: var(--v7-workout-progress, 0%);
+    height: 0.5rem;
+    border-radius: var(--v7-radius-pill);
+    background: color-mix(in srgb, var(--v7-primary) 22%, var(--v7-primary-soft));
+}
+
+.rehab-v7-shell #workout .v7-workout-plan-progress span {
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    text-align: center;
+}
+
+.rehab-v7-shell #workout .v7-workout-session-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--v7-space-3);
+    height: 4.5rem;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #workout .v7-workout-session-strip b {
+    font-size: 1.375rem;
+    font-weight: var(--v7-weight-semibold);
+    line-height: 1.05;
+}
+
+.rehab-v7-shell #workout .v7-workout-session-strip em {
+    margin-left: 0.2rem;
+}
+
+.rehab-v7-shell #workout .mode-tabs.v7-workout-segmented {
+    display: none;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > .timer-panel {
+    order: 2;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] .timer-panel,
+.rehab-v7-shell #workout[data-v7-workout-state="strength-logging"] .timer-panel {
+    display: none;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > .v7-workout-running-context {
+    order: 3;
+    display: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--v7-space-3);
+    margin-top: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--v7-radius-xl);
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active[data-v7-workout-state="running"] > .v7-workout-running-context,
+.rehab-v7-shell #workout.v7-feature-workout.active[data-v7-workout-state="resting"] > .v7-workout-running-context,
+.rehab-v7-shell #workout.v7-feature-workout.active[data-v7-workout-state="paused"] > .v7-workout-running-context {
+    display: grid;
+}
+
+.rehab-v7-shell #workout .v7-workout-running-context > div {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.rehab-v7-shell #workout .v7-workout-running-context small,
+.rehab-v7-shell #workout .v7-workout-running-context span {
+    overflow: hidden;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #workout .v7-workout-running-context b {
+    overflow: hidden;
+    font-size: var(--v7-type-md);
+    font-weight: var(--v7-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > .workout-controls {
+    order: 4;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] .workout-controls {
+    width: min(18.375rem, calc(100% - 4rem));
+    margin: 1rem auto 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] .fab-play-shell,
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] .fab-play {
+    width: 100%;
+    min-width: 0;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] .fab-play {
+    min-height: 3.625rem;
+    border-radius: var(--v7-radius-pill);
+    font-size: var(--v7-type-lg);
+    font-weight: var(--v7-weight-semibold);
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] #pipBtn {
+    display: none;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="strength-logging"] .workout-controls {
+    display: none;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > #strengthCard,
+.rehab-v7-shell #workout.v7-feature-workout.active > .cardio-card,
+.rehab-v7-shell #workout.v7-feature-workout.active > #strengthLogCard {
+    order: 6;
+    margin-top: var(--v7-space-6);
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] > #strengthCard,
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] > .cardio-card,
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] > #workoutPlanCard,
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] > #currentActionList,
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] > .routine-tool {
+    display: none;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > #strengthCard:not(.hidden),
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > .cardio-card:not(.hidden),
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > #workoutPlanCard,
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > #currentActionList:not(.hidden),
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > .routine-tool:not(.hidden) {
+    display: block;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > .routine-tool:not(.hidden) {
+    display: flex;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > .workout-controls {
+    position: static;
+    left: auto;
+    bottom: auto;
+    order: 10;
+    transform: none;
+    margin: var(--v7-space-4) auto 0;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > #workoutPlanCard {
+    order: 7;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > #currentActionList {
+    order: 8;
+}
+
+.rehab-v7-shell #workout.v7-feature-workout.active > .routine-tool {
+    order: 9;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="running"] #strengthCard,
+.rehab-v7-shell #workout[data-v7-workout-state="running"] .cardio-card,
+.rehab-v7-shell #workout[data-v7-workout-state="running"] #strengthLogCard,
+.rehab-v7-shell #workout[data-v7-workout-state="running"] #workoutPlanCard,
+.rehab-v7-shell #workout[data-v7-workout-state="running"] #currentActionList,
+.rehab-v7-shell #workout[data-v7-workout-state="running"] .routine-tool,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] #strengthCard,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] .cardio-card,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] #strengthLogCard,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] #workoutPlanCard,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] #currentActionList,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] .routine-tool,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] #strengthCard,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] .cardio-card,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] #strengthLogCard,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] #workoutPlanCard,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] #currentActionList,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] .routine-tool {
+    display: none !important;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="running"] .timer-panel,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] .timer-panel,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] .timer-panel,
+.rehab-v7-shell #workout[data-v7-workout-state="resume"] .timer-panel {
+    min-height: 17rem;
+    padding: 1.25rem 1rem 1rem;
+}
+
+.rehab-v7-shell #workout[data-v7-workout-state="running"] .workout-controls,
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] .workout-controls,
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] .workout-controls {
+    margin: 0.875rem auto 0;
+    padding: 0.375rem;
+    background: var(--v7-surface);
+    box-shadow: var(--v7-shadow-1);
 }

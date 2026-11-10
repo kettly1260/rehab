@@ -82,6 +82,7 @@
     }
 
     function todayKey(date = new Date()) {
+        if (typeof window !== 'undefined' && window.data?.logicalDateKey) return window.data.logicalDateKey(date);
         return window.data?.dateKey ? data.dateKey(date) : new Date(date).toISOString().slice(0, 10);
     }
 
@@ -111,6 +112,8 @@
         activeRun: null,
         lastProgressionSuggestion: null,
         selectedPlanId: '',
+        _currentPlanSessionId: null,
+        _currentPlanSessionPlanId: null,
         planTypeMeta,
 
         ensurePlanPrefs() {
@@ -175,18 +178,44 @@
 
         ensureTaskShape(item = {}, options = {}) {
             const nowTs = Number(options.nowTs || Date.now());
-            const spec = item?.spec && typeof item.spec === 'object' ? item.spec : {};
+            let rawSpec = item?.spec;
+            let hasExplicitSpec = false;
+            if (typeof rawSpec === 'string' && rawSpec.trim()) {
+                const sMatch = rawSpec.match(/(\d+)\s*组/);
+                const rMatch = rawSpec.match(/(\d+)\s*次/);
+                const wMatch = rawSpec.match(/(\d+)\s*秒/);
+                if (sMatch || rMatch || wMatch) {
+                    const alt = /侧|交替|单/.test(rawSpec);
+                    const sets = sMatch ? parseInt(sMatch[1], 10) : 3;
+                    const reps = rMatch ? parseInt(rMatch[1], 10) : 0;
+                    const work = wMatch ? parseInt(wMatch[1], 10) : (reps > 0 ? 0 : 30);
+                    const mode = alt ? (work > 0 ? 'alt-hold' : 'alt-reps') : (work > 0 ? 'hold' : 'reps');
+                    rawSpec = { sets, reps: reps || (work > 0 ? 1 : 12), work, repRest: 20, actionRest: 60, isAlt: alt, mode };
+                    hasExplicitSpec = true;
+                }
+            } else if (rawSpec && typeof rawSpec === 'object') {
+                const s = Number(rawSpec.sets || 0);
+                const r = Number(rawSpec.reps || 0);
+                const w = Number(rawSpec.work || 0);
+                if (s > 0 && (r > 0 || w > 0)) {
+                    hasExplicitSpec = true;
+                }
+            }
+            const hasMissingSpec = item.invalidSpec === true || item.spec === null || (!hasExplicitSpec && !rawSpec);
+            const spec = (rawSpec && typeof rawSpec === 'object' && hasExplicitSpec) ? rawSpec : null;
             const meta = window.planPolicy?.actionMetaForName?.(`${item.name || ''} ${item.aiReasoning || ''}`) || {};
-            let reps = Math.max(0, Number(spec.reps || 0));
-            const work = Math.max(0, Number(spec.work || 0));
+            let reps = spec ? Math.max(0, Number(spec.reps || 0)) : 0;
+            const work = spec ? Math.max(0, Number(spec.work || 0)) : 0;
             if (reps <= 0 && work > 0) reps = 1;
-            const invalidSpec = !item.deleted && (reps <= 0 && work <= 0);
+            const invalidSpec = !item.deleted && (hasMissingSpec || (reps <= 0 && work <= 0));
+            const requiresUserConfirm = invalidSpec || Boolean(item.requiresUserConfirm);
+            const userConfirmed = invalidSpec ? false : (requiresUserConfirm ? item.userConfirmed === true : item.userConfirmed !== false);
             const next = {
                 id: item.id || this.generateRecordId('daily-task'),
                 name: String(item.name || '未命名任务'),
                 planType: PLAN_TYPES.includes(item.planType) ? item.planType : (PLAN_TYPES.includes(options.planType) ? options.planType : 'rehab'),
                 category: normalizeTaskCategory(item.category || item.phase || item.type || meta.categoryHint),
-                spec: {
+                spec: spec ? {
                     sets: Math.max(1, Number(spec.sets || 1)),
                     reps,
                     work,
@@ -195,11 +224,14 @@
                     isAlt: !!spec.isAlt,
                     ...(spec.mode ? { mode: String(spec.mode) } : {}),
                     ...(spec.weight != null ? { weight: Number(spec.weight || 0) } : {})
-                },
+                } : null,
                 chainId: item.chainId ? String(item.chainId) : (meta.chainId || ''),
                 actionKey: String(item.actionKey || meta.actionKey || ''),
                 canonicalName: String(item.canonicalName || meta.canonicalName || item.name || ''),
-                progressionGroup: String(item.progressionGroup || meta.progressionGroup || ''),
+                progressionGroup: String(item.progressionGroup || item.group || meta.progressionGroup || ''),
+                group: String(item.group || item.progressionGroup || meta.progressionGroup || ''),
+                rehabStage: String(item.rehabStage || ''),
+                equipment: Array.isArray(item.equipment) ? item.equipment : (meta.requiredEquipment || []),
                 progressionLevel: Number(item.progressionLevel ?? meta.progressionLevel ?? 0),
                 nextProgressionSuggestion: item.nextProgressionSuggestion && typeof item.nextProgressionSuggestion === 'object'
                     ? { ...item.nextProgressionSuggestion }
@@ -211,11 +243,12 @@
                 feedback: normalizeTaskFeedback(item.feedback, 0),
                 cooldownRefs: uniq(item.cooldownRefs),
                 userOverride: !!item.userOverride,
-                requiresUserConfirm: !!item.requiresUserConfirm,
-                userConfirmed: item.requiresUserConfirm ? item.userConfirmed === true : item.userConfirmed !== false,
+                requiresUserConfirm,
+                userConfirmed,
                 policy: item.policy && typeof item.policy === 'object' ? { ...item.policy } : null,
                 sourceActionId: item.sourceActionId || '',
                 prescriptionActionId: item.prescriptionActionId || '',
+                prescriptionWeekStart: item.prescriptionWeekStart || '',
                 excludeFromPr: item.excludeFromPr !== false,
                 aiReasoning: String(item.aiReasoning || ''),
                 durationEstHint: String(item.durationEstHint || ''),
@@ -291,7 +324,43 @@
         seedTasksFromPrefs() {
             const prefs = this.ensurePlanPrefs();
             const equipment = new Set(prefs.equipment || []);
-            const chains = this.activeRecords(this.db.progressionChains || []).filter((chain) => !chain.applicableTypes?.length || chain.applicableTypes.includes('rehab')).slice(0, 4);
+            const policy = window.planPolicy || window.rehabPolicy;
+            const policyContext = policy?.buildPlanPolicyContext?.({ db: this.db, types: ['rehab'] });
+            const candidatePrescriptions = policyContext?.mustKeepActions?.length
+                ? policyContext.mustKeepActions
+                : (policyContext?.preferredActions?.length ? policyContext.preferredActions : (policyContext?.prescriptionActions || []));
+            const blockedKeys = new Set((policyContext?.hardBlocks || []).map((b) => b.actionKey || b.canonicalName || b.name));
+            const validPrescriptions = candidatePrescriptions.filter((act) => {
+                const key = act.actionKey || act.canonicalName || act.name;
+                return !blockedKeys.has(key) && act.policyType !== 'blocked' && act.status !== 'dropped';
+            });
+
+            if (validPrescriptions.length > 0) {
+                return validPrescriptions.slice(0, 6).map((action) => {
+                    const task = policy?.prescriptionTask ? policy.prescriptionTask(action) : null;
+                    if (task) return this.ensureTaskShape(task);
+                    const raw = String(action.spec || action.dosage || '').trim();
+                    const hasDose = /(\d+)\s*(组|次|秒)/.test(raw) || (action.spec && typeof action.spec === 'object' && (Number(action.spec.sets || 0) > 0 && (Number(action.spec.reps || 0) > 0 || Number(action.spec.work || 0) > 0)));
+                    return this.ensureTaskShape({
+                        name: action.displayName || action.canonicalName || action.name,
+                        category: action.category || 'main',
+                        prescriptionActionId: action.prescriptionActionId || action.id || '',
+                        prescriptionWeekStart: action.weekDate || action.weekStart || '',
+                        spec: hasDose ? action.spec : null,
+                        invalidSpec: !hasDose,
+                        requiresUserConfirm: !hasDose || Boolean(action.requiresUserConfirm),
+                        userConfirmed: hasDose && !action.requiresUserConfirm,
+                        excludeFromPr: true
+                    });
+                });
+            }
+
+            const chains = this.activeRecords(this.db.progressionChains || []).filter((chain) => {
+                const key = chain.actionKey || chain.group;
+                if (blockedKeys.has(key)) return false;
+                return !chain.applicableTypes?.length || chain.applicableTypes.includes('rehab');
+            }).slice(0, 4);
+
             return chains.map((chain) => {
                 const levels = Array.isArray(chain.levels) ? chain.levels : [];
                 const level = levels.find((item) => (item.requiredEquipment || []).every((name) => equipment.has(name))) || levels[0];
@@ -355,6 +424,14 @@
 
         createPlanAdjustmentBatch(input = {}, options = {}) {
             this.ensurePlanAdjustmentState();
+            if (input.trigger?.type === 'feedback-saved' && input.trigger.planId && input.trigger.taskId) {
+                const existing = (this.db.planAdjustments || []).find((item) => {
+                    if (!item || item.deleted) return false;
+                    const tr = item.trigger;
+                    return tr && tr.type === 'feedback-saved' && tr.planId === input.trigger.planId && tr.taskId === input.trigger.taskId && (input.trigger.doneAt ? tr.doneAt === input.trigger.doneAt : true);
+                });
+                if (existing) return existing;
+            }
             const id = this.generateRecordId?.('adj') || `adj-${Date.now()}`;
             const batch = window.planPolicy?.buildAdjustmentBatch?.(input, id) || { id, ...input, changes: input.changes || [], beforePlans: input.beforePlans || [], afterPlans: input.afterPlans || [] };
             this.ensureRecordMeta?.(batch, 'plan-adjustment', batch.createdAt);
@@ -413,7 +490,13 @@
                 actionKey: taskRef.actionKey || refMeta.actionKey || '',
                 progressionGroup: taskRef.progressionGroup || refMeta.progressionGroup || ''
             };
-            return this.activeRecords(this.db.dailyPlans || [])
+            const queryContext = (typeof this.queryContextData === 'function')
+                ? this.queryContextData({ range: 'all', contexts: { training: true } })
+                : ((typeof window !== 'undefined' && typeof window.data?.queryContextData === 'function')
+                    ? window.data.queryContextData({ range: 'all', contexts: { training: true } })
+                    : null);
+            const sourcePlans = queryContext?.allDailyPlans || queryContext?.rangeDailyPlans || queryContext?.pastAndTodayPlans || this.activeRecords(this.db.dailyPlans || []);
+            return sourcePlans
                 .flatMap((plan) => (plan.items || []).map((item) => ({ plan, item })))
                 .filter(({ item }) => {
                     if (!item || !item.feedback?.rpe) return false;
@@ -426,7 +509,20 @@
                         || window.planPolicy?.itemsMatch?.(item, ref);
                 })
                 .sort((a, b) => Number(a.item.feedback?.doneAt || 0) - Number(b.item.feedback?.doneAt || 0))
-                .map(({ item }) => item.feedback);
+                .map(({ item }) => {
+                    const fb = item.feedback || {};
+                    const plannedSets = Number(item.spec?.sets || 0);
+                    const completedSets = typeof item.doneSets === 'number' ? item.doneSets : (typeof fb.actualSets === 'number' ? fb.actualSets : (item.status === 'done' ? plannedSets : 0));
+                    const isPartial = item.status === 'in-progress' || Boolean(item.manualStop || fb.manualStop) || (plannedSets > 0 && completedSets < plannedSets);
+                    return {
+                        ...fb,
+                        status: item.status,
+                        plannedSets,
+                        actualSets: completedSets,
+                        manualStop: Boolean(item.manualStop || fb.manualStop),
+                        isPartial
+                    };
+                });
         },
 
         createProgressionAdjustmentSuggestion(planId, taskId, options = {}) {
@@ -441,24 +537,72 @@
                 if (options.save !== false) this.save();
                 return result;
             };
+            if (task.status === 'skipped') {
+                return clearSuggestion({ decision: 'hold', reason: '动作已跳过，下次保持原参数不加量' });
+            }
+            const fb = task.feedback || {};
+            const painScore = Number(fb.painScore ?? fb.painLevel ?? fb.pain ?? 0);
+            const rpe = Number(fb.rpe || 0);
+            const noIncrease = Boolean(fb.noIncrease || fb.dontIncrease);
+            const keepNextTime = Boolean(fb.keepNextTime);
+            const unsuitable = Boolean(fb.unsuitable);
+            const wantsContinue = fb.wantsContinue !== false;
+
             const meta = window.planPolicy?.actionMetaForName?.(`${task.name || ''} ${task.aiReasoning || ''}`) || {};
             const chainId = task.chainId || meta.chainId || '';
-            if (!chainId) return clearSuggestion(null);
-            const chain = this.activeRecords(this.db.progressionChains || []).find((item) => item.id === chainId) || window.planChains?.find?.(chainId);
-            if (!chain) return clearSuggestion(null);
-            const result = window.planProgression?.evaluate?.({
-                taskItem: task,
-                chain,
-                history: this.buildFeedbackHistory(chainId, task),
-                userOverride: task.userOverride
-            }) || null;
+            const chain = chainId ? (this.activeRecords(this.db.progressionChains || []).find((item) => item.id === chainId) || window.planChains?.find?.(chainId)) : null;
+
+            let result = null;
+            if (chain) {
+                result = window.planProgression?.evaluate?.({
+                    taskItem: task,
+                    chain,
+                    history: this.buildFeedbackHistory(chainId, task),
+                    userOverride: task.userOverride
+                }) || null;
+            } else if (painScore >= 4 || rpe === 5 || unsuitable || !wantsContinue) {
+                const curSpec = task.spec || {};
+                const loweredSpec = {
+                    ...curSpec,
+                    sets: Math.max(1, Math.round(Number(curSpec.sets || 3) * 0.7)),
+                    reps: curSpec.reps ? Math.max(1, Math.round(Number(curSpec.reps || 10) * 0.8)) : curSpec.reps,
+                    work: curSpec.work ? Math.max(5, Math.round(Number(curSpec.work || 30) * 0.8)) : curSpec.work
+                };
+                result = {
+                    decision: 'deload',
+                    reason: painScore >= 4 ? `动作出现明显疼痛(${painScore}/10)，下次训练自动降载` : (unsuitable ? '动作不适合，下次训练降低负荷' : '动作做不动，下次训练自动降载'),
+                    suggestedSpec: loweredSpec
+                };
+            }
+
+            const plannedSets = Number(task.spec?.sets || 0);
+            const hasExplicitDoneSets = typeof task.doneSets === 'number' || typeof fb.actualSets === 'number' || typeof fb.doneSets === 'number';
+            const actualDoneSets = hasExplicitDoneSets ? Number(task.doneSets ?? fb.actualSets ?? fb.doneSets ?? 0) : plannedSets;
+            const isPartial = task.status === 'in-progress' || (hasExplicitDoneSets && plannedSets > 0 && actualDoneSets < plannedSets) || Boolean(fb.manualStop);
+
+            if (result && ['progress', 'volume-up'].includes(result.decision || result.suggestion)) {
+                if (isPartial || painScore >= 4 || noIncrease || keepNextTime || unsuitable || !wantsContinue) {
+                    const curSpec = task.spec || {};
+                    result = {
+                        decision: painScore >= 4 ? 'deload' : 'hold',
+                        reason: painScore >= 4 ? `动作出现疼痛(${painScore}/10)，自动改为降载` : (isPartial ? `动作未全部完成(完成${actualDoneSets}/${plannedSets}组)，维持原参数不加量` : '用户选择保持/不再加量，维持原参数'),
+                        suggestedSpec: painScore >= 4 ? {
+                            ...curSpec,
+                            sets: Math.max(1, Math.round(Number(curSpec.sets || 3) * 0.7)),
+                            reps: curSpec.reps ? Math.max(1, Math.round(Number(curSpec.reps || 10) * 0.8)) : curSpec.reps
+                        } : curSpec
+                    };
+                }
+            }
+
             const decision = result?.decision || result?.suggestion || 'hold';
             if (!result || ['hold', 'maintain'].includes(decision)) return clearSuggestion(result);
-            const suggestion = window.planPolicy?.buildProgressionSuggestion?.(result, { plan, task, chain }) || {
+
+            const suggestion = (window.planPolicy?.buildProgressionSuggestion && chain) ? window.planPolicy.buildProgressionSuggestion(result, { plan, task, chain }) : {
                 createdAt: Date.now(),
                 decision,
                 targetLevel: result.targetLevel ?? task.currentLevel ?? null,
-                targetName: (chain.levels || []).find((item) => Number(item.lv) === Number(result.targetLevel))?.name || '',
+                targetName: (chain?.levels || []).find((item) => Number(item.lv) === Number(result.targetLevel))?.name || task.name || '',
                 suggestedSpec: result.suggestedSpec || {},
                 reason: String(result.reason || ''),
                 appliesTo: 'future-only',
@@ -472,7 +616,7 @@
                 source: 'auto-after-feedback',
                 status: 'previewed',
                 sourceDate: plan.date || '',
-                trigger: { type: 'feedback-saved', planId, taskId },
+                trigger: { type: 'feedback-saved', planId, taskId, doneAt: fb.doneAt || Date.now() },
                 summary: result.reason || '根据训练反馈生成下次调整建议',
                 changes: [{ id: `chg-${Date.now()}`, type: decision === 'progress' ? 'progress' : decision === 'deload' ? 'deload' : 'volume-up', risk: decision === 'progress' ? 'medium' : 'low', status: 'pending', reason: result.reason || '' }]
             }, { save: false });
@@ -563,9 +707,57 @@
             return true;
         },
 
+        addTask(planId, taskData = {}, options = {}) {
+            this.ensurePlanBootstrap();
+            const plan = this.activeRecords(this.db.dailyPlans || []).find((item) => item.id === planId);
+            if (!plan) return null;
+            plan.items = Array.isArray(plan.items) ? plan.items : [];
+            const task = this.ensureTaskShape(taskData, { planType: plan.type || 'rehab' });
+            plan.items.push(task);
+            this.touchRecord(plan, ['items']);
+            if (options.save !== false) this.save({ render: options.render !== false });
+            return task;
+        },
+
+        movePlanTaskOrder(planId, taskId, direction = 0) {
+            const delta = typeof direction === 'number'
+                ? direction
+                : (direction === 'up' || direction === 'prev' ? -1 : (direction === 'down' || direction === 'next' ? 1 : 0));
+            const { plan, task } = this.findTask(planId, taskId);
+            if (!plan || !task || !delta) return false;
+            const items = plan.items || [];
+            const groupItems = items.filter((i) => !i.deleted && (i.status === task.status || (task.status === 'todo' && i.status === 'in-progress') || (task.status === 'in-progress' && i.status === 'todo')));
+            const groupIndex = groupItems.findIndex((i) => i.id === taskId);
+            if (groupIndex < 0) return false;
+            const targetGroupIndex = groupIndex + delta;
+            if (targetGroupIndex < 0 || targetGroupIndex >= groupItems.length) return false;
+            const targetTask = groupItems[targetGroupIndex];
+            const idx1 = items.findIndex((i) => i.id === task.id);
+            const idx2 = items.findIndex((i) => i.id === targetTask.id);
+            if (idx1 < 0 || idx2 < 0) return false;
+            const temp = items[idx1];
+            items[idx1] = items[idx2];
+            items[idx2] = temp;
+            this.touchRecord(plan, ['items']);
+            this.save();
+            return true;
+        },
+
         todayKey,
         esc
     };
+
+    Object.defineProperty(api, '__runtimeStateKeys', {
+        value: [
+            'activeRun',
+            '_currentPlanSessionId',
+            '_currentPlanSessionPlanId',
+            'lastProgressionSuggestion',
+            'selectedPlanId',
+            'planTodayExpanded'
+        ],
+        enumerable: false
+    });
 
     window.dataPlanStore = api;
 })();

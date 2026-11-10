@@ -47,7 +47,9 @@
         const items = mainItems(plan);
         if (!items.length) return { done: 0, total: 0, complete: false };
         const done = items.filter((item) => item.status === 'done').length;
-        return { done, total: items.length, complete: done >= items.length };
+        const skipped = items.filter((item) => item.status === 'skipped').length;
+        const finished = done + skipped;
+        return { done, skipped, total: items.length, complete: finished >= items.length && (done > 0 || items.some((i) => i.feedback)) };
     }
 
     // 名为 bodyPart，推断的其实是训练负荷桶（下肢/上肢推/上肢拉/核心/有氧/活动度），不是临床部位；
@@ -264,36 +266,50 @@
         next.status = 'todo';
         next.doneSets = 0;
         next.feedback = null;
+        if (item.userOverride === true) {
+            next.userOverride = true;
+            next.aiReasoning = '用户锁定动作：保留原设定与锁定状态，跳过自动调整。';
+            return next;
+        }
+        if (item.status === 'skipped') {
+            next.aiReasoning = '本地保守调整：该动作今日已跳过，明天按原剂量保留，不自动加量。';
+            return next;
+        }
         next.userOverride = false;
-        const part = inferBodyPart(`${item.name || ''} ${item.aiReasoning || ''}`);
-        const rpe = Number(item.feedback?.rpe || 0);
-        const painScore = Number(item.feedback?.painScore ?? item.feedback?.painLevel ?? item.feedback?.pain ?? 0);
-        const noIncrease = Boolean(item.feedback?.noIncrease || item.feedback?.dontIncrease);
-        const keepNextTime = Boolean(item.feedback?.keepNextTime);
-        const unsuitable = Boolean(item.feedback?.unsuitable);
-        const wantsContinue = item.feedback?.wantsContinue !== false;
         const category = taskCategory(item);
-        const policy = options.policy || null;
-        const canAutoProgress = category === 'main' && policy?.canAutoProgress !== false && !options.preventProgression;
         if (category !== 'main') {
             next.aiReasoning = category === 'warmup'
                 ? '本地保守调整：热身动作仅沿用，不根据 RPE 自动加量。'
                 : '本地保守调整：保留冷却/放松动作，避免训练后恢复环节丢失。';
-        } else if (policy?.safetyLevel === 'cautious') {
-            next.aiReasoning = `本地保守调整：${policy.reason || '处方待确认'}，仅按原剂量沿用，不自动加量。`;
-        } else if (unsuitable || wantsContinue === false) {
-            next.spec = painScore >= 4 ? lowerSpec(next.spec || {}) : next.spec;
-            next.aiReasoning = `本地保守调整：用户反馈${unsuitable ? '该动作不适合' : '不希望继续'}，明天不自动进阶${painScore >= 4 ? '并先降载' : '，等待用户确认'}。`;
-            next.requiresUserConfirm = true;
-            next.userConfirmed = false;
-        } else if (noIncrease || keepNextTime) {
-            next.aiReasoning = '本地保守调整：用户选择保持/不再加量，明天按原剂量保留。';
-        } else if (painScore >= 4) {
+            return next;
+        }
+        const plannedSets = Number(item.spec?.sets || 0);
+        const completedSets = typeof item.doneSets === 'number' ? item.doneSets : (typeof item.feedback?.actualSets === 'number' ? item.feedback.actualSets : (item.status === 'done' ? plannedSets : 0));
+        const isPartial = item.status === 'in-progress' || Boolean(item.manualStop || item.feedback?.manualStop) || (item.status === 'done' && plannedSets > 0 && completedSets < plannedSets);
+        const part = inferBodyPart(`${item.name || ''} ${item.aiReasoning || ''}`);
+        const rpe = Number(item.feedback?.rpe ?? item.rpe ?? 0);
+        const painScore = Number(item.feedback?.painScore ?? item.feedback?.painLevel ?? item.feedback?.pain ?? item.painScore ?? item.pain ?? 0);
+        const noIncrease = Boolean(item.feedback?.noIncrease || item.feedback?.dontIncrease || item.noIncrease);
+        const keepNextTime = Boolean(item.feedback?.keepNextTime || item.keepNextTime);
+        const unsuitable = Boolean(item.feedback?.unsuitable || item.unsuitable);
+        const wantsContinue = item.feedback?.wantsContinue !== false && item.wantsContinue !== false;
+        const policy = options.policy || null;
+        const canAutoProgress = category === 'main' && policy?.canAutoProgress !== false && !options.preventProgression;
+
+        if (painScore >= 4) {
             next.spec = lowerSpec(next.spec || {});
             next.aiReasoning = `自动降载：用户反馈疼痛 ${painScore}/10，明天先降低负荷并观察。`;
         } else if (rpe === 5 || (part && stats.tooHardParts?.includes(part))) {
             next.spec = lowerSpec(next.spec || {});
             next.aiReasoning = `自动降载：今日反馈做不动(RPE 5)，明天避开${part || '同部位'}高负荷。`;
+        } else if (isPartial) {
+            next.aiReasoning = `本地保守调整：今日仅完成部分组数(${completedSets}/${plannedSets}组)，明天按原计划重试，不自动加量。`;
+        } else if (unsuitable || wantsContinue === false) {
+            next.aiReasoning = `本地保守调整：用户反馈${unsuitable ? '该动作不适合' : '不希望继续'}，明天不自动进阶，等待用户确认。`;
+        } else if (policy?.safetyLevel === 'cautious') {
+            next.aiReasoning = `本地保守调整：${policy.reason || '处方待确认'}，仅按原剂量沿用，不自动加量。`;
+        } else if (noIncrease || keepNextTime) {
+            next.aiReasoning = '本地保守调整：用户选择保持/不再加量，明天按原剂量保留。';
         } else if (rpe === 1 && canAutoProgress) {
             next.spec = raiseSpec(next.spec || {});
             next.aiReasoning = '自动小幅加量：今日反馈太轻(RPE 1)，且不属于待确认处方动作。';
@@ -302,30 +318,69 @@
         } else {
             next.aiReasoning = next.aiReasoning || '本地保守调整：今日反馈可接受，保持稳定训练。';
         }
+
+        if (unsuitable || wantsContinue === false) {
+            next.requiresUserConfirm = true;
+            next.userConfirmed = false;
+            next.aiReasoning = `本地保守调整：用户反馈${unsuitable ? '该动作不适合' : '不希望继续'}，明天不自动进阶${painScore >= 4 ? '并先降载' : ''}，等待用户确认。`;
+        }
         return window.planPolicy?.applyFutureProgressionSuggestion?.(next, item, options) || next;
     }
 
     function prescriptionTask(action = {}) {
         const meta = window.planPolicy?.actionMetaForName?.(`${action.name || ''} ${action.rawDescription || ''}`) || {};
-        const spec = action.spec || { sets: 2, reps: 10, work: 3, repRest: 0, actionRest: 30, isAlt: false, mode: 'reps' };
-        const needsConfirm = Boolean(action.requiresUserConfirm || action.safetyLevel === 'cautious');
+        let spec = action.spec;
+        let hasExplicitSpec = false;
+        if (spec && typeof spec === 'object') {
+            const sets = Number(spec.sets || 0);
+            const reps = Number(spec.reps || 0);
+            const work = Number(spec.work || 0);
+            if (sets > 0 && (reps > 0 || work > 0)) {
+                hasExplicitSpec = true;
+            }
+        }
+        if (!hasExplicitSpec) {
+            const raw = String(action.spec || action.suggestedSpec || action.reps || action.dosage || '').trim();
+            const sMatch = raw.match(/(\d+)\s*组/);
+            const rMatch = raw.match(/(\d+)\s*次/);
+            const wMatch = raw.match(/(\d+)\s*秒/);
+            if (sMatch || rMatch || wMatch) {
+                const alt = /侧|交替|单/.test(raw);
+                const sets = sMatch ? parseInt(sMatch[1], 10) : 2;
+                const reps = rMatch ? parseInt(rMatch[1], 10) : (wMatch ? 1 : 10);
+                const work = wMatch ? parseInt(wMatch[1], 10) : 0;
+                const mode = alt ? (work > 0 ? 'alt-hold' : 'alt-reps') : (work > 0 ? 'hold' : 'reps');
+                spec = { sets, reps, work, repRest: 0, actionRest: 30, isAlt: alt, mode };
+                hasExplicitSpec = true;
+            } else {
+                spec = null;
+            }
+        }
+        const missingDose = !hasExplicitSpec;
+        const needsConfirm = missingDose || Boolean(action.requiresUserConfirm || action.safetyLevel === 'cautious');
         return {
             name: action.name || meta.canonicalName || '医嘱动作',
             category: window.planPolicy?.inferCategory?.(meta.categoryHint, action.name) || 'main',
             spec,
-            aiReasoning: `本地保守补充处方动作：${action.reason || action.coachNote || action.status || '最近康复处方'}；按基准剂量安排，不自动加量。`,
+            invalidSpec: missingDose,
+            aiReasoning: missingDose ? '最新医嘱动作，剂量待补充' : `本地保守补充处方动作：${action.reason || action.coachNote || action.status || '最近康复处方'}；按基准剂量安排，不自动加量。`,
             status: 'todo',
             doneSets: 0,
             userOverride: false,
             excludeFromPr: true,
             actionKey: action.actionKey || meta.actionKey || '',
             canonicalName: action.canonicalName || meta.canonicalName || action.name || '',
-            progressionGroup: action.progressionGroup || meta.progressionGroup || '',
+            progressionGroup: action.progressionGroup || action.group || meta.progressionGroup || '',
+            group: action.group || action.progressionGroup || meta.progressionGroup || '',
             progressionLevel: Number(action.progressionLevel || meta.progressionLevel || 0),
             chainId: action.chainId || meta.chainId || '',
+            rehabStage: action.rehabStage || '',
+            equipment: Array.isArray(action.equipment) ? action.equipment : (meta.requiredEquipment || []),
+            prescriptionActionId: action.prescriptionActionId || action.id || '',
+            prescriptionWeekStart: action.weekDate || action.weekStart || '',
             requiresUserConfirm: needsConfirm,
             userConfirmed: !needsConfirm,
-            policy: { source: 'prescription', requiresUserConfirm: needsConfirm, prescriptionName: action.name || meta.canonicalName || '' }
+            policy: { source: 'prescription', requiresUserConfirm: needsConfirm, prescriptionName: action.name || meta.canonicalName || '', missingDose }
         };
     }
 
@@ -377,20 +432,23 @@
     window.dataPlanAutoAdjust = {
         _autoAdjustInFlight: false,
 
-        shouldAutoAdjustAfterPlanFeedback() {
+        shouldAutoAdjustAfterPlanFeedback(targetPlanId) {
             const sourceDate = this.logicalDateKey?.() || this.dateKey?.(new Date()) || new Date().toISOString().slice(0, 10);
             const todaysPlans = this.activeRecords?.(this.db.dailyPlans || []).filter((item) => item.date === sourceDate) || [];
+            if (targetPlanId) {
+                const target = todaysPlans.find((p) => p.id === targetPlanId);
+                if (target) {
+                    const rate = completion(target);
+                    return rate.total > 0 && rate.complete;
+                }
+            }
             const completedPlans = todaysPlans.filter((item) => completion(item).complete);
-            if (!completedPlans.length) return false;
-            return todaysPlans.every((item) => {
-                const rate = completion(item);
-                return !rate.total || rate.complete;
-            });
+            return completedPlans.length > 0;
         },
 
-        maybeAutoAdjustNextDayAfterFeedback() {
-            if (!this.shouldAutoAdjustAfterPlanFeedback?.()) return;
-            this.autoAdjustNextDayPlans?.({ reason: 'training-complete' });
+        maybeAutoAdjustNextDayAfterFeedback(planId) {
+            if (!this.shouldAutoAdjustAfterPlanFeedback?.(planId)) return;
+            this.autoAdjustNextDayPlans?.({ reason: 'training-complete', planId });
         },
 
         async autoAdjustNextDayPlans(options = {}) {
@@ -404,7 +462,8 @@
             const targetDate = String(options.targetDate || dateOffset(sourceDate, 1));
             const sourcePlans = (this.activeRecords?.(this.db.dailyPlans || []) || [])
                 .filter((plan) => plan.date === sourceDate && completion(plan).complete)
-                .filter((plan) => mainItems(plan).some((item) => item.feedback?.rpe || item.status === 'done'));
+                .filter((plan) => !options.planId || plan.id === options.planId)
+                .filter((plan) => mainItems(plan).some((item) => item.feedback?.rpe || item.status === 'done' || item.status === 'skipped'));
             if (!sourcePlans.length) return null;
             const types = normalizePlanTypes(sourcePlans.map((plan) => plan.type || 'rehab'));
             const key = `${AUTO_KEY_PREFIX}${sourceDate}:${targetDate}:${types.join(',')}`;
@@ -520,7 +579,7 @@
                 `源:${sourceDate};目标:${targetDate}。`,
                 'RPE1小进；2-3稳；4保持/轻降；5降载/替换；热身冷却不加量。',
                 '不加量/保持/疼痛>=4/不想继续/不适合=>hold/deload/待确认。',
-                '处方近3周canAutoAdd做主框架；非医嘱新增须确认；cautious/watch不新增不加量；dropped/avoid/暂停禁用；锁定不覆盖。',
+                '处方近3个版本canAutoAdd做主框架；非医嘱新增须确认；cautious/watch不新增不加量；dropped/avoid/暂停禁用；锁定不覆盖。',
                 `策略: ${JSON.stringify(policyContext?.summary || policyContext || {})}`,
                 `进阶信号: ${JSON.stringify(sourceSignals)}`,
                 `反馈: ${JSON.stringify(stats)}`,
@@ -709,6 +768,8 @@
                 ...options,
                 targetDate
             }) || [];
-        }
+        },
+        _cloneForTomorrow: cloneForTomorrow,
+        _buildFallbackPlans: buildFallbackPlans
     };
 })();

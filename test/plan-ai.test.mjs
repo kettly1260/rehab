@@ -1075,15 +1075,15 @@ test('plan AI context includes six recent rehab prescriptions', () => {
 
   const prompt = api.buildPlanAiContext.call(ctx, 'today', '安排康复训练', ['rehab']);
 
-  assert.match(prompt, /近6周康复中心处方/);
+  assert.match(prompt, /近6个版本康复中心处方/);
   assert.match(prompt, /prescriptionActionId/);
   assert.match(prompt, /必须原样回填 prescriptionActionId/);
-  // 6 周窗口只约束这一行；处方目录的“待分类部位”一行是刻意的全量覆盖，不受窗口限制。
-  const weeklyLine = prompt.split('\n').find((line) => line.startsWith('近6周康复中心处方:')) || '';
+  // 6 个版本窗口只约束这一行；处方目录的“待分类部位”一行是刻意的全量覆盖，不受窗口限制。
+  const weeklyLine = prompt.split('\n').find((line) => line.startsWith('近6个版本康复中心处方:')) || '';
   assert.match(weeklyLine, /康复动作1/);
   assert.match(weeklyLine, /康复动作6/);
   assert.doesNotMatch(weeklyLine, /康复动作7/);
-  assert.match(prompt, /第4-6周处方仅用于理解长期禁忌/);
+  assert.match(prompt, /第4-6个版本处方仅用于理解长期禁忌/);
 });
 
 test('plan AI week context names every target date for the next seven days', () => {
@@ -1195,7 +1195,7 @@ test('plan AI context includes current target plan and body part constraints', (
   assert.match(prompt, /"bodyPart":"膝"/);
   assert.match(prompt, /台阶下放\(疼痛4\/10\)/);
   assert.match(prompt, /跪姿后踢腿/);
-  assert.match(prompt, /安全\/健康禁忌\/疼痛阈值 > 最近3周康复处方 > 当前计划保留\/改造/);
+  assert.match(prompt, /安全\/健康禁忌\/疼痛阈值 > 最近3个版本康复处方 > 当前计划保留\/改造/);
 });
 
 test('plan AI context can target an overridden date for auto adjustment', () => {

@@ -30,11 +30,52 @@ export function createBottomNavigation(options = {}) {
 
     /** @type {ReturnType<typeof setTimeout> | null} */
     let movementTimer = null;
+    let activePointerId = null;
+
+    const updateIndicatorPointer = (event) => {
+        if (!indicator) return;
+        const rect = indicator.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
+        indicator.style.setProperty('--v7-liquid-x', `${x.toFixed(1)}%`);
+        indicator.style.setProperty('--v7-liquid-y', `${y.toFixed(1)}%`);
+    };
+
+    const endPointerInteraction = () => {
+        activePointerId = null;
+        if (indicator) indicator.dataset.v7Interacting = 'false';
+    };
+
+    const onPointerDown = (event) => {
+        const item = event.target?.closest?.('.nav-item');
+        if (!item || !nav.contains(item) || !indicator) return;
+        activePointerId = event.pointerId;
+        indicator.dataset.v7Interacting = 'true';
+        updateIndicatorPointer(event);
+        try { nav.setPointerCapture?.(event.pointerId); } catch {}
+    };
+
+    const onPointerMove = (event) => {
+        if (activePointerId !== event.pointerId) return;
+        updateIndicatorPointer(event);
+    };
+
+    const onPointerEnd = (event) => {
+        if (activePointerId !== null && event.pointerId !== activePointerId) return;
+        endPointerInteraction();
+    };
+
     const update = (page) => {
         const activePage = PAGE_ORDER.includes(page) ? page : (items.find((item) => item.classList.contains('active'))?.dataset.v7Page || 'today');
         const index = Math.max(0, PAGE_ORDER.indexOf(activePage));
         nav.style.setProperty('--v7-nav-index', String(index));
-        items.forEach((item) => item.setAttribute('aria-current', item.dataset.v7Page === activePage ? 'page' : 'false'));
+        nav.style.setProperty('--v7-nav-offset', `calc(${index * 100}% + ${index * 0.375}rem)`);
+        items.forEach((item) => {
+            const active = item.dataset.v7Page === activePage;
+            item.classList.toggle('active', active);
+            item.setAttribute('aria-current', active ? 'page' : 'false');
+        });
         nav.dataset.v7NavMoving = 'true';
         if (movementTimer) clearTimeout(movementTimer);
         movementTimer = setTimeout(() => { nav.dataset.v7NavMoving = 'false'; }, 220);
@@ -55,6 +96,10 @@ export function createBottomNavigation(options = {}) {
     };
 
     nav.addEventListener('keydown', onKeyDown);
+    nav.addEventListener('pointerdown', onPointerDown, { passive: true });
+    nav.addEventListener('pointermove', onPointerMove, { passive: true });
+    nav.addEventListener('pointerup', onPointerEnd, { passive: true });
+    nav.addEventListener('pointercancel', onPointerEnd, { passive: true });
     const offMount = events?.on?.('feature:mounted', ({ id }) => update(id)) || (() => {});
     update(documentRef.documentElement.dataset.v7ActivePage || 'today');
 
@@ -62,12 +107,18 @@ export function createBottomNavigation(options = {}) {
         update,
         dispose() {
             if (movementTimer) clearTimeout(movementTimer);
+            endPointerInteraction();
             offMount();
             nav.removeEventListener('keydown', onKeyDown);
+            nav.removeEventListener('pointerdown', onPointerDown);
+            nav.removeEventListener('pointermove', onPointerMove);
+            nav.removeEventListener('pointerup', onPointerEnd);
+            nav.removeEventListener('pointercancel', onPointerEnd);
             indicator?.remove?.();
             nav.classList.remove('v7-bottom-nav');
             nav.removeAttribute('data-v7-nav-moving');
             nav.style.removeProperty('--v7-nav-index');
+            nav.style.removeProperty('--v7-nav-offset');
         }
     });
 }

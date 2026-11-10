@@ -3,6 +3,8 @@
     const errorBus = window.errorBus;
     const state = {
         sentinel: /** @type {any} */ (null),
+        sentinelToken: null,
+        runToken: null,
         warned: false,
         training: false
     };
@@ -24,8 +26,10 @@
         btn.title = active ? '屏幕常亮中' : '屏幕常亮已释放，点击重新申请';
     }
 
-    async function request() {
+    async function request(runToken = null) {
         state.training = true;
+        const currentToken = runToken != null ? runToken : (window.workout?._runToken ?? null);
+        state.runToken = currentToken;
         try {
             if (!navigator.wakeLock || typeof navigator.wakeLock.request !== 'function') {
                 logOnce('[wakelock] Wake Lock API unavailable');
@@ -33,30 +37,58 @@
                 return false;
             }
             if (state.sentinel) {
-                renderStatus();
-                return true;
+                if (currentToken == null || state.sentinelToken === currentToken) {
+                    renderStatus();
+                    return true;
+                }
+                const old = state.sentinel;
+                state.sentinel = null;
+                state.sentinelToken = null;
+                try { await old?.release?.(); } catch {}
             }
             const sentinel = await navigator.wakeLock.request('screen');
+            const isStale = !state.training || (currentToken != null && (state.runToken !== currentToken || (window.workout?._runToken != null && window.workout._runToken !== currentToken)));
+            if (isStale) {
+                try { await sentinel?.release?.(); } catch {}
+                return false;
+            }
             state.sentinel = sentinel;
+            state.sentinelToken = currentToken;
+            const onRelease = () => {
+                if (state.sentinel === sentinel) {
+                    state.sentinel = null;
+                    state.sentinelToken = null;
+                    renderStatus();
+                }
+            };
             if (sentinel?.addEventListener) {
-                sentinel.addEventListener('release', () => { state.sentinel = null; renderStatus(); });
+                sentinel.addEventListener('release', onRelease);
             } else if ('onrelease' in sentinel) {
-                sentinel.onrelease = () => { state.sentinel = null; renderStatus(); };
+                sentinel.onrelease = onRelease;
             }
             renderStatus();
             return true;
         } catch (e) {
-            state.sentinel = null;
-            renderStatus();
+            if (currentToken == null || state.runToken === currentToken) {
+                state.sentinel = null;
+                state.sentinelToken = null;
+                renderStatus();
+            }
             try { errorBus?.report?.('wakelock', e); } catch {}
             return false;
         }
     }
 
-    async function release() {
+    async function release(runToken = null) {
+        const token = runToken != null ? runToken : (window.workout?._runToken ?? null);
+        if (typeof token === 'number' && typeof state.sentinelToken === 'number' && token < state.sentinelToken) {
+            return;
+        }
         state.training = false;
+        state.runToken = null;
         const s = state.sentinel;
         state.sentinel = null;
+        state.sentinelToken = null;
         renderStatus();
         if (!s?.release) return;
         try { await s.release(); } catch (e) {
@@ -70,14 +102,15 @@
 
     document.addEventListener('visibilitychange', () => {
         if (!state.training) return;
-        if (!document.hidden) request();
+        if (!document.hidden) request(window.workout?._runToken ?? null);
     });
 
     window.addEventListener('workout:state', (e) => {
         const d = e?.detail || {};
-        if (d.status === 'playing') request();
-        if (d.status === 'paused') release();
-        if (d.status === 'stopped' || d.status === 'idle') release();
+        const token = d.runToken ?? (window.workout?._runToken ?? null);
+        if (d.status === 'playing') request(token);
+        if (d.status === 'paused') release(token);
+        if (d.status === 'stopped' || d.status === 'idle') release(token);
         renderStatus();
     });
 

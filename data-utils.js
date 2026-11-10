@@ -53,6 +53,11 @@
 
         historyDayKey(entry) {
             if (entry?.dayKey) return entry.dayKey;
+            const s = String(entry?.date || '').trim();
+            const dateOnly = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+            if (dateOnly) {
+                return `${dateOnly[1]}-${dateOnly[2].padStart(2, '0')}-${dateOnly[3].padStart(2, '0')}`;
+            }
             return this.logicalDateKey(this.parseHistoryDate(entry?.date));
         },
 

@@ -78,6 +78,7 @@ Object.assign(workout, {
             this.reinforceKeepAlive();
         }
         this.updateStateClasses();
+        if (window.workoutState) window.workoutState.markActive();
         try {
             window.dispatchEvent(new CustomEvent('workout:state', {
                 detail: { status: this.isPlaying ? (this.isPaused ? 'paused' : 'playing') : 'idle', phase: window.workoutEngine?.state?.phase || '', action: window.workoutEngine?.state?.activeAction || null, set: window.workoutEngine?.state?.setIndex || 0, rep: window.workoutEngine?.state?.repIndex || 0 }
@@ -86,6 +87,7 @@ Object.assign(workout, {
     },
 
     setMode(mode) {
+        if (this.mode === mode) return;
         if (this.isPlaying) return alert('训练中不能切换模式');
         this.mode = mode;
         document.getElementById('modeStrengthBtn').classList.toggle('active', mode === 'strength');
@@ -110,6 +112,7 @@ Object.assign(workout, {
     },
 
     resetMainPanel() {
+        this.closeSetReview?.();
         document.getElementById('statusText').innerText = this.mode === 'cardio' ? 'CARDIO' : 'READY';
         document.getElementById('mainTime').innerText = this.mode === 'cardio' ? '00:00' : '00';
         document.getElementById('subText').innerText = this.mode === 'cardio' ? '准备有氧训练' : this.nextStrengthActionLabel?.() || '准备就绪';
@@ -160,13 +163,27 @@ Object.assign(workout, {
         }
         if (this.mode === 'cardio') return cardio.toggle();
         if (!this.isPlaying) {
-            const plannedActions = data._planActions ? data._planActions() : data.activeRecords(data.db.actions || []).filter(a => !a.libOnly);
+            const root = document.getElementById('workout');
+            const intent = root?.dataset?.v7WorkoutIntent;
+            if (intent === 'recovery' || intent === 'stretch') {
+                if (window.data) window.data._activeWorkoutIntentFilter = intent;
+            } else {
+                if (window.data) window.data._activeWorkoutIntentFilter = null;
+            }
+            const plannedActions = window.workoutEngine?.currentActions?.() || (data._planActions ? data._planActions() : data.activeRecords(data.db.actions || []).filter(a => !a.libOnly));
             if (plannedActions.length === 0) return;
+            this._workoutActionsSnapshot = plannedActions.map(a => ({ ...a }));
             window.errorBus?.event?.('workout', 'start', { mode: this.mode, actionCount: plannedActions.length });
             window.workoutReadiness?.notifyBeforeStart?.();
             window.workoutVoice?.unlockAudio?.();
             this.isPlaying = true; this.isPaused = false; this.totalSec = 0;
-            if (window.workoutEngine) workoutEngine.state = workoutEngine.createInitialState();
+            this._runToken = (this._runToken || 0) + 1;
+            const currentRunToken = this._runToken;
+            if (window.workoutEngine) {
+                workoutEngine._runToken = currentRunToken;
+                workoutEngine.state = workoutEngine.createInitialState();
+                workoutEngine.state._runToken = currentRunToken;
+            }
             this.updateStateClasses();
             const firstAction = this.nextStrengthActionLabel?.();
             if (firstAction) {
@@ -176,6 +193,7 @@ Object.assign(workout, {
             document.getElementById('playIcon').innerText = 'pause';
             document.getElementById('stopBtn').classList.remove('hidden');
             await this.acquireWakeLock();
+            if (!this.isPlaying || this._runToken !== currentRunToken) return;
             this.setupMediaSession();
             try { window.dispatchEvent(new CustomEvent('workout:state', { detail: { status: 'playing', phase: 'intro', action: null, set: 0, rep: 0 } })); } catch {}
             this.keepAudioAlive();
@@ -183,6 +201,11 @@ Object.assign(workout, {
             
             this._sessionLastTick = Date.now();
             this.sessionInt = setInterval(() => {
+                if (!this.isPlaying || this._runToken !== currentRunToken) {
+                    clearInterval(this.sessionInt);
+                    this.sessionInt = null;
+                    return;
+                }
                 if (this.isPaused) {
                     this._sessionLastTick = Date.now();
                     return;
@@ -197,7 +220,8 @@ Object.assign(workout, {
             if (window.workoutState) workoutState.markActive();
             
             await this.speak("训练开始");
-            if (window.workoutEngine) workoutEngine.start();
+            if (!this.isPlaying || this._runToken !== currentRunToken) return;
+            if (window.workoutEngine) workoutEngine.start(currentRunToken);
         } else {
             this.setTrainingPaused(!this.isPaused);
         }
@@ -207,8 +231,13 @@ Object.assign(workout, {
         if (window.workoutEngine) return workoutEngine.run();
     },
 
-    count(sec, sub, status) {
+    count(sec, sub, status, runToken) {
         return new Promise(resolve => {
+            const token = runToken != null ? runToken : this._runToken;
+            if (token !== this._runToken || !this.isPlaying) {
+                resolve();
+                return;
+            }
             this._phaseLeft = sec;
             this._phaseSub = sub;
             this._phaseStatus = status;
@@ -220,7 +249,7 @@ Object.assign(workout, {
             if (window.workoutState) workoutState.markActive();
             if (sec > 12 && status !== 'HOLD') this.speak(`${sub}，${sec}秒`);
             this.timer = setInterval(() => {
-                if (!this.isPlaying || this.skipFlag) {
+                if (token !== this._runToken || !this.isPlaying || this.skipFlag) {
                     clearInterval(this.timer); this.timer = null; this.skipFlag = false;
                     this._phaseLeft = null;
                     this._countResolve = null; resolve(); return;
@@ -276,10 +305,27 @@ Object.assign(workout, {
         this.renderPip();
         if (window.workoutState) workoutState.markActive();
     },
-    stop() {
+    stop(reason) {
         if (this.mode === 'cardio') return cardio.stop();
         window.haptics?.medium?.();
+        if (typeof reason === 'string' && reason) {
+            this._stopReason = reason;
+        } else if (reason && typeof reason === 'object') {
+            this._stopReason = reason.reason || reason.note || null;
+            if (reason.painScore != null || reason.painPart || reason.note) {
+                this._discomfort = {
+                    painScore: reason.painScore,
+                    painPart: reason.painPart,
+                    note: reason.note || reason.reason || ''
+                };
+            }
+        }
         if(confirm("停止并保存记录？")) {
+            this._runToken = (this._runToken || 0) + 1;
+            if (window.workoutEngine) {
+                workoutEngine._runToken = (workoutEngine._runToken || 0) + 1;
+                if (workoutEngine.state) workoutEngine.state._runToken = workoutEngine._runToken;
+            }
             window.errorBus?.event?.('workout', 'stop:confirmed', { mode: this.mode, duration: this.totalSec, phase: window.workoutEngine?.state?.phase || '' });
             this.isPlaying = false;
             if (this._countResolve) { this._countResolve(); this._countResolve = null; }
@@ -287,14 +333,31 @@ Object.assign(workout, {
             this.finish();
         }
     },
+    recordDiscomfort(discomfort) {
+        this._discomfort = discomfort ? { ...discomfort } : null;
+        if (window.data?.activeRun && discomfort) {
+            window.data.activeRun.discomfort = { ...discomfort };
+        }
+    },
     finish() {
-        const duration = this.totalSec;
-        const manualStop = !!this._manualStopRequested;
-        window.errorBus?.event?.('workout', 'finish:start', { mode: this.mode, duration, manualStop });
-        this._manualStopRequested = false;
-        this.isPlaying = false;
-        this.isPaused = false;
-        this.updateStateClasses();
+        this._runToken = (this._runToken || 0) + 1;
+        if (window.workoutEngine) {
+            workoutEngine._runToken = (workoutEngine._runToken || 0) + 1;
+            if (workoutEngine.state) workoutEngine.state._runToken = workoutEngine._runToken;
+        }
+        if (this._isFinishing || (!this.isPlaying && !this.isPaused && !this.timer && !this._manualStopRequested)) {
+            return;
+        }
+        this._isFinishing = true;
+        try {
+            const duration = this.totalSec;
+            const manualStop = !!this._manualStopRequested;
+            window.errorBus?.event?.('workout', 'finish:start', { mode: this.mode, duration, manualStop });
+            this._manualStopRequested = false;
+            this.totalSec = 0;
+            this.isPlaying = false;
+            this.isPaused = false;
+            this.updateStateClasses();
         clearInterval(this.timer); clearInterval(this.sessionInt);
         this.timer = null; this.sessionInt = null;
         clearInterval(this._speechWatchdog); clearInterval(this._audioKeepAliveInt);
@@ -315,39 +378,72 @@ Object.assign(workout, {
         workout._nextActionName = ''; workout._totalSetsAll = 0; workout._doneSetsAll = 0;
         const bar = document.getElementById('globalTrainingBar');
         if (bar) { bar.classList.add('hidden'); bar.querySelector('span').style.width = '0%'; }
-        const buildHistoryRecord = () => ({
-            id: data.generateRecordId('history'),
-            date: new Date().toLocaleString(), dayKey: data.logicalDateKey(), duration,
-            actions: [...(data._planActions ? data._planActions() : data.activeRecords(data.db.actions || []).filter(a => !a.libOnly))],
-            actualSets: data.db.actualSetsBuffer || [],
-            manualStop,
-            updatedAt: Date.now(),
-            deleted: false
-        });
+        const getWorkoutActions = () => {
+            if (Array.isArray(this._workoutActionsSnapshot) && this._workoutActionsSnapshot.length > 0) {
+                return this._workoutActionsSnapshot.map(a => ({ ...a }));
+            }
+            if (window.workoutEngine?.currentActions) {
+                const acts = window.workoutEngine.currentActions();
+                if (Array.isArray(acts) && acts.length > 0) return [...acts];
+            }
+            if (typeof data?._planActions === 'function') {
+                const acts = data._planActions();
+                if (Array.isArray(acts) && acts.length > 0) return [...acts];
+            }
+            return data?.activeRecords ? data.activeRecords(data.db.actions || []).filter(a => !a.libOnly) : [];
+        };
+        const buildHistoryRecord = () => {
+            const sid = window.data?.activeRun?.sessionId || this.planContext?.sessionId || window.data?._workoutSessionId || (window.data?.generateRecordId ? window.data.generateRecordId('session') : ('sess_' + Date.now()));
+            return {
+                id: data.generateRecordId ? data.generateRecordId('history') : ('hist_' + Date.now()),
+                sessionId: sid,
+                date: new Date().toLocaleString(),
+                dayKey: data.logicalDateKey ? data.logicalDateKey() : new Date().toISOString().slice(0, 10),
+                duration,
+                actions: getWorkoutActions(),
+                actualSets: data.db.actualSetsBuffer ? [...data.db.actualSetsBuffer] : [],
+                manualStop,
+                stopReason: this._stopReason || this._discomfort?.note || null,
+                discomfort: this._discomfort ? { ...this._discomfort } : null,
+                updatedAt: Date.now(),
+                deleted: false
+            };
+        };
         const attachPlanContext = (historyRecord) => {
-            if (window.data?.activeRun) {
-                historyRecord.__planCtx = JSON.parse(JSON.stringify(window.data.activeRun));
+            const ctx = window.data?.activeRun || this.planContext || null;
+            if (ctx) {
+                historyRecord.__planCtx = JSON.parse(JSON.stringify(ctx));
             }
             return historyRecord;
         };
+        const hasPlan = !!(window.data?.activeRun || this.planContext);
         if (duration < 20) {
-            if (window.data?.activeRun && !manualStop) {
+            if (hasPlan) {
                 const historyRecord = attachPlanContext(buildHistoryRecord());
                 historyRecord.planShortRun = true;
-                window.data?.handlePlanWorkoutFinished?.(historyRecord);
+                if (!historyRecord._planHandled) {
+                    window.data?.handlePlanWorkoutFinished?.(historyRecord);
+                    historyRecord._planHandled = true;
+                }
                 data.db.actualSetsBuffer = [];
                 data.saveAndBackup();
                 this.resetMainPanel();
-                window.toast?.show?.('计划动作已完成，未保存过短训练记录', 'success');
+                this._stopReason = null;
+                this._discomfort = null;
+                this.planContext = null;
+                this._workoutActionsSnapshot = null;
+                if (window.data) window.data._activeWorkoutIntentFilter = null;
+                if (!manualStop) {
+                    window.toast?.show?.('计划动作已完成，未保存过短训练记录', 'success');
+                } else {
+                    window.toast?.show?.('训练已停止并更新计划状态', 'info');
+                }
                 return;
             }
             window.errorBus?.event?.('workout', 'finish:tooShort', { duration, manualStop });
-            if (window.data?.activeRun) {
-                const ctx = window.data.activeRun;
-                if (ctx.previousPlan && window.data?._replacePlanActions) window.data._replacePlanActions(ctx.previousPlan);
-                window.data.activeRun = null;
-                window.data.updatePlanWorkoutBanner?.();
-            }
+            this._stopReason = null;
+            this._discomfort = null;
+            this._workoutActionsSnapshot = null;
             this.speak("训练时间过短，无法记录");
             alert("训练时间低于20秒，无法保存记录");
             data.save();
@@ -362,10 +458,21 @@ Object.assign(workout, {
             data.db.history.unshift(historyRecord);
         }
         window.errorBus?.event?.('workout', 'finish:recorded', { duration, manualStop, actionCount: historyRecord.actions.length, actualSetCount: historyRecord.actualSets.length });
-        window.data?.handlePlanWorkoutFinished?.(historyRecord);
+        if (!historyRecord._planHandled) {
+            window.data?.handlePlanWorkoutFinished?.(historyRecord);
+            historyRecord._planHandled = true;
+        }
         data.db.actualSetsBuffer = [];
         data.saveAndBackup();
         this.resetMainPanel();
+        this._stopReason = null;
+        this._discomfort = null;
+        this.planContext = null;
+        this._workoutActionsSnapshot = null;
+        if (window.data) window.data._activeWorkoutIntentFilter = null;
+        } finally {
+            this._isFinishing = false;
+        }
     },
 
     openSetReview(actionName, setIdx, plannedReps) {
@@ -384,7 +491,7 @@ Object.assign(workout, {
         modal.setAttribute('aria-hidden', 'false');
     },
     closeSetReview() {
-        if (!window.navStack?.requestClose?.('modal')) this.closeSetReviewInternal();
+        if (!window.navStack?.requestClose?.('modal', 'setReviewModal')) this.closeSetReviewInternal();
     },
     closeSetReviewInternal() {
         const modal = document.getElementById('setReviewModal');

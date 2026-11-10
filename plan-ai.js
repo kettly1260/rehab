@@ -328,7 +328,11 @@
                     calories: Number(record.cardio?.calories || 0),
                     names: names.slice(0, 10),
                     actions,
-                    actualSets: summarizeActualSets(record.actualSets)
+                    actualSets: summarizeActualSets(record.actualSets),
+                    manualStop: !!record.manualStop,
+                    stopReason: record.stopReason || null,
+                    discomfort: record.discomfort || null,
+                    rpe: record.rpe || null
                 };
             });
     }
@@ -803,10 +807,55 @@
             const unclassifiedBodyParts = window.actionIdentity?.listUnclassifiedBodyPartActions?.(this.db || {})?.actions || [];
             const rehabByCondition = partitionRehabWeeklyByConditions(rehabWeekly, selectedConditionIds, temporaryConditions, profile);
             const bodyPartConstraints = summarizeBodyPartConstraints(profile, rehabWeekly, selectedConditionIds, temporaryConditions);
-            const recentPlans = this.activeRecords(this.db.dailyPlans || [])
+            const rangeFromPrompt = (window.advicePanel?.parsePromptAnalysisRange || window.data?.parsePromptAnalysisRange || this.parsePromptAnalysisRange)?.(userText);
+            const planRange = options.range || (rangeFromPrompt && rangeFromPrompt !== 'auto' ? rangeFromPrompt : (mode === 'week' ? 'week' : 'week'));
+            const rangeDays = planRange === 'month' ? 30 : (planRange === 'all' ? 90 : (planRange === 'today' ? 1 : 7));
+            const rangeLabel = planRange === 'month' ? '最近 30 天' : (planRange === 'all' ? '全部历史' : (planRange === 'today' ? '今日' : '最近 7 天'));
+            const queryContext = (typeof this.queryContextData === 'function')
+                ? this.queryContextData({ prompt: userText, range: planRange, contexts: { training: true } })
+                : ((typeof window !== 'undefined' && typeof window.data?.queryContextData === 'function')
+                    ? window.data.queryContextData({ prompt: userText, range: planRange, contexts: { training: true } })
+                    : null);
+            const rawPast = (queryContext?.rangeDailyPlans || queryContext?.pastAndTodayPlans || this.activeRecords(this.db.dailyPlans || []))
+                .filter((plan) => String(plan.date || '') <= today);
+            const pastAndTodayPlans = rawPast
                 .filter((plan) => types.includes(plan.type || 'rehab'))
-                .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || Number(b.updatedAt || 0) - Number(a.updatedAt || 0))
-                .slice(0, 14)
+                .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
+            const rawFuture = (queryContext?.futureDailyPlans || this.activeRecords(this.db.dailyPlans || []))
+                .filter((plan) => String(plan.date || '') > today);
+            const futureDailyPlans = rawFuture
+                .filter((plan) => types.includes(plan.type || 'rehab'))
+                .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+            let startDateKey = null;
+            if (planRange === 'today') {
+                startDateKey = today;
+            } else if (planRange === 'week' || planRange === 'month') {
+                const days = planRange === 'month' ? 30 : 7;
+                const d = new Date(today + 'T00:00:00');
+                if (!isNaN(d.getTime())) {
+                    d.setDate(d.getDate() - (days - 1));
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    startDateKey = `${y}-${m}-${day}`;
+                }
+            }
+            const allowedDates = new Set();
+            for (const plan of pastAndTodayPlans) {
+                if (!plan.date) continue;
+                if (startDateKey && plan.date < startDateKey) continue;
+                allowedDates.add(plan.date);
+                if (allowedDates.size >= rangeDays) break;
+            }
+            let allPlansTruncationNotice = '';
+            if (planRange === 'all') {
+                const totalUniqueDates = new Set(pastAndTodayPlans.map(p => p.date).filter(Boolean)).size;
+                if (totalUniqueDates > rangeDays) {
+                    allPlansTruncationNotice = `（历史全部计划共 ${totalUniqueDates} 个日期，因长度限制已裁剪，仅保留最近 ${rangeDays} 个日期）`;
+                }
+            }
+            const recentPlans = pastAndTodayPlans
+                .filter((plan) => allowedDates.has(plan.date) && (!startDateKey || plan.date >= startDateKey))
                 .map((plan) => ({
                 date: plan.date,
                 type: plan.type || 'rehab',
@@ -816,10 +865,21 @@
                 items: (plan.items || []).filter((item) => !item.deleted).map((item) => ({
                     name: item.name,
                     status: item.status,
+                    doneSets: item.doneSets != null ? item.doneSets : (item.status === 'done' ? item.spec?.sets : 0),
+                    plannedSets: item.spec?.sets || null,
                     currentLevel: item.currentLevel,
+                    manualStop: !!item.manualStop,
+                    stopReason: item.stopReason || null,
+                    discomfort: item.discomfort || null,
                     feedback: item.feedback || null,
                     userOverride: !!item.userOverride
                 }))
+            }));
+            const futurePlansSummary = futureDailyPlans.slice(0, 7).map((plan) => ({
+                date: plan.date,
+                type: plan.type || 'rehab',
+                title: plan.title || '',
+                items: (plan.items || []).filter((item) => !item.deleted).map(item => item.name)
             }));
             const targetDates = planAiTargetDates(this, mode, options);
             const currentTargetPlans = this.activeRecords(this.db.dailyPlans || [])
@@ -958,17 +1018,18 @@
                 `漏练补偿候选: ${JSON.stringify(missedCandidates)}`,
                 `计划调整偏好约束: ${JSON.stringify(adjustmentPrefs)}`,
                 `今日已完成运动摘要: ${JSON.stringify(todayCompleted)}`,
-                `近6周康复中心处方: ${JSON.stringify(rehabWeekly)}`,
+                `近6个版本康复中心处方: ${JSON.stringify(rehabWeekly)}`,
                 `处方动作标准库: ${JSON.stringify(prescriptionCatalog)}`,
                 unclassifiedBodyParts.length ? `待分类部位的处方动作: ${JSON.stringify(unclassifiedBodyParts)}` : '',
-                '处方动作标准库规则: 生成动作时优先使用 displayName；来自处方动作标准库或近6周处方的动作必须原样回填 prescriptionActionId，非处方动作留空；aliases 只是识别同一动作的历史写法；linkedActionId 表示可参考普通动作库参数；regression/progression 表示退阶/进阶，只能按疼痛、RPE 和用户反馈选择。不要把关联动作当成合并动作。',
+                '处方动作标准库规则: 生成动作时优先使用 displayName；来自处方动作标准库或近6个版本处方的动作必须原样回填 prescriptionActionId，非处方动作留空；aliases 只是识别同一动作的历史写法；linkedActionId 表示可参考普通动作库参数；regression/progression 表示退阶/进阶，只能按疼痛、RPE 和用户反馈选择。不要把关联动作当成合并动作。',
                 `选中病症相关处方强规则: ${JSON.stringify(rehabByCondition.target)}`,
                 `其他病症处方安全限制: ${JSON.stringify(rehabByCondition.safetyOnly)}`,
                 `诊断/处方部位约束: ${JSON.stringify(bodyPartConstraints)}`,
-                rehabWeekly.length ? '康复处方规则: 必须优先遵守最近3周康复中心处方；continued/progressed 动作应保留或参考；dropped 动作不能出现在计划中；new/watch/needsReview 动作不得自动加量，疼痛>=4/10 只能降级或替换。第4-6周处方仅用于理解长期禁忌、反复疼痛和动作演变。' : '',
-                '冲突优先级: 安全/健康禁忌/疼痛阈值 > 最近3周康复处方 > 当前计划保留/改造 > 用户临时目标。',
+                rehabWeekly.length ? '康复处方规则: 必须优先遵守最近3个版本康复中心处方；continued/progressed 动作应保留或参考；dropped 动作不能出现在计划中；new/watch/needsReview 动作不得自动加量，疼痛>=4/10 只能降级或替换。第4-6个版本处方仅用于理解长期禁忌、反复疼痛和动作演变。' : '',
+                '冲突优先级: 安全/健康禁忌/疼痛阈值 > 最近3个版本康复处方 > 当前计划保留/改造 > 用户临时目标。',
                 userSpecRule,
-                `最近 7 天对应类型计划摘要: ${JSON.stringify(recentPlans)}`,
+                `${rangeLabel}对应类型计划摘要${allPlansTruncationNotice}: ${JSON.stringify(recentPlans)}`,
+                futurePlansSummary.length ? `未来计划排期摘要: ${JSON.stringify(futurePlansSummary)}` : '',
                 `健康档案: ${JSON.stringify(profile)}`,
                 `目标类型: ${String(this.db.health?.dietGoal?.goalType || this.db.health?.goalType || '')}`,
                 prefTagsStr ? `偏好参数:\n${prefTagsStr}` : '',

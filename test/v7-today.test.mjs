@@ -12,8 +12,8 @@ test('V7 Today keeps ordinary cards on stable Surface', () => {
     assert.doesNotMatch(css, /transition\s*:\s*all\b/i);
 });
 
-test('V7 Today reserves Liquid behavior for one plan CTA', () => {
-    assert.match(feature, /\.plan-actions \.md-btn-filled/);
+test('V7 Today reserves Liquid behavior for one standalone primary CTA', () => {
+    assert.match(feature, /\.today-primary-launch/);
     assert.match(feature, /data-v7-liquid/);
     assert.doesNotMatch(feature, /requestAnimationFrame|setInterval/);
 });

@@ -398,7 +398,7 @@
                                 <span class="record-icon material-symbols-rounded">${icon}</span>
                                 <div style="flex:1;min-width:0">
                                     <strong>${this.escapeHtml(h.date)}</strong>
-                                    <small>${mins}分${secs}秒 &middot; ${meta}</small>
+                                    <small>${h.planManualDone ? '手动完成' : `${mins}分${secs}秒`} &middot; ${meta}</small>
                                     <div class="item-chip">${names.length > 20 ? names.slice(0, 20) + '...' : names}</div>
                                 </div>
                                 <button class="delete-btn" onclick="data.deleteHistory('${h.id}')"><span class="material-symbols-rounded">delete</span></button>

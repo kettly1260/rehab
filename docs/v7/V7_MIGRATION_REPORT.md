@@ -2,7 +2,7 @@
 
 ## Result
 
-The V7 Liquid Glass migration completed through Phase 13 and final desktop browser QA on August 28, 2026. V6 remains the business, persistence and service truth source; V7 owns app lifecycle, route presentation, feature surfaces and restrained effects. Inventoried V6 capabilities without a V7 entry: **0**.
+The V7 Liquid Glass migration completed through Phase 13 and the reference-driven visual-recovery closeout on August 29, 2026. V6 remains the business, persistence and service truth source; V7 owns app lifecycle, route presentation, feature surfaces and restrained effects. Inventoried V6 capabilities without a V7 entry: **0** and business functions marked `DELETE`: **0**.
 
 Android thermal and battery acceptance remains `BLOCKED_EXTERNAL_DEVICE`. No phone power or temperature claim is made.
 
@@ -24,7 +24,7 @@ Android thermal and battery acceptance remains `BLOCKED_EXTERNAL_DEVICE`. No pho
 | 11 | `5273f66` | Shared secondary surfaces |
 | 12 | `249e866` | PWA runtime integration |
 | 13 | `4f79318` | GPU-on render, lifecycle and effects performance gates |
-| Final QA | this final compatibility commit | Browser compatibility, screenshots and final reports |
+| Final visual recovery | current recovery worktree | Repaired-reference fidelity, dynamic theme bridge, Full/Balanced/Economy, secondary surfaces and final regression/performance QA |
 
 `645c3b7` added the remaining-agent taskbook and is not a product phase commit.
 
@@ -91,18 +91,23 @@ The V7 ESM shell is part of the Service Worker precache graph. Manifest install,
 
 ## Final verification evidence
 
-- Unit/source contracts: 1064/1064 at the Phase 13 gate.
-- CSS overlap: 217 conflicts, 30 duplicates and 167 complements.
-- Edge boot smoke: 45 scripts, 50 resources, 0 Long Tasks, 884 KB transfer, 77.9 ms first render in the final rerun (60.7 ms in the earlier Phase 13 run).
-- GPU-on 390 x 844 render suite: all paths passed; final Workout running sample was 65 ms Long Task / 70 ms LoAF, frame p95 8.4 ms.
-- Twenty-round lifecycle gate: no warm-to-final listener, timer or observer growth.
-- Final 390 x 844 browser QA: ten screenshots, no page errors or page-level horizontal overflow; deep link, browser back, Escape and keyboard checks passed.
+- Repaired reference gate: 5 / 5 browser-decodable and manually readable at 390 x 844.
+- Main-page visual gates: Today, Workout, Records, Coach and Profile each passed reference/actual `view_image` review with a mismatch ledger before the next phase began.
+- Theme matrix: all five pages passed green/light and custom rose/dark browser checks with readable neutral surfaces, dynamic nav/CTA accent and zero nested V7 backdrops.
+- Unit/source contracts: **1064 / 1064**.
+- CSS overlap: **217 conflicts, 31 duplicates, 195 complements**, within the 220 conflict gate.
+- Size budgets: all configured budgets pass without raising limits; first-paint-critical is 51.93 / 52 kB and Records bundle is 94.19 / 94.2 kB brotlied.
+- Edge boot smoke: 45 scripts, 50 resources, 0 Long Tasks, 984 KB transfer, FCP 816 ms and 189.5 ms `boot:first-render`; all explicit smoke budgets passed.
+- GPU-on 390 x 844 render suite: `ok:true`, no failures/page errors, zero running animations/permanent `will-change`/nested V7 backdrops; Workout-running remains the heaviest sample at 157 ms Long Task / 164 ms LoAF with frame p95 6.3 ms and stays inside the harness budget.
+- Effects suite: `ok:true`, no failures/page errors; Economy preserves geometry and removes V7 filter/backdrop work.
+- Twenty-round lifecycle gate: 1 / 1 pass; round 1 to round 20 has no listener/interval/observer growth and timeouts decrease 3 -> 2.
+- Secondary UI browser QA covers Theme, Voice, generic Modal, AI Model Picker, Search Manager, Toast/Update, Attachments and Workout Advanced without console errors or nav/CTA overlap.
 
 ## Deferred and blocked items
 
 - `DEFER`: Debug/diagnostics primary-page visual polish. The compatible entry remains reachable and functional.
 - `BLOCKED_EXTERNAL_DEVICE`: Android physical-device battery and thermal comparison. Execute `V7_ANDROID_TEST_PLAN.md` before making a device-power conclusion.
-- Reference limitation: four of five visual SVGs contain embedded image payloads that do not decode in Edge; see `V7_VISUAL_FIDELITY.md`.
+- Historical reference limitation is resolved: the repaired repository SVGs are now 5 / 5 readable; see `V7_VISUAL_FIDELITY.md` and `V7_VISUAL_RECOVERY_REPORT.md`.
 
 ## Rollback
 

@@ -4,34 +4,23 @@
 
     function n0(v) { return +v || 0; }
 
-    function planStatusClass(type = 'rehab') {
-        return ['rehab', 'cut', 'bulk', 'maintenance', 'custom'].includes(type) ? `is-${type}` : 'is-rehab';
-    }
-
     function taskSort(task) {
         const order = { 'in-progress': 0, todo: 1, done: 2, skipped: 3 };
         return order[task?.status] ?? 9;
     }
 
-    function taskCategoryMeta(task = {}) {
-        if (task.category === 'warmup') return { label: '热身', icon: 'directions_run' };
-        if (task.category === 'cooldown') return { label: '拉伸', icon: 'self_improvement' };
-        return { label: '主训练', icon: 'fitness_center' };
-    }
-
     function taskSpecText(task = {}) {
         const spec = task.spec || {};
-        const category = taskCategoryMeta(task);
-        const noData = (Number(spec.reps || 0) <= 0 && Number(spec.work || 0) <= 0);
-        const main = noData
-            ? '参数不完整'
-            : (Number(spec.reps || 0) > 0 ? `每组${Number(spec.reps || 0)}次` : `每次${Number(spec.work || 0)}秒`);
+        const reps = Number(spec.reps || 0);
+        const work = Number(spec.work || 0);
+        const main = reps > 0 ? `每组${reps}次` : work > 0 ? `每次${work}秒` : '参数不完整';
         const details = [
             Number(spec.repRest || 0) > 0 ? `次休${Number(spec.repRest || 0)}秒` : '',
             Number(spec.actionRest || 0) > 0 ? `组休${Number(spec.actionRest || 0)}秒` : '',
             spec.isAlt ? '双侧交替' : ''
         ].filter(Boolean);
-        return `${category.label} · ${Number(spec.sets || 1)}组 · ${main}${details.length ? ` · ${details.join(' · ')}` : ''}`;
+        const category = task.category === 'warmup' ? '热身' : task.category === 'cooldown' ? '拉伸' : '主训练';
+        return `${category} · ${Number(spec.sets || 1)}组 · ${main}${details.length ? ` · ${details.join(' · ')}` : ''}`;
     }
 
     function planTypeMeta(type = 'rehab', title = '') {
@@ -76,20 +65,25 @@
         return activeList(ctx, raw).filter((plan) => String(plan?.date || '') === String(date || ''));
     }
 
-    function readPlanPrefs(ctx) {
-        const prefs = ctx.db?.prefs;
-        if (!prefs || typeof prefs !== 'object') return { showWeeklyDock: true };
-        const plan = prefs.plan && typeof prefs.plan === 'object'
-            ? prefs.plan
-            : (prefs.rehab && typeof prefs.rehab === 'object' ? prefs.rehab : {});
-        return {
-            showWeeklyDock: plan.showWeeklyDock !== false
-        };
+    function selectedPlan(ctx, plans) {
+        return plans.find((item) => item.id === ctx.selectedPlanId) || plans[0] || null;
     }
 
-    function selectedPlan(ctx, plans) {
-        const list = Array.isArray(plans) ? plans : [];
-        return list.find((item) => item.id === ctx.selectedPlanId) || list[0] || null;
+    function latestPainFeedback(plans = []) {
+        let score;
+        let latestAt = -Infinity;
+        for (const plan of plans) {
+            for (const item of plan?.items || []) {
+                const value = Number(item?.feedback?.painScore);
+                if (!Number.isFinite(value)) continue;
+                const at = Number(item?.feedback?.doneAt || item?.updatedAt || plan?.updatedAt || 0);
+                if (at >= latestAt) {
+                    score = value;
+                    latestAt = at;
+                }
+            }
+        }
+        return score;
     }
 
     function ths(ctx, s) {
@@ -116,7 +110,7 @@
 
     window.dataTodayViewCore = {
         getTodayDailyPlans(date) {
-            return readTodayPlans(this, date == null ? todayKey(this) : date);
+            return readTodayPlans(this, date ?? todayKey(this));
         },
 
         completionRate(plan) {
@@ -139,76 +133,57 @@
             const goalCal = n0(g.cal || this.db?.health?.dietGoal?.dailyCal);
             const displayPercent = goalCal ? Math.max(0, Math.round(intake / goalCal * 100)) : 0;
             const ringProgress = Math.min(100, displayPercent);
-            const st = (v, t, b) => b + Math.min(120, this.ratio(n0(v), n0(t)) * 1.2);
-            const macroStops = {
-                pro: st(m.pro, g.pro, 0),
-                carb: st(m.carb, g.carb, 120),
-                fat: st(m.fat, g.fat, 240)
-            };
             if (!goalCal) {
                 return '<div class="ring ring-diet"><span class="ring-motion-aura" aria-hidden="true"></span><div><b>--</b><small>饮食</small></div></div>';
             }
-            return `<div class="ring ring-diet" style="--progress:${ringProgress};--pro-stop:${macroStops.pro}deg;--carb-stop:${macroStops.carb}deg;--fat-stop:${macroStops.fat}deg"><span class="ring-motion-aura" aria-hidden="true"></span><div><b>${displayPercent}%</b><small>饮食</small><em>${intake}/${goalCal}</em></div></div>`;
+            const st = (v, t, b) => b + Math.min(120, this.ratio(n0(v), n0(t)) * 1.2);
+            return `<div class="ring ring-diet" style="--progress:${ringProgress};--pro-stop:${st(m.pro, g.pro, 0)}deg;--carb-stop:${st(m.carb, g.carb, 120)}deg;--fat-stop:${st(m.fat, g.fat, 240)}deg"><span class="ring-motion-aura" aria-hidden="true"></span><div><b>${displayPercent}%</b><small>饮食</small><em>${intake}/${goalCal}</em></div></div>`;
         },
 
-        renderPlanTodaySection(summary) {
-                const todayPlans = this.getTodayDailyPlans?.() || readTodayPlans(this);
-            const aggregate = this.aggregateCompletionRate?.(todayPlans) || aggregateCompletionRate(todayPlans);
-            const plan = selectedPlan(this, todayPlans);
-            const percent = Math.round((aggregate.rate || 0) * 100);
-            const today = todayKey(this);
-            summary = ths(this, summary);
-            const weight = summary.weight
-                || activeList(this, this.db?.health?.weights || []).find((item) => item.date === today)
-                || this.sortedWeights?.().slice(-1)[0]
-                || null;
-            const exerciseCal = Math.round(this.todayTrainingCalories?.() || summary.exerciseCal || 0);
-            const intake = n0(summary.intake);
-            const goalCal = n0(summary.goals?.cal || this.db?.health?.dietGoal?.dailyCal);
-            const remaining = goalCal ? goalCal - intake : 0;
-            const heroTitle = goalCal
-                ? `距目标还差 ${remaining} 千卡`
-                : (weight ? `体重 ${Number(weight.weight || 0).toFixed(2)} kg` : '开始今日训练');
+        renderPlanTodaySection() {
+            const todayPlans = this.getTodayDailyPlans();
+            const aggregate = this.aggregateCompletionRate(todayPlans);
             const streakDays = this.computeStreakDays?.() || 0;
-            const prefs = readPlanPrefs(this);
-            const weeklySummary = window.planWeekly?.summary?.() || { done: 0, total: 0 };
-            const esc = (v) => (typeof this.escapeHtml === 'function' ? this.escapeHtml(v) : String(v ?? ''));
-            return `<div class="hero"><span class="hero-motion-aura" aria-hidden="true"></span><div class="hero-head"><div><div class="hero-label">今日概览</div><div class="hero-title">${esc(heroTitle)}</div></div><div style="display:flex;align-items:center;gap:6px">
-                        ${streakDays > 0 ? `<span class="streak-chip"><span class="material-symbols-rounded">local_fire_department</span>连续 ${streakDays} 天</span>` : ''}
-                        ${prefs.showWeeklyDock === false ? '' : `<button class="md-icon-btn-bar today-weekly-plan-btn" type="button" onclick="data.openPlanWeeklySheet()" aria-label="近期计划" title="3-7天 · ${weeklySummary.done}/${weeklySummary.total || 0} 完成"><span class="material-symbols-rounded">calendar_month</span></button>`}
-                        <button class="md-icon-btn-bar" type="button" onclick="data.openPlanTodayAiSheet()" aria-label="AI"><span class="material-symbols-rounded">auto_awesome</span></button></div></div><div class="rings">
-                    ${this.renderPlanIntakeRing?.(summary) || ''}
-                    <span class="ring-divider"></span><button class="ring ring-train ${plan ? planStatusClass(plan.type) : 'is-empty'}" style="--plan-progress:${percent * 3.6}deg" type="button" onclick="${plan ? `data.openPlanTaskDrawer('${plan.id}')` : 'data.openNewPlanSheet()'}"><span class="ring-motion-aura" aria-hidden="true"></span><div><b>${aggregate.total ? `${aggregate.done}/${aggregate.total}` : '+'}</b><small>训练</small><em>${percent}% · ${exerciseCal} 分钟</em></div></button></div>
-                ${todayPlans.length > 1 ? `<div class="plan-type-tabs">${todayPlans.map((item) => {
-                    const meta = this.planTypeMeta?.(item.type, item.title) || planTypeMeta(item.type, item.title);
-                    return `<button class="plan-type-tab ${item.id === plan.id ? 'active' : ''} ${planStatusClass(item.type)}" type="button" onclick="data.selectTodayPlan?.('${item.id}')"><span class="material-symbols-rounded">${meta.icon}</span>${esc(item.title || meta.label)}</button>`;
-                }).join('')}</div>` : ''}
-            </div>`;
+            const pain = latestPainFeedback(todayPlans);
+            const recoveryIndex = typeof this.recoveryIndex === 'function'
+                ? Number(this.recoveryIndex(this.db))
+                : (typeof window.planAnalytics?.recoveryIndex === 'function' ? Number(window.planAnalytics.recoveryIndex(this.db)) : NaN);
+            const hasRecovery = Number.isFinite(recoveryIndex);
+            const boundedRecovery = hasRecovery ? Math.max(0, Math.min(100, Math.round(recoveryIndex))) : null;
+            const status = hasRecovery
+                ? (boundedRecovery >= 80 ? '恢复状态良好' : boundedRecovery >= 60 ? '恢复状态一般' : '建议优先恢复')
+                : '恢复状态待评估';
+            const hint = hasRecovery
+                ? (boundedRecovery >= 80 ? '可按计划训练，避免额外加量' : boundedRecovery >= 60 ? '建议保持中等强度并关注反馈' : '今天优先轻量训练或休息')
+                : '记录训练反馈后可获得更完整的恢复参考';
+            return `<section class="hero today-readiness-card" aria-label="今日恢复"><div class="today-readiness-head"><div><div class="hero-label">今日恢复</div><div class="today-readiness-main"><strong class="today-readiness-score">${hasRecovery ? boundedRecovery : '—'}</strong><span class="today-readiness-status">${status}</span></div><p>${hint}</p></div></div><div class="today-readiness-meta"><span><small>连续训练</small><b>${streakDays ? `${streakDays} 天` : '0 天'}</b></span><span><small>疼痛反馈</small><b>${Number.isFinite(pain) ? `${pain}/10` : '未记录'}</b></span><span><small>计划完成</small><b>${aggregate.total ? `${aggregate.done}/${aggregate.total}` : '未安排'}</b></span></div></section>`;
         },
 
         renderTodayV6PlanCard() {
-            const todayPlans = this.getTodayDailyPlans?.() || readTodayPlans(this);
+            const todayPlans = this.getTodayDailyPlans();
             const selected = selectedPlan(this, todayPlans);
+            const headActions = (primaryAction) => `<span class="today-plan-head-actions"><button class="today-weekly-plan-btn" aria-label="近期计划" type="button" onclick="data.openPlanWeeklySheet()">3-7天</button>${primaryAction}</span>`;
             if (!selected) {
-                return `<div class="sect-head"><span class="t">当前训练计划</span><button class="a" onclick="data.openNewPlanSheet()" type="button">新建计划</button></div><div class="glass-card plan-card"><div class="plan-head"><div><div class="pt">待安排</div><div class="pn">今天还没有训练计划</div></div><div class="plan-chip"><span class="material-symbols-rounded">event_note</span>0/0</div></div><div class="plan-meta"><span>先创建计划，或让 AI 根据当前目标安排今天的训练。</span></div><div class="plan-actions"><button class="md-btn md-btn-filled" type="button" onclick="data.openNewPlanSheet()"><span class="material-symbols-rounded">playlist_add</span>新建计划</button><button class="md-btn md-btn-tonal" type="button" onclick="data.openPlanTodayAiSheet()"><span class="material-symbols-rounded">auto_awesome</span>AI 生成</button></div></div>`;
+                return `<div class="sect-head"><span class="t">今日计划</span>${headActions('<button class="a" onclick="data.openNewPlanSheet()" type="button">新建计划</button>')}</div><div class="glass-card plan-card today-plan-empty" aria-label="当前训练计划"><div><div class="pn">今天还没有训练计划</div><div class="plan-meta">创建计划，或让 AI 根据当前目标安排今天的训练。</div></div><div class="plan-actions"><button class="md-btn md-btn-tonal" type="button" onclick="data.openNewPlanSheet()">创建计划</button><button class="md-btn md-btn-text" type="button" onclick="data.openPlanTodayAiSheet()">AI 安排</button></div></div>`;
             }
             const plan = selected;
-            const planMeta = this.planTypeMeta?.(plan.type || 'rehab', plan.title) || planTypeMeta(plan.type || 'rehab', plan.title);
-            const completion = this.completionRate?.(plan) || completionRate(plan);
+            const planMeta = this.planTypeMeta(plan.type || 'rehab', plan.title);
+            const completion = this.completionRate(plan);
             const items = (plan.items || []).filter((item) => !item.deleted).sort((a, b) => taskSort(a) - taskSort(b));
             const current = items.find((item) => item.status === 'in-progress') || items.find((item) => item.status === 'todo') || null;
-            const pending = items.filter((item) => item.status === 'todo' || item.status === 'in-progress').length;
-            const totalItems = items.length || 1;
             const esc = (v) => (typeof this.escapeHtml === 'function' ? this.escapeHtml(v) : String(v ?? ''));
-            return `<div class="sect-head"><span class="t">当前训练计划</span><button class="a" onclick="data.openPlanTaskDrawer('${plan.id}')" type="button">查看全部</button></div><div class="glass-card plan-card"><div class="plan-head"><div><div class="pt">进行中 · ${esc(planMeta.label)}</div><div class="pn">${esc(plan.title || planMeta.label)}</div></div><div class="plan-chip"><span class="material-symbols-rounded">play_circle</span>${completion.done}/${completion.total}</div></div><div class="seg-bar">${items.map((item) => {
-                const cls = item.status === 'done' ? 'done' : (current && item.id === current.id ? 'cur' : '');
-                return `<span class="seg ${cls}" style="width:${100 / totalItems}%"></span>`;
-            }).join('')}</div>
-                ${current ? `<div class="plan-meta"><span>${taskSpecText(current)}${current.currentLevel ? ` · Lv${current.currentLevel}` : ''}</span>${pending ? `<span>${pending} 项待完成</span>` : ''}</div>` : ''}
-                ${window.searchEvidenceUi?.trail(plan.searchEvidence, esc) || ''}
-                <div class="plan-actions">
-                    ${current ? `<button class="md-btn md-btn-filled" type="button" onclick="data.handlePlanTaskTap('${plan.id}','${current.id}')"><span class="material-symbols-rounded">play_arrow</span>继续训练</button>` : `<button class="md-btn md-btn-tonal" type="button" onclick="data.openPlanTaskDrawer('${plan.id}')"><span class="material-symbols-rounded">checklist</span>查看完成</button>`}
-                    <button class="md-btn md-btn-tonal" type="button" onclick="data.openPlanTaskDrawer('${plan.id}')">查看动作</button></div></div>`;
+            const switcher = todayPlans.length > 1 ? `<div class="today-plan-switcher" role="tablist" aria-label="今日计划切换">${todayPlans.map((item) => {
+                const meta = this.planTypeMeta(item.type || 'rehab', item.title);
+                const active = item.id === plan.id;
+                return `<button type="button" role="tab" aria-selected="${active}" class="${active ? 'is-active' : ''}" onclick="data.selectTodayPlan('${item.id}')">${esc(item.title || meta.label)}</button>`;
+            }).join('')}</div>` : '';
+            const visible = items.slice(0, 3);
+            return `<div class="sect-head"><span class="t">今日计划</span>${headActions(`<button class="a" onclick="data.openPlanTaskDrawer('${plan.id}')" type="button">查看全部</button>`)}</div>${switcher}<div class="glass-card plan-card today-plan-list" aria-label="当前训练计划 · ${esc(plan.title || planMeta.label)}">${visible.length ? visible.map((item, index) => {
+                const done = item.status === 'done';
+                const active = current && item.id === current.id;
+                const status = done ? '已完成' : active ? '待完成' : item.status === 'skipped' ? '已跳过' : '待开始';
+                return `<button class="today-plan-row ${done ? 'is-done' : ''} ${active ? 'is-current' : ''}" type="button" onclick="data.openPlanTaskDrawer('${plan.id}')"><span class="today-plan-index">${done ? '<span class="material-symbols-rounded">check</span>' : index + 1}</span><span class="today-plan-copy"><b>${esc(item.name || `训练动作 ${index + 1}`)}</b><small>${esc(taskSpecText(item))}</small></span><span class="today-plan-state">${status}</span></button>`;
+            }).join('') : `<div class="today-plan-no-items"><b>${esc(plan.title || planMeta.label)}</b><span>计划暂无可执行动作</span></div>`}<div class="today-plan-foot"><span>${items.length > 3 ? `显示 3/${items.length} · ${esc(planMeta.label)}` : esc(planMeta.label)}</span><span>${completion.done}/${completion.total || 0} 完成</span></div></div>`;
         },
 
         renderTodayV6DietCard(summary) {
@@ -217,23 +192,35 @@
             const g = summary.goals || {};
             const intake = n0(summary.intake);
             const pro = n0(m.pro);
-            const carb = n0(m.carb);
-            const fat = n0(m.fat);
             const goalCal = n0(g.cal || this.db?.health?.dietGoal?.dailyCal);
-            const remaining = goalCal ? goalCal - intake : 0;
-            const p = (v, t) => (t ? Math.min(100, Math.round(v / t * 100)) : 0);
-            const proPct = p(pro, n0(g.pro));
-            const carbPct = p(carb, n0(g.carb));
-            const fatPct = p(fat, n0(g.fat));
-            return `<div class="sect-head"><span class="t">饮食摄入</span><button class="a" onclick="data.openDietModal()" type="button">添加记录 ›</button></div><div class="glass-card"><div class="calorie-head"><div><span class="num">${goalCal ? remaining : '--'}</span><span class="unit">${goalCal ? 'kcal 剩余' : ''}</span></div>
-                    ${goalCal ? `<div class="right"><div class="lab">已摄入 / 目标</div><div class="val">${intake} / ${goalCal}</div></div>` : ''}
-                </div>
-                ${goalCal ? `<div class="stack-bar"><i class="b1" style="width:${carbPct}%"></i><i class="b2" style="width:${proPct}%"></i><i class="b3" style="width:${fatPct}%"></i></div><div class="macros"><span class="macro c"><small>碳水</small><b>${carb.toFixed(0)}g</b></span><span class="macro p"><small>蛋白</small><b>${pro.toFixed(0)}g</b></span><span class="macro f"><small>脂肪</small><b>${fat.toFixed(0)}g</b></span><span class="macro r"><small>余</small><b>${remaining}</b></span></div>` : ''}
-            </div>`;
+            const todayPlans = this.getTodayDailyPlans();
+            const aggregate = this.aggregateCompletionRate(todayPlans);
+            return `<section class="glass-card today-status-strip" aria-label="今日状态"><div class="today-status-label">今日状态</div><div class="today-status-metrics"><span><b>${aggregate.total ? `${aggregate.done}/${aggregate.total}` : '--'}</b><small>计划任务</small></span><span><b>${intake ? Math.round(intake) : '--'}</b><small>${goalCal ? `摄入 / ${goalCal} kcal` : '摄入 kcal'}</small></span><span><b>${pro ? `${Math.round(pro)}g` : '--'}</b><small>蛋白</small></span></div></section>`;
         },
 
         renderTodayActionDock() {
-            return `<div class="quick-dock"><button class="record-quick-btn" type="button" data-q="weight" onclick="data.openWeightModal()"><span class="material-symbols-rounded">monitor_weight</span><span>记体重</span></button><button class="record-quick-btn" type="button" data-q="diet" onclick="data.openDietModal()"><span class="material-symbols-rounded">restaurant</span><span>记饮食</span></button><button class="record-quick-btn" type="button" data-q="cardio" onclick="data.openExerciseModal()"><span class="material-symbols-rounded">fitness_center</span><span>记运动</span></button><button class="record-quick-btn record-quick-btn-ai context-ai-btn" type="button" data-q="ai" data-ai-ctx="today" data-ai-idx="0"><span class="material-symbols-rounded">psychology</span><span>问 AI</span></button></div>`;
+            return `<section class="today-quick-section"><div class="sect-head"><span class="t">快捷记录</span></div><div class="quick-dock"><button class="record-quick-btn" type="button" data-q="weight" onclick="data.openWeightModal()"><span class="material-symbols-rounded">monitor_weight</span><span>记体重</span></button><button class="record-quick-btn" type="button" data-q="diet" onclick="data.openDietModal()"><span class="material-symbols-rounded">restaurant</span><span>记饮食</span></button><button class="record-quick-btn" type="button" data-q="cardio" onclick="data.openExerciseModal()"><span class="material-symbols-rounded">fitness_center</span><span>记运动</span></button><button class="record-quick-btn record-quick-btn-ai context-ai-btn" type="button" data-q="ai" data-ai-ctx="today" data-ai-idx="0"><span class="material-symbols-rounded">psychology</span><span>问 AI</span></button></div></section>`;
+        },
+
+        renderTodayCompletionTrend() {
+            const plans = activeList(this, this.db?.dailyPlans || []);
+            const days = [...new Set(plans.map((plan) => plan?.date).filter(Boolean))].sort().slice(-7);
+            const rates = days.map((date) => aggregateCompletionRate(plans.filter((plan) => plan.date === date)).rate);
+            const chart = rates.length > 1 ? `<div class="today-trend-chart" role="img" aria-label="最近计划完成率趋势">${rates.map((rate) => `<i style="--v:${Math.round(rate * 100)}%"></i>`).join('')}</div>` : '';
+            return `<section class="glass-card today-trend-card"><div class="today-trend-head"><b>训练完成趋势</b><span>${days.length ? `最近 ${days.length} 天` : '暂无数据'}</span></div>${chart || '<div class="today-trend-empty">完成更多训练计划后显示趋势</div>'}</section>`;
+        },
+
+        renderTodayPrimaryAction() {
+            if (window.workout?.isPlaying) {
+                return '<button class="today-primary-launch md-btn md-btn-filled" type="button" onclick="ui.tab(\'workout\', document.querySelector(\'[data-tab=workout]\'))"><span class="material-symbols-rounded">play_circle</span>继续进行中训练</button>';
+            }
+            const plans = this.getTodayDailyPlans();
+            const plan = selectedPlan(this, plans);
+            if (!plan) return '<button class="today-primary-launch md-btn md-btn-filled" type="button" onclick="data.openNewPlanSheet()">创建今日计划</button>';
+            const items = (plan.items || []).filter((item) => item && !item.deleted).sort((a, b) => taskSort(a) - taskSort(b));
+            const current = items.find((item) => item.status === 'in-progress') || items.find((item) => item.status === 'todo');
+            if (current) return `<button class="today-primary-launch md-btn md-btn-filled" type="button" onclick="data.handlePlanTaskTap('${plan.id}','${current.id}')"><span class="material-symbols-rounded">play_arrow</span>开始今日训练</button>`;
+            return `<button class="today-primary-launch md-btn md-btn-filled" type="button" onclick="data.openPlanTaskDrawer('${plan.id}')">查看今日训练</button>`;
         },
 
         updateTodayV6Greet() {

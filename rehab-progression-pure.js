@@ -21,7 +21,12 @@ function normalizedHistory(history = []) {
             keepNextTime: !!item.keepNextTime,
             unsuitable: !!item.unsuitable,
             doneAt: Number(item.doneAt || item.at || 0),
-            note: String(item.note || '')
+            note: String(item.note || ''),
+            status: String(item.status || ''),
+            actualSets: typeof item.actualSets === 'number' ? item.actualSets : (typeof item.doneSets === 'number' ? item.doneSets : undefined),
+            plannedSets: typeof item.plannedSets === 'number' ? item.plannedSets : undefined,
+            manualStop: !!item.manualStop,
+            isPartial: Boolean(item.isPartial || item.status === 'in-progress' || item.manualStop || (typeof item.plannedSets === 'number' && typeof item.actualSets === 'number' && item.plannedSets > 0 && item.actualSets < item.plannedSets))
         }))
         .sort((a, b) => Number(a.doneAt || 0) - Number(b.doneAt || 0));
 }
@@ -76,7 +81,17 @@ export function evaluateProgression({ taskItem, chain, history = [], planType = 
     let consecutiveEasy = 0;
     let consecutiveModerate = 0;
     for (let i = safeHistory.length - 1; i >= 0; i--) {
-        const rpe = safeHistory[i].rpe;
+        const h = safeHistory[i];
+        const isHistoryPartial = Boolean(
+            h.isPartial ||
+            h.status === 'in-progress' ||
+            h.manualStop ||
+            (typeof h.plannedSets === 'number' && typeof h.actualSets === 'number' && h.plannedSets > 0 && h.actualSets < h.plannedSets)
+        );
+        if (isHistoryPartial) {
+            break;
+        }
+        const rpe = h.rpe;
         if (rpe === 1) {
             consecutiveEasy++;
         } else if (rpe === 2) {
@@ -118,18 +133,28 @@ export function evaluateProgression({ taskItem, chain, history = [], planType = 
         return signal;
     }
 
-    if (latest?.noIncrease || latest?.keepNextTime) {
-        signal.decision = 'hold';
-        signal.reason = '用户选择保持/不再加量，本次不自动进阶';
-        return signal;
-    }
-
     if (Number(latest?.painScore || 0) >= 4) {
         return applyDeload(signal, spec, currentLevel, range, chain, `疼痛 ${latest.painScore}/10${latest.painPart ? `（${latest.painPart}）` : ''}`);
     }
 
     if (latestRpe === 5) {
         return applyDeload(signal, spec, currentLevel, range, chain, '上次反馈做不动');
+    }
+
+    if (latest?.noIncrease || latest?.keepNextTime) {
+        signal.decision = 'hold';
+        signal.reason = '用户选择保持/不再加量，本次不自动进阶';
+        return signal;
+    }
+
+    const plannedSets = Number(taskItem?.spec?.sets || latest?.plannedSets || 0);
+    const hasExplicitDoneSets = typeof taskItem?.doneSets === 'number' || typeof latest?.actualSets === 'number' || typeof latest?.doneSets === 'number';
+    const completedSets = hasExplicitDoneSets ? Number(taskItem?.doneSets ?? latest?.actualSets ?? latest?.doneSets ?? 0) : plannedSets;
+    const isPartialCompletion = taskItem?.status === 'in-progress' || latest?.status === 'in-progress' || (hasExplicitDoneSets && plannedSets > 0 && completedSets < plannedSets) || Boolean(taskItem?.manualStop || latest?.manualStop || latest?.isPartial);
+    if (isPartialCompletion) {
+        signal.decision = 'hold';
+        signal.reason = `动作未达标完成（实做${completedSets}/${plannedSets}组），维持原参数不加量`;
+        return signal;
     }
 
     if (latestRpe === 1) {

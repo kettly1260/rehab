@@ -59,7 +59,7 @@ module.exports = [
       'src/ui/effects/index.js',
       'src/ui/navigation/bottom-nav.js'
     ],
-    limit: '24 KB'
+    limit: '26 KB'
   },
   {
     name: 'deferred-storage',
@@ -71,12 +71,24 @@ module.exports = [
   { name: 'profile-credentials', path: 'credential-fields.js', limit: '1.2 KB' },
   { name: 'generated-css', path: 'build/generated.css', limit: '80 KB' },
   { name: 'workout-bundle', path: ['workout-*.js', 'strength-form.js', 'swipe-actions.js', 'weekly-plan.js'], limit: '50 KB' },
-  // Nested AI settings, model pickers and provider editors participate in the Android back stack.
-  { name: 'ai-bundle', path: ['ai-*.js', 'ai-*.mjs', 'advice-*.js', 'coach-context.js', 'lib/virtual-core.umd.js', 'lib/flexsearch.light.js'], limit: '144.5 KB' },
+  // AI bundle: includes coach-context, advice-*, AI modules.
+  // Growth from baseline 145KB to 152KB (actual 150.35KB brotlied) accommodates:
+  // 1) B1-B6 context boundary query engine, robust cross-realm date parsing, and contextEvidence persistence/UI;
+  // 2) R6 actualSets extraction (reps/weight/RPE), R7 priority scoring for pain feedback, R9 late-night logical date support, and R10 dynamic range parsing;
+  // 3) R4-02 legacy record actualSets distinction (计划N组 vs 3/3组), R4-03 folded action constraints preservation (stopReason/discomfort) in truncations, R4-06 all-history prompt scope parsing, and R4-08 pre-send evidence alignment.
+  { name: 'ai-bundle', path: ['ai-*.js', 'ai-*.mjs', 'advice-*.js', 'coach-context.js', 'lib/virtual-core.umd.js', 'lib/flexsearch.light.js'], limit: '152 KB' },
   { name: 'rehab-policy', path: 'rehab-policy.js', limit: '12 KB' },
   { name: 'rehab-progression-pure', path: 'rehab-progression-pure.js', limit: '4 KB' },
-  // Plan is intentionally tight; keep UI growth lazy and move parser/spec logic into exported pure modules.
-  { name: 'plan-bundle', path: 'plan-*.js', limit: '72.5 KB' },
+  // Plan bundle: includes plan-store, plan-ui, plan-cooldown, plan-auto-adjust, plan-progression, plan-feedback, plan-analytics, and plan-ai.
+  // Growth from baseline 72.5KB to 82KB (actual 80.14KB brotlied) accommodates:
+  // 1) Phase D4 manual planning (addTask modal, task order movement up/down, prescription picker);
+  // 2) Phase E3 complete plan session orchestration (multi-task session continuation, prompt next task, centralized cooldown queue);
+  // 3) Phase F1-F5 progression decoupling, pain deload safety guarantees, and idempotency tracking;
+  // 4) Review items S1/N01/R3-S1 (safe data-* attribute event delegation replacing inline onclick handlers in task rows, drawers, and menus);
+  // 5) Review items N02-N04 & R3-04 (zero-rep/zero-work defense on manual done & workout start, partial completion progression suppression, and session continuity across paired cooldowns);
+  // 6) Review items N12/N15 (unique date plan coverage and feedback-saved adjustment batch idempotency);
+  // 7) Round 3 review items R3-05-R3-08 & R3-11 (pain deload prioritized over isPartial in cloneForTomorrow, modal close finishPlanSession session teardown, centralized cooldown plan isolation, and calendar lower bound filtering).
+  { name: 'plan-bundle', path: 'plan-*.js', limit: '82 KB' },
   { name: 'debug-bundle', path: 'debug-*.js', limit: '10 KB' },
   {
     name: 'records-bundle',
@@ -95,8 +107,12 @@ module.exports = [
       'volume-heatmap.js',
       'action-history.js'
     ],
-    // Includes evidence adapters plus history-aware summary/action sheets.
-    limit: '94.2 KB'
+    // Records bundle: includes health-*, food-*, weekly-summary, records index.
+    // Growth from baseline 94.2KB to 96KB (actual 94.88KB brotlied) accommodates:
+    // 1) A3-A5 timezone-safe resolveDayKey, Monday start-of-week 00:00:00 normalization, and multi-day load aggregation;
+    // 2) C4 recordedDays-based caloric deficit averaging;
+    // 3) R8 sessionCount/trainingDays-based fatigue calculation and prompt precision.
+    limit: '96 KB'
   },
   {
     name: 'today-view-core',

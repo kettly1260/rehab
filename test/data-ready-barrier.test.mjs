@@ -234,3 +234,40 @@ test('FIND-12 ready state is listed in dataStore runtimeStateKeys', () => {
     assert.match(src, /_readyState/);
     assert.match(src, /_readyPromise/);
 });
+
+test('R8-01 FIND-12: ensureDataReady before init settles true when init succeeds', async () => {
+    const h = createStoreContext();
+    let settled = false;
+    const pending = h.data.ensureDataReady().then((v) => { settled = true; return v; });
+    assert.equal(h.data._readyState, 'pending');
+    await h.data.init();
+    const result = await pending;
+    assert.equal(settled, true);
+    assert.equal(result, true);
+    assert.equal(h.data._readyState, 'ready');
+});
+
+test('R8-01 FIND-12: whenReady before init runs action once and clears busy when init succeeds', async () => {
+    const h = createStoreContext();
+    let actionRuns = 0;
+    const pending = h.data.whenReady(() => { actionRuns += 1; return 'early-ran'; }, { busyKey: 'saveCardio', routeAtClick: 'today' });
+    assert.equal(h.data._readyState, 'pending');
+    assert.ok(h.data._readyWaiters['saveCardio']);
+    await h.data.init();
+    const result = await pending;
+    assert.equal(result, 'early-ran');
+    assert.equal(actionRuns, 1);
+    assert.equal(h.data._readyWaiters['saveCardio'], undefined);
+});
+
+test('R8-01 FIND-12: whenReady before init cancels and ends busy when init fails', async () => {
+    const h = createStoreContext();
+    let actionRuns = 0;
+    const pending = h.data.whenReady(() => { actionRuns += 1; return 'should-not-run'; }, { busyKey: 'earlyFail', routeAtClick: 'today' });
+    assert.equal(h.data._readyState, 'pending');
+    h.data.markDataFailed(new Error('init-fail'));
+    const result = await pending;
+    assert.equal(result, undefined);
+    assert.equal(actionRuns, 0);
+    assert.equal(h.data._readyWaiters['earlyFail'], undefined);
+});

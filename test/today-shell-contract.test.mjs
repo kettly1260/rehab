@@ -69,7 +69,7 @@ test('renderTodayPage fills existing slots without inventing a new root structur
 
     context.window.dataViews.ensureTodayShellSkeleton();
     assert.match(elements.todayQuickActions.innerHTML, /记体重[\s\S]*记饮食[\s\S]*记运动[\s\S]*问 AI/);
-    assert.match(elements.todayOverview.innerHTML, /今日概览/);
+    assert.match(elements.todayOverview.innerHTML, /今日恢复/);
     assert.equal(elements.todayQuickActions.dataset.todayShell, 'skeleton');
 
     const host = {

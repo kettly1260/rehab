@@ -96,13 +96,13 @@ test('first paint with only today-view-core produces V6 hero and never legacy re
     const plan = host.renderTodayV6PlanCard();
     const diet = host.renderTodayV6DietCard();
 
-    assert.match(overview, /class="hero"/);
+    assert.match(overview, /class="hero\b/);
     assert.doesNotMatch(overview, /record-overview-card/);
     assert.doesNotMatch(overview, /md-card hero-card/);
-    assert.match(overview, /今日概览/);
+    assert.match(overview, /今日恢复/);
     assert.match(dock, /记体重[\s\S]*记饮食[\s\S]*记运动[\s\S]*问 AI/);
-    assert.match(plan, /当前训练计划|今天还没有训练计划/);
-    assert.match(diet, /饮食摄入/);
+    assert.match(plan, /今日计划|今天还没有训练计划/);
+    assert.match(diet, /今日状态/);
     assert.equal(host.db.dailyPlans.length, 0, 'core must not create plans on first paint');
 });
 
@@ -316,7 +316,7 @@ test('full lifecycle: core first paint, plan-ui enhance, re-render stay V6 witho
     context.window.data = data;
     context.window.dataViews.renderTodayPage.call(data);
 
-    assert.match(slots.todayOverview.innerHTML, /class="hero"/);
+    assert.match(slots.todayOverview.innerHTML, /class="hero\b/);
     assert.doesNotMatch(slots.todayOverview.innerHTML, /record-overview-card/);
     assert.equal(ensureCount, 0);
     assert.equal(legacyCount, 0);
@@ -341,13 +341,14 @@ test('full lifecycle: core first paint, plan-ui enhance, re-render stay V6 witho
     assert.equal(overviewWrites, writesAfterFirst.overview, 'enhance must not rewrite overview slot');
     assert.equal(planWrites, writesAfterFirst.plan, 'enhance must not rewrite plan slot');
     assert.equal(dietWrites, writesAfterFirst.diet, 'enhance must not rewrite diet slot');
-    assert.match(slots.todayTimeline.innerHTML, /timeline-ready/);
+    assert.match(slots.todayTimeline.innerHTML, /训练完成趋势/);
+    assert.match(slots.todayAiCard.innerHTML, /timeline-ready/);
     assert.match(slots.todayAiCard.innerHTML, /ai-ready|今日 AI|AI 建议|psychology/);
     assert.equal(data._bound, 1, 'bindPlanQuickRepeat must be idempotent across double enhance');
 
     // Normal re-render after enhancement still uses core V6 path.
     context.window.dataViews.renderTodayPage.call(data);
-    assert.match(slots.todayOverview.innerHTML, /class="hero"/);
+    assert.match(slots.todayOverview.innerHTML, /class="hero\b/);
     assert.doesNotMatch(slots.todayOverview.innerHTML, /record-overview-card/);
     assert.equal(ensureCount, 0, 're-render must not call ensureTodayPlan');
     assert.equal(legacyCount, 0);

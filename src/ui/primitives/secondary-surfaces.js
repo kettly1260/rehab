@@ -52,6 +52,9 @@ function decorate(element) {
     const kind = secondaryKind(element);
     element.classList.add('v7-secondary-surface', `v7-secondary-${kind}`);
     element.dataset.v7Secondary = kind;
+    element.querySelectorAll?.('.md-modal-backdrop, .advice-attachment-preview-backdrop').forEach((backdrop) => {
+        backdrop.classList.add('v7-glass-overlay');
+    });
     if (['modal', 'sheet', 'picker', 'manager', 'preview'].includes(kind)) {
         element.setAttribute('role', element.getAttribute('role') || 'dialog');
         element.setAttribute('aria-modal', 'true');

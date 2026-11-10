@@ -103,3 +103,7 @@ Manifest install, shortcut routing, offline Today closure, V7 ESM shell caching,
 - Inventoried V6 capabilities without a V7 entry: **0**.
 - Explicitly deferred capability: **Debug/diagnostics primary-page polish only**; the route remains reachable and its functionality is retained.
 - Data compatibility conclusion: all migrated entries continue to read/write through the verified V6-compatible adapters, store names and schema; no V7-only user-data format was introduced.
+
+### Visual-recovery closeout — August 29, 2026
+
+The mapping was re-read after R11 and before final functional QA. No capability was removed to satisfy the repaired references. In particular, the Today recovery redesign initially hid the existing 3–7 day recent-plan entry and multi-plan selector; final regression QA caught that loss and restored both as compact controls without changing the reference card/CTA hierarchy. The final gate remains **0 unmapped / 0 DELETE**, with Debug/Diagnostics primary-page polish as the only deliberate DEFER.

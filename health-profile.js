@@ -274,8 +274,9 @@
             return 'is-continued';
         },
 
-        rehabSpecLabel(spec) {
-            if (!spec) return '不进入本周训练';
+        rehabSpecLabel(spec, status) {
+            if (normalizeRehabStatus(status) === 'dropped') return '停做/不进入本周';
+            if (!spec) return '剂量待补充';
             const sets = Number(spec.sets || 0);
             const work = Number(spec.work || 0);
             const reps = Number(spec.reps || 0);
@@ -295,7 +296,7 @@
                 <div class="rehab-week-action-mini">
                     <span class="rehab-status ${this.rehabStatusClass(action.status)}">${this.rehabStatusLabel(action.status)}</span>
                     <b>${esc(this, action.name || '未命名动作')}</b>
-                    <small>${esc(this, this.rehabSpecLabel(action.spec))}</small>
+                    <small>${esc(this, this.rehabSpecLabel(action.spec, action.status))}</small>
                 </div>`).join('');
             const historyRows = weeks.map((week, index) => {
                 const weekActions = week.actions || [];
@@ -315,7 +316,7 @@
                 <div class="rehab-week-glass-summary">
                     <div class="rehab-week-stat"><strong>${actions.length || 0}</strong><small>动作</small></div>
                     <div class="rehab-week-stat"><strong>${newCount}</strong><small>新增</small></div>
-                    <div class="rehab-week-stat"><strong>${reviewCount}</strong><small>确认</small></div>
+                    <div class="rehab-week-stat"><strong>${reviewCount}</strong><small>需复核</small></div>
                 </div>
                 <div class="profile-head rehab-week-head">
                     <div class="profile-head-main">
@@ -323,7 +324,7 @@
                         <div>
                             <span class="cardio-kicker">康复周处方</span>
                             <h3>${latest ? `${esc(this, latest.weekStart || '')} 起` : '还没有本周处方'}</h3>
-                            <small>${latest ? '训练计划 AI 会自动参考最近 3 周处方' : '输入康复师原话，AI 解析后再确认录入'}</small>
+                            <small>${latest ? `训练计划 AI 会自动参考最近 ${Math.min(3, weeks.length)} 个版本处方` : '输入康复师原话，AI 解析后再确认录入'}</small>
                         </div>
                     </div>
                     <div class="profile-edit-btn-row">
@@ -333,7 +334,7 @@
                 </div>
                 ${latest ? `<div class="rehab-week-action-list">${actionPreview || '<div class="profile-condition-note">本周处方暂无动作明细</div>'}</div>` : `<div class="profile-condition-note">适合每周从康复中心回来后录入新动作、暂停动作和疼痛反馈。</div>`}
                 ${sourceTrail(latest)}
-                ${weeks.length > 1 ? `<details class="rehab-week-history"><summary><span class="material-symbols-rounded">history</span> 查看/编辑旧处方（共 ${weeks.length} 周）</summary><div class="rehab-week-history-list">${historyRows}</div></details>` : ''}
+                ${weeks.length > 1 ? `<details class="rehab-week-history"><summary><span class="material-symbols-rounded">history</span> 查看/编辑旧处方（共 ${weeks.length} 个版本）</summary><div class="rehab-week-history-list">${historyRows}</div></details>` : ''}
             </div>`;
         },
 
@@ -1154,7 +1155,7 @@
             const mustInclude = actions.filter(a => ['continued', 'progressed'].includes(a.status)).map(a => a.name);
             const mustExclude = actions.filter(a => a.status === 'dropped').map(a => a.name);
             const cautious = actions.filter(a => a.status === 'new' || a.status === 'watch' || a.needsReview).map(a => `${a.name}（${this.rehabStatusLabel(a.status)}，疼痛${Number(a.painLevel || 0)}/10，置信${Number(a.confidence || 0)}%）`);
-            return [`【近3周康复中心处方 - 本周摘要】`, `必须保留或参考：${mustInclude.join('、') || '无'}`, `本周禁止出现在计划中：${mustExclude.join('、') || '无'}`, `新增/观察动作不得自动加量：${cautious.join('、') || '无'}`, '规则：低置信动作必须先让用户确认；疼痛 >=4/10 的动作只能降级或替换，不能进阶。'].join('\n');
+            return [`【近3个版本康复中心处方 - 本周摘要】`, `必须保留或参考：${mustInclude.join('、') || '无'}`, `本周禁止出现在计划中：${mustExclude.join('、') || '无'}`, `新增/观察动作不得自动加量：${cautious.join('、') || '无'}`, '规则：低置信动作必须先让用户确认；疼痛 >=4/10 的动作只能降级或替换，不能进阶。'].join('\n');
         },
 
         updateRehabWeeklyDraftUi() {

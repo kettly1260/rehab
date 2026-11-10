@@ -2,13 +2,13 @@
 
 ## Status
 
-Phase 13 desktop automation passed on August 28, 2026. Android thermal and battery validation is `BLOCKED_EXTERNAL_DEVICE`; see `V7_ANDROID_TEST_PLAN.md`.
+Phase 13 desktop automation and the final visual-recovery rerun passed on August 29, 2026. Android thermal and battery validation is `BLOCKED_EXTERNAL_DEVICE`; see `V7_ANDROID_TEST_PLAN.md`.
 
 ## Baseline
 
 The V6 reference is commit `ae1194b17be420a6ec6ecf8b70d1cb358a28bc7b`. Its recorded GPU-off `perf:edge` baseline is 27 scripts, 38 resources, 0 Long Tasks, 772 KB transfer and 126.5 ms `boot:first-render`. The baseline did not measure route rendering or Android power.
 
-The final acceptance rerun reported 45 scripts, 50 resources, 0 Long Tasks, 884 KB transfer and 77.9 ms `boot:first-render`; the earlier Phase 13 run recorded 60.7 ms. Script/resource transfer increased because the V7 ESM shell is now part of the offline-capable startup graph. Both V7 timings are directionally better than the recorded baseline, but the final harness uses Playwright instead of the unstable raw CDP page socket, so the boot duration is not treated as a strict apples-to-apples benchmark.
+The August 29 Edge smoke reported 45 scripts, 50 resources, 0 Long Tasks, 984 KB transfer, 189.5 ms `boot:first-render` and FCP 816 ms. Script/resource transfer increased because the V7 ESM shell is now part of the offline-capable startup graph. The smoke remains within its explicit budgets (70 scripts, 95 resources, 180 ms Long Task total and 1000 KB transfer). Its timing should not be treated as a strict apples-to-apples comparison with the older raw-CDP baseline because the harness/browser path and worktree have changed.
 
 ## Test method
 
@@ -25,21 +25,21 @@ System Edge `151.0.4129.107` used ANGLE D3D11 on Intel UHD Graphics. The table r
 
 | Path | Long Task ms | LoAF ms | Frame p95 ms | DOM nodes | Active RAF | Timers (timeout/interval) |
 |---|---:|---:|---:|---:|---:|---:|
-| Today idle | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
-| Today scroll | 0 | 0 | 12.5 | 1584 | 1 | 0 / 1 |
-| Tab switching | 0 | 0 | 12.4 | 1584 | 1 | 0 / 1 |
-| Workout idle | 0 | 0 | 8.3 | 1584 | 1 | 0 / 1 |
-| Workout running | 65 | 70 | 8.4 | 1599 | 1 | 1 / 5 |
-| Records chart/scroll | 0 | 0 | 8.5 | 1653 | 1 | 0 / 1 |
-| Coach streaming | 0 | 0 | 8.3 | 1701 | 1 | 0 / 1 |
-| Profile scroll | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
-| Modal/Sheet | 0 | 0 | 4.3 | 1584 | 1 | 0 / 1 |
+| Today idle | 0 | 0 | 6.5 | 1593 | 1 | 0 / 1 |
+| Today scroll | 0 | 0 | 6.8 | 1593 | 1 | 0 / 1 |
+| Tab switching | 0 | 0 | 6.6 | 1593 | 1 | 0 / 1 |
+| Workout idle | 0 | 0 | 6.2 | 1646 | 1 | 0 / 1 |
+| Workout running | 157 | 164 | 6.3 | 1669 | 1 | 1 / 5 |
+| Records chart/scroll | 0 | 0 | 6.5 | 1744 | 2 | 0 / 1 |
+| Coach streaming | 0 | 0 | 6.5 | 1705 | 2 | 0 / 1 |
+| Profile scroll | 0 | 0 | 6.5 | 1593 | 1 | 0 / 1 |
+| Modal/Sheet | 0 | 0 | 6.2 | 1593 | 1 | 0 / 1 |
 
 The one active RAF in settled samples is the app/runtime proxy count after the harness frame sampler has been cancelled. No sampled route had a running CSS animation, permanent `will-change`, nested V7 backdrop, or visible V7 backdrop after interaction settle.
 
 ## Balanced and economy
 
-Today idle, Records chart/scroll, Coach streaming, Modal/Sheet and Workout running were compared in both modes. Both modes had 0 settled visible/nested V7 backdrops, 0 running animations and 0 permanent `will-change` in all sampled paths. In the final effects rerun both balanced and economy Workout recorded 0 Long Task and 0 LoAF, with frame p95 of 8.3 ms and 8.4 ms respectively. This is evidence that economy does not add visual work, not a claim of Android battery or thermal improvement.
+Today idle, Records chart/scroll, Coach streaming, Modal/Sheet and Workout running were compared in both modes. Both modes had 0 settled visible/nested V7 backdrops, 0 running animations and 0 permanent `will-change` in all sampled paths. The final effects artifact reports `ok:true`, `failures:[]` and `pageErrors:[]`. Records chart/scroll frame p95 measured 12.1 ms in Balanced and 6.5 ms in Economy; Today idle measured 6.7 vs 6.6 ms. Workout-running is intentionally session-heavy and remained inside the harness budget in both modes. This is evidence that Economy removes visual work without changing layout, not a claim of Android battery or thermal improvement.
 
 ## Lifecycle cleanup
 
@@ -83,7 +83,7 @@ npm run perf:lifecycle
 npm run perf:effects
 ```
 
-All four commands passed. Runtime evidence is written to `.tmp/v7-perf/`; the 20-round lifecycle evidence is written under `.tmp/lazy-runtime-v344/playwright/lifecycle/`.
+All four commands passed in the August 29 closeout. `render.json` and `effects.json` both end with `ok:true`, no failures and no page errors. The 20-round lifecycle browser test passed 1 / 1 and its checkpoint table is unchanged from round 1 through round 20 for listeners/intervals/observers, with timeout count decreasing from 3 to 2. Runtime evidence is written to `.tmp/v7-perf/`; lifecycle evidence is written under `.tmp/lazy-runtime-v344/playwright/lifecycle/`.
 
 ## Limitations
 

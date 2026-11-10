@@ -94,33 +94,59 @@ const planAnalytics = {
     },
 
     consecutiveTrainingDays(db) {
-        const plans = db?.dailyPlans || [];
-        const active = plans.filter(p => !p.deleted);
-        const dateSet = new Set(active.map(p => p.date));
+        const plans = (db?.dailyPlans || []).filter(p => !p.deleted);
+        const history = (db?.history || []).filter(h => !h.deleted);
+        const exerciseLogs = (db?.health?.exerciseLogs || []).filter(e => !e.deleted);
+
+        const trainedDates = new Set();
+
+        for (const p of plans) {
+            if (!p.date) continue;
+            const hasCompletedItem = (p.items || []).some(i => i && !i.deleted && (i.status === 'done' || (Number(i.doneSets) > 0)));
+            if (hasCompletedItem) trainedDates.add(p.date);
+        }
+
+        for (const h of history) {
+            const date = h.dayKey || (h.date ? String(h.date).slice(0, 10).replace(/\//g, '-') : '');
+            if (date) trainedDates.add(date);
+        }
+
+        for (const e of exerciseLogs) {
+            const date = e.date ? String(e.date).slice(0, 10).replace(/\//g, '-') : '';
+            if (date) trainedDates.add(date);
+        }
+
         const today = new Date();
         let streak = 0;
         for (let i = 0; i < 30; i++) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
             const key = d.toISOString().slice(0, 10);
-            if (dateSet.has(key)) streak++;
+            if (trainedDates.has(key)) streak++;
             else break;
         }
         return streak;
     },
 
     weekCalorieDeficit(db) {
-        const foods = db?.health?.foodLogs || [];
+        const foods = (db?.health?.foodLogs || []).filter(f => !f.deleted && f.date);
         const today = new Date();
         const weekAgo = new Date(today);
         weekAgo.setDate(weekAgo.getDate() - 7);
         const weekKey = weekAgo.toISOString().slice(0, 10);
-        const recentFoods = foods.filter(f => !f.deleted && f.date && f.date >= weekKey);
+        const recentFoods = foods.filter(f => f.date >= weekKey);
         if (!recentFoods.length) return null;
+
+        const recordedDates = new Set(recentFoods.map(f => f.date));
+        const recordedDays = recordedDates.size;
+        if (!recordedDays) return null;
+
         const totalCal = recentFoods.reduce((s, f) => s + Number(f.cal || 0), 0);
         const goal = Number(db?.health?.dietGoal?.dailyCal || 0);
         if (!goal) return null;
-        return Math.round((totalCal / 7) - goal);
+
+        const avgDailyCal = totalCal / recordedDays;
+        return Math.round(avgDailyCal - goal);
     },
 
     latestPR(db) {

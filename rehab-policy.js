@@ -539,24 +539,59 @@
     const meta = actionMetaForName(sourceText(action)) || {};
     const name = action.canonicalName || action.name || meta.canonicalName || '医嘱动作';
     const category = inferCategory(meta.categoryHint, name);
-    const spec = action.spec || action.suggestedSpec || action.reps || action.dosage || '5秒 × 12次 × 1组';
+    let spec = action.spec || action.suggestedSpec || action.defaultSpec;
+    let hasExplicitSpec = false;
+    if (spec && typeof spec === 'object') {
+      const sets = Number(spec.sets || 0);
+      const reps = Number(spec.reps || 0);
+      const work = Number(spec.work || 0);
+      if (sets > 0 && (reps > 0 || work > 0)) {
+        hasExplicitSpec = true;
+      }
+    }
+    if (!hasExplicitSpec) {
+      const raw = String(action.spec || action.suggestedSpec || action.reps || action.dosage || '').trim();
+      const sMatch = raw.match(/(\d+)\s*组/);
+      const rMatch = raw.match(/(\d+)\s*次/);
+      const wMatch = raw.match(/(\d+)\s*秒/);
+      if (sMatch || rMatch || wMatch) {
+        const alt = /侧|交替|单/.test(raw);
+        const sets = sMatch ? parseInt(sMatch[1], 10) : 3;
+        const reps = rMatch ? parseInt(rMatch[1], 10) : (wMatch ? 1 : 12);
+        const work = wMatch ? parseInt(wMatch[1], 10) : 0;
+        const mode = alt ? (work > 0 ? 'alt-hold' : 'alt-reps') : (work > 0 ? 'hold' : 'reps');
+        spec = { sets, reps, work, repRest: 20, actionRest: 60, isAlt: alt, mode };
+        hasExplicitSpec = true;
+      } else {
+        spec = null;
+      }
+    }
+    const missingDose = !hasExplicitSpec;
+    const requiresUserConfirm = missingDose || Boolean(action.requiresUserConfirm);
+    const userConfirmed = !requiresUserConfirm;
     return {
       id: `prescription-${action.actionKey || meta.actionKey || normalizeActionName(name)}-${Date.now().toString(36)}`,
       name,
+      category,
       type: category,
       spec,
+      invalidSpec: missingDose,
       status: 'todo',
       source: 'prescription',
-      prescriptionActionId: action.prescriptionActionId || '',
+      prescriptionActionId: action.prescriptionActionId || action.id || '',
+      prescriptionWeekStart: action.weekDate || action.weekStart || '',
       actionKey: action.actionKey || meta.actionKey || '',
       canonicalName: name,
-      progressionGroup: action.progressionGroup || meta.progressionGroup || '',
+      progressionGroup: action.progressionGroup || action.group || meta.progressionGroup || '',
+      group: action.group || action.progressionGroup || meta.progressionGroup || '',
       progressionLevel: Number(action.progressionLevel || meta.progressionLevel || 0),
       chainId: action.chainId || meta.chainId || '',
-      requiresUserConfirm: Boolean(action.requiresUserConfirm),
-      userConfirmed: !action.requiresUserConfirm,
-      policy: { source: 'prescription', prescriptionName: name, requiresUserConfirm: Boolean(action.requiresUserConfirm) },
-      aiReasoning: '补入最新医嘱中应保留的动作'
+      rehabStage: action.rehabStage || '',
+      equipment: Array.isArray(action.equipment) ? action.equipment : (meta.requiredEquipment || []),
+      requiresUserConfirm,
+      userConfirmed,
+      policy: { source: 'prescription', prescriptionName: name, requiresUserConfirm, missingDose },
+      aiReasoning: missingDose ? '最新医嘱动作，剂量待用户补充后执行' : '补入最新医嘱中应保留的动作'
     };
   }
 
@@ -887,6 +922,16 @@
     const decision = suggestion?.decision || '';
     delete next.nextProgressionSuggestion;
     if (!suggestion || suggestion.appliesTo !== 'future-only' || !['progress', 'volume-up', 'deload'].includes(decision)) return next;
+    if (['progress', 'volume-up'].includes(decision)) {
+      const fb = source.feedback || {};
+      const pain = Number(fb.painScore ?? fb.painLevel ?? fb.pain ?? 0);
+      const plannedSets = Number(source.spec?.sets || fb.plannedSets || 0);
+      const completedSets = typeof source.doneSets === 'number' ? source.doneSets : (typeof fb.actualSets === 'number' ? fb.actualSets : (source.status === 'done' ? plannedSets : 0));
+      const isPartial = source.status === 'in-progress' || Boolean(source.manualStop || fb.manualStop || fb.isPartial) || (plannedSets > 0 && completedSets < plannedSets);
+      if (pain >= 4 || fb.noIncrease || fb.keepNextTime || fb.unsuitable || fb.wantsContinue === false || isPartial) {
+        return next;
+      }
+    }
       const targetLevel = Number(suggestion.targetLevel || 0);
       if (targetLevel && chain?.levels?.length && targetLevel !== Number(source.currentLevel || 0)) {
         const target = chain.levels.find((item) => Number(item.lv) === targetLevel);
@@ -1076,6 +1121,8 @@
     buildAdjustmentBatch,
     restorePlanAdjustmentPlans,
     buildProgressionSuggestion,
-    applyFutureProgressionSuggestion
+    applyFutureProgressionSuggestion,
+    prescriptionTask
   };
+  root.rehabPolicy = root.planPolicy;
 })();

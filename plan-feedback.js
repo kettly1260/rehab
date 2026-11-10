@@ -21,14 +21,24 @@
     window.dataPlanFeedback = {
         _planFeedbackCtx: null,
 
-        openPlanFeedback(planId, taskId) {
+        openPlanFeedback(planId, taskId, options = {}) {
             const { plan, task } = this.findTask?.(planId, taskId) || {};
             if (!plan || !task) return;
             const sheet = qs('planFeedbackSheet');
             const body = qs('planFeedbackSheetBody');
             if (!sheet || !body) return;
-            this._planFeedbackCtx = { planId, taskId, rpe: Number(task.feedback?.rpe || 0) || 0 };
-            const feedback = task.feedback || {};
+            const prefill = options.prefill || {};
+            const feedback = { ...(task.feedback || {}), ...prefill };
+            const feedbackCtx = {
+                planId,
+                taskId,
+                rpe: Number(feedback.rpe || 0) || 0,
+                sessionId: options.sessionId || this._currentPlanSessionId || this.activeRun?.sessionId || null,
+                _handled: false
+            };
+            this._planFeedbackCtx = feedbackCtx;
+            if (window.dataPlanFeedback) window.dataPlanFeedback._planFeedbackCtx = feedbackCtx;
+            if (window.data) window.data._planFeedbackCtx = feedbackCtx;
             const painScore = feedback.painScore ?? feedback.painLevel ?? '';
             body.innerHTML = `
                 <div class="plan-feedback-sheet">
@@ -82,8 +92,11 @@
         },
 
         selectPlanFeedback(rpe) {
-            this._planFeedbackCtx = this._planFeedbackCtx || {};
-            this._planFeedbackCtx.rpe = Number(rpe || 0);
+            const ctx = this._planFeedbackCtx || window.data?._planFeedbackCtx || window.dataPlanFeedback?._planFeedbackCtx || {};
+            ctx.rpe = Number(rpe || 0);
+            this._planFeedbackCtx = ctx;
+            if (window.dataPlanFeedback) window.dataPlanFeedback._planFeedbackCtx = ctx;
+            if (window.data) window.data._planFeedbackCtx = ctx;
             document.querySelectorAll('[data-plan-rpe]').forEach((btn) => {
                 const active = Number(btn.getAttribute('data-plan-rpe')) === Number(rpe);
                 btn.classList.toggle('active', active);
@@ -91,26 +104,38 @@
             window.haptics?.light?.();
         },
 
-        closePlanFeedback() {
-            return window.navStack?.requestClose?.('modal', 'planFeedbackSheet') || this.closePlanFeedbackInternal();
+        closePlanFeedback(options = {}) {
+            return window.navStack?.requestClose?.('modal', 'planFeedbackSheet') || this.closePlanFeedbackInternal(options);
         },
 
-        closePlanFeedbackInternal() {
+        closePlanFeedbackInternal(options = {}) {
+            const ctx = this._planFeedbackCtx;
             const sheet = qs('planFeedbackSheet');
             sheet?.classList.add('hidden');
             sheet?.setAttribute('aria-hidden', 'true');
             this._planFeedbackCtx = null;
+            if (window.dataPlanFeedback) window.dataPlanFeedback._planFeedbackCtx = null;
+            if (window.data) window.data._planFeedbackCtx = null;
+            if (ctx && !options?.silent && !ctx._handled) {
+                ctx._handled = true;
+                this.afterPlanFeedback?.(ctx.planId, ctx.taskId, {
+                    didSaveFeedback: false,
+                    isModalClose: true,
+                    sessionId: ctx.sessionId
+                });
+            }
             return true;
         },
 
         skipPlanFeedback() {
             const ctx = this._planFeedbackCtx;
-            this.closePlanFeedback();
-            if (ctx) this.afterPlanFeedback?.(ctx.planId, ctx.taskId, false);
+            if (ctx) ctx._handled = true;
+            this.closePlanFeedback({ silent: true });
+            if (ctx) this.afterPlanFeedback?.(ctx.planId, ctx.taskId, { didSaveFeedback: false, sessionId: ctx.sessionId });
         },
 
         savePlanFeedback() {
-            const ctx = this._planFeedbackCtx;
+            const ctx = this._planFeedbackCtx || window.data?._planFeedbackCtx || window.dataPlanFeedback?._planFeedbackCtx;
             if (!ctx?.planId || !ctx?.taskId || !ctx.rpe) {
                 window.toast?.show?.('先选一个体感等级', 'info');
                 return;
@@ -129,9 +154,15 @@
                 doneAt: Date.now()
             });
             this.maybeApplyProgression?.(ctx.planId, ctx.taskId);
-            this.closePlanFeedback();
+            if (ctx) ctx._handled = true;
+            this.closePlanFeedback({ silent: true });
             this.render?.();
-            this.afterPlanFeedback?.(ctx.planId, ctx.taskId, true);
+            this.afterPlanFeedback?.(ctx.planId, ctx.taskId, { didSaveFeedback: true, sessionId: ctx.sessionId });
         }
     };
+
+    Object.defineProperty(window.dataPlanFeedback, '__runtimeStateKeys', {
+        value: ['_planFeedbackCtx'],
+        enumerable: false
+    });
 })();

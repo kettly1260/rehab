@@ -429,7 +429,7 @@ test('AI advice auto context includes training and diet only when weight questio
     assert.match(userContent, /【最近30天饮食记录】/);
     assert.match(userContent, /【最近30天训练记录】/);
     assert.match(userContent, /【最近30天体重记录】/);
-    assert.match(userContent, /【近6周康复中心处方】/);
+    assert.match(userContent, /【近6个版本康复中心处方】/);
 });
 
 test('AI advice prompt includes plans goals libraries and reports', () => {

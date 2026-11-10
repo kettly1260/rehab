@@ -14,7 +14,11 @@ Approved vocabulary:
 
 ## Modes
 
-`balanced` is the normal mode. `economy` turns V7 backdrop filters off and uses an opaque/translucent solid fallback. Reduced-motion and Save-Data environments automatically start in economy unless the persisted state already requests economy; a persisted balanced choice is also downgraded when those constraints are active.
+- `full`: Balanced geometry plus a slightly richer bounded temporary overlay/Soft Glass budget and stronger pointer-local Liquid highlight. It does not enable page-wide blur or an idle animation loop.
+- `balanced`: normal/recommended phone mode; restrained 8px navigation Soft Glass and 6px temporary overlay Glass.
+- `economy`: `backdrop-filter:none`, `filter:none`, no Liquid pseudo transition and an opaque/solid fallback while preserving layout.
+
+Reduced-motion and Save-Data environments resolve to Economy. A user-selected Full mode is a real persisted mode and survives reload on an unconstrained environment.
 
 The setting key is `rehab.v7.effects.v1`. It is presentation-only and does not alter user health/training data.
 
@@ -28,4 +32,8 @@ The setting key is `rehab.v7.effects.v1`. It is presentation-only and does not a
 - The effects controller schedules no RAF loop; pointer-local highlight values update only during pointer interaction.
 
 `auditEffectBudget()` exposes a browser-testable budget snapshot.
+
+## Final browser/performance evidence
+
+`test/v7-effects.browser.test.mjs` verifies all three modes on the real Today CTA and Bottom Nav, including layout invariance, interaction-only Full highlight, Economy computed `none` filter/backdrop, persistence and backdrop audit. `perf:effects` on system Edge 151 at 390 x 844 completed with `ok:true`, no page errors/failures, zero running CSS animations, zero permanent `will-change` and zero nested backdrops in every Balanced/Economy scenario. Records chart/scroll frame p95 measured 12.1ms in Balanced and 6.5ms in Economy in the final run.
 

@@ -131,17 +131,17 @@
                 return;
             }
             const currentCount = this._planActions().length;
+            const alreadyMatches = this.planMatchesRoutine ? this.planMatchesRoutine(r) : false;
             return this._openModal({
-                title: '导入方案',
+                title: alreadyMatches ? '方案已在当前计划' : '导入方案',
                 icon: 'library_books',
                 bodyHtml: `
                     <div style="color:var(--md-sys-on-surface-variant);font-size:13px;line-height:1.45">
-                        当前已有 <b style="color:var(--md-sys-on-surface)">${currentCount}</b> 个动作。<br>
-                        选择导入方式：
+                        ${alreadyMatches ? `当前计划已包含方案「<b style="color:var(--md-sys-on-surface)">${this.escapeHtml(r.name || '未命名')}</b>」的内容（共 ${currentCount} 个动作）。<br>请确认是否重新载入或仍然追加：` : `当前已有 <b style="color:var(--md-sys-on-surface)">${currentCount}</b> 个动作。<br>选择导入方式：`}
                     </div>
                     <div style="margin-top:10px;display:grid;gap:8px">
                         <button class="md-btn md-btn-tonal" type="button" data-rl-import="append">
-                            <span class="material-symbols-rounded">add</span> 追加到当前计划
+                            <span class="material-symbols-rounded">add</span> ${alreadyMatches ? '仍然追加动作' : '追加到当前计划'}
                         </button>
                         <button class="md-btn md-btn-filled" type="button" data-rl-import="replace">
                             <span class="material-symbols-rounded">swap_horiz</span> 替换当前计划

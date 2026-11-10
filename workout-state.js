@@ -43,12 +43,17 @@ const workoutState = {
                 totalRep: document.getElementById('totalRep')?.innerText || ''
             },
             cardio: {
-                isRunning: cardio.isRunning,
-                isPaused: cardio.isPaused,
-                seconds: cardio.seconds,
-                targetAnnounced: cardio.targetAnnounced
+                isRunning: typeof cardio !== 'undefined' ? cardio.isRunning : (typeof window !== 'undefined' && window.cardio?.isRunning || false),
+                isPaused: typeof cardio !== 'undefined' ? cardio.isPaused : (typeof window !== 'undefined' && window.cardio?.isPaused || false),
+                seconds: typeof cardio !== 'undefined' ? cardio.seconds : (typeof window !== 'undefined' && window.cardio?.seconds || 0),
+                targetAnnounced: typeof cardio !== 'undefined' ? cardio.targetAnnounced : (typeof window !== 'undefined' && window.cardio?.targetAnnounced || false)
             },
-            strength: strengthSnapshot
+            strength: strengthSnapshot,
+            planContext: (typeof workout !== 'undefined' && workout?.planContext) || (typeof window !== 'undefined' && window.data?.activeRun ? JSON.parse(JSON.stringify(window.data.activeRun)) : null),
+            activeWorkoutIntentFilter: (typeof window !== 'undefined' && window.data?._activeWorkoutIntentFilter) || null,
+            currentPlanSessionId: (typeof window !== 'undefined' && window.data?._currentPlanSessionId) || null,
+            currentPlanSessionPlanId: (typeof window !== 'undefined' && window.data?._currentPlanSessionPlanId) || null,
+            workoutActionsSnapshot: (typeof workout !== 'undefined' && Array.isArray(workout._workoutActionsSnapshot)) ? JSON.parse(JSON.stringify(workout._workoutActionsSnapshot)) : null
         };
     },
 
@@ -198,6 +203,24 @@ const workoutState = {
         cardio.timer = setInterval(() => cardio.tick(), 1000);
         workout._lastActiveAt = new Date(snapshot.updatedAt || Date.now()).getTime();
         this.compensateElapsed();
+        if (snapshot.planContext) {
+            workout.planContext = snapshot.planContext;
+            if (typeof window !== 'undefined' && window.data) {
+                window.data.activeRun = JSON.parse(JSON.stringify(snapshot.planContext));
+            }
+        }
+        if (snapshot.activeWorkoutIntentFilter && typeof window !== 'undefined' && window.data) {
+            window.data._activeWorkoutIntentFilter = snapshot.activeWorkoutIntentFilter;
+        }
+        if (snapshot.currentPlanSessionId && typeof window !== 'undefined' && window.data) {
+            window.data._currentPlanSessionId = snapshot.currentPlanSessionId;
+        }
+        if (snapshot.currentPlanSessionPlanId && typeof window !== 'undefined' && window.data) {
+            window.data._currentPlanSessionPlanId = snapshot.currentPlanSessionPlanId;
+        }
+        if (typeof window !== 'undefined' && window.data?.updatePlanWorkoutBanner) {
+            window.data.updatePlanWorkoutBanner();
+        }
         workout.showToast('已恢复未完成的有氧训练');
     },
 
@@ -228,8 +251,29 @@ const workoutState = {
             workout.updateUI();
         }, 1000);
         workout._lastActiveAt = new Date(snapshot.updatedAt || Date.now()).getTime();
+        if (snapshot.planContext) {
+            workout.planContext = snapshot.planContext;
+            if (typeof window !== 'undefined' && window.data) {
+                window.data.activeRun = JSON.parse(JSON.stringify(snapshot.planContext));
+            }
+        }
+        if (snapshot.activeWorkoutIntentFilter && typeof window !== 'undefined' && window.data) {
+            window.data._activeWorkoutIntentFilter = snapshot.activeWorkoutIntentFilter;
+        }
+        if (snapshot.currentPlanSessionId && typeof window !== 'undefined' && window.data) {
+            window.data._currentPlanSessionId = snapshot.currentPlanSessionId;
+        }
+        if (snapshot.currentPlanSessionPlanId && typeof window !== 'undefined' && window.data) {
+            window.data._currentPlanSessionPlanId = snapshot.currentPlanSessionPlanId;
+        }
+        if (snapshot.workoutActionsSnapshot && Array.isArray(snapshot.workoutActionsSnapshot)) {
+            workout._workoutActionsSnapshot = snapshot.workoutActionsSnapshot;
+        }
         workoutEngine.restore(snapshot.strength, snapshot.labels, snapshot.updatedAt);
         this.compensateElapsed();
+        if (typeof window !== 'undefined' && window.data?.updatePlanWorkoutBanner) {
+            window.data.updatePlanWorkoutBanner();
+        }
         workout.showToast('已恢复未完成的力量训练');
     }
 };

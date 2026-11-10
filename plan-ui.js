@@ -97,9 +97,11 @@
                 el.innerHTML = next;
                 if (el.dataset) el.dataset.todayShell = 'ready';
             };
-            fillIfNeeded(timeline, ctx.renderTodayTimeline?.() || '');
+            const trendHtml = `${ctx.renderTodayCompletionTrend?.() || ''}${ctx.renderTodayPrimaryAction?.() || ''}`;
+            fillIfNeeded(timeline, trendHtml || ctx.renderTodayTimeline?.() || '');
             if (aiCard) {
-                let aiHtml = ctx.renderTodayAiReminder?.() || ctx.renderContextAiCard?.('today') || '';
+                let aiHtml = ctx.renderTodayTimeline?.() || '';
+                aiHtml += ctx.renderTodayAiReminder?.() || ctx.renderContextAiCard?.('today') || '';
                 if (ctx.renderWeeklyAiInsightCard) aiHtml += ctx.renderWeeklyAiInsightCard();
                 fillIfNeeded(aiCard, aiHtml);
             }
@@ -204,6 +206,7 @@
                 ['已跳过', 'skipped', items.filter((item) => item.status === 'skipped')]
             ];
             return `<div class="plan-task-drawer"><div class="plan-drawer-summary ${planStatusClass(plan.type)}"><span class="material-symbols-rounded plan-drawer-summary-icon">${planMeta.icon}</span><span class="plan-drawer-summary-copy"><strong>${this.escapeHtml(plan.title || planMeta.label)}</strong><small>${completion.total ? `${completion.done}/${completion.total} 完成` : '暂无待完成训练'}${plan.notes ? ` · ${this.escapeHtml(plan.notes)}` : ''}</small></span><button class="md-btn md-btn-tonal plan-cancel-day-btn" type="button" data-cancel-plan-id="${this.escapeHtml(plan.id)}" title="取消今日计划" aria-label="取消今日计划"><span class="material-symbols-rounded">event_busy</span><span>取消计划</span></button></div>
+                <div class="plan-drawer-toolbar" style="display:flex; justify-content:flex-end; margin:8px 0;"><button class="md-btn md-btn-tonal plan-add-task-btn" type="button" data-open-add-task-plan-id="${this.escapeHtml(plan.id)}"><span class="material-symbols-rounded">add</span> 添加动作</button></div>
                 ${sections.map(([label, key, list]) => `
                     <section class="plan-section plan-section-${key}"><div class="plan-section-head"><strong>${label}</strong><small>${list.length}</small></div>
                         ${list.length ? list.map((task, index) => this.renderPlanTaskRow(plan.id, task, index + 1, false)).join('') : '<div class="plan-empty">暂无</div>'}
@@ -228,6 +231,35 @@
                     event.preventDefault();
                     this.cancelDailyPlanConfirm?.(btn.getAttribute('data-cancel-plan-id') || '');
                 });
+            });
+            modal.addEventListener('click', (event) => {
+                const addBtn = event.target.closest('[data-open-add-task-plan-id]');
+                if (addBtn) {
+                    event.preventDefault();
+                    const pId = addBtn.getAttribute('data-open-add-task-plan-id') || planId;
+                    this.openAddPlanTaskModal?.(pId);
+                    return;
+                }
+                const actionBtn = event.target.closest('[data-plan-task-action]');
+                if (actionBtn) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const action = actionBtn.getAttribute('data-plan-task-action');
+                    const pId = actionBtn.getAttribute('data-plan-id') || planId;
+                    const tId = actionBtn.getAttribute('data-task-id');
+                    if (action === 'edit') this.openPlanTaskEdit?.(pId, tId);
+                    else if (action === 'done') this.markPlanTaskDone?.(pId, tId);
+                    else if (action === 'menu') this.openPlanTaskMenu?.(pId, tId);
+                    return;
+                }
+                const mainBtn = event.target.closest('[data-plan-task-tap-plan-id]');
+                if (mainBtn) {
+                    event.preventDefault();
+                    const pId = mainBtn.getAttribute('data-plan-task-tap-plan-id') || planId;
+                    const tId = mainBtn.getAttribute('data-plan-task-tap-task-id');
+                    this.handlePlanTaskTap?.(pId, tId);
+                    return;
+                }
             });
             document.body.appendChild(modal);
             this._planTaskDrawerEl = modal;
@@ -279,11 +311,13 @@
             const policyBadge = task.requiresUserConfirm
                 ? `<span class="plan-policy-badge ${task.userConfirmed ? 'is-confirmed' : 'is-warning'}">${confirmMeta.badge}</span>`
                 : '';
-            return `<div class="plan-task-row ${meta.className}"><button class="plan-task-main" type="button" onclick="data.handlePlanTaskTap('${planId}','${task.id}')"><span class="plan-task-order">${index}</span><span class="plan-task-body"><span class="plan-task-title"><strong>${this.escapeHtml(task.name || '未命名任务')}</strong><em><span class="material-symbols-rounded">${meta.icon}</span>${meta.label}</em></span>
+            const safePlanId = this.escapeHtml(planId);
+            const safeTaskId = this.escapeHtml(task.id);
+            return `<div class="plan-task-row ${meta.className}"><button class="plan-task-main" type="button" data-plan-task-tap-plan-id="${safePlanId}" data-plan-task-tap-task-id="${safeTaskId}"><span class="plan-task-order">${index}</span><span class="plan-task-body"><span class="plan-task-title"><strong>${this.escapeHtml(task.name || '未命名任务')}</strong><em><span class="material-symbols-rounded">${meta.icon}</span>${meta.label}</em></span>
                         ${policyBadge}
                         <small>${taskSpecText(task)}${task.currentLevel ? ` · Lv${task.currentLevel}` : ''}${task.userOverride ? ' · 已锁定' : ''}${task.invalidSpec ? ' · ⚠️ 参数不完整' : ''}</small>
                         ${!compact && doneMeta}
-                    </span></button><div class="plan-task-actions"><button class="md-icon-btn" type="button" onclick="event.stopPropagation();data.openPlanTaskEdit('${planId}','${task.id}')" aria-label="编辑动作"><span class="material-symbols-rounded">edit</span></button><button class="md-icon-btn" type="button" onclick="event.stopPropagation();data.markPlanTaskDone('${planId}','${task.id}')" aria-label="手动完成"><span class="material-symbols-rounded">done</span></button><button class="md-icon-btn" type="button" onclick="event.stopPropagation();data.openPlanTaskMenu('${planId}','${task.id}')" aria-label="更多"><span class="material-symbols-rounded">more_vert</span></button></div></div>`;
+                    </span></button><div class="plan-task-actions"><button class="md-icon-btn" type="button" data-plan-task-action="edit" data-plan-id="${safePlanId}" data-task-id="${safeTaskId}" aria-label="编辑动作"><span class="material-symbols-rounded">edit</span></button><button class="md-icon-btn" type="button" data-plan-task-action="done" data-plan-id="${safePlanId}" data-task-id="${safeTaskId}" aria-label="手动完成"><span class="material-symbols-rounded">done</span></button><button class="md-icon-btn" type="button" data-plan-task-action="menu" data-plan-id="${safePlanId}" data-task-id="${safeTaskId}" aria-label="更多"><span class="material-symbols-rounded">more_vert</span></button></div></div>`;
         },
 
         renderPlanManualStrip() {
@@ -350,8 +384,13 @@
                 bodyHtml: `
                     <div class="md-grid modal-grid" style="gap:10px"><div class="md-field span-full"><input id="planEditName" type="text" placeholder=" " autocomplete="off" value="${this.escapeHtml(task.name || '')}" oninput="data.renderPlanEditActionSuggestions?.(this)" onfocus="data.renderPlanEditActionSuggestions?.(this)"><label>动作名称</label></div><div id="planEditActionSuggestions" class="plan-action-suggestions span-full"></div><div class="md-field"><select id="planEditCategory"><option value="warmup" ${category === 'warmup' ? 'selected' : ''}>热身</option><option value="main" ${category === 'main' ? 'selected' : ''}>主训练</option><option value="cooldown" ${category === 'cooldown' ? 'selected' : ''}>拉伸/放松</option></select><label>阶段</label></div><div class="md-field"><input id="planEditSets" type="number" placeholder=" " value="${Number(current.sets || 1)}"><label>组数</label></div><div class="md-field"><input id="planEditReps" type="number" placeholder=" " value="${Number(current.reps || 0)}"><label>次数</label></div><div class="md-field"><input id="planEditWork" type="number" placeholder=" " value="${Number(current.work || 0)}"><label>时长（秒）</label></div><div class="md-field"><input id="planEditRest" type="number" placeholder=" " value="${Number(current.actionRest || 0)}"><label>组间休息</label></div><div class="md-field"><input id="planEditRepRest" type="number" min="0" placeholder=" " value="${Number(current.repRest || 0)}"><label>次/侧间休息（秒）</label></div><label class="plan-edit-alt"><input id="planEditIsAlt" type="checkbox" ${current.isAlt ? 'checked' : ''}><span>双侧交替（左右换边）</span></label><div class="md-field span-full"><input id="planEditReason" type="text" placeholder=" " value="${this.escapeHtml(task.aiReasoning || '')}"><label>修改理由/备注（可选）</label></div></div>`,
                 actionsHtml: `
-                    <button class="md-btn" type="button" data-modal-close>取消</button><button class="md-btn md-btn-filled" type="button" onclick="data.savePlanTaskEdit('${planId}','${taskId}')">保存</button>
-                `
+                    <button class="md-btn" type="button" data-modal-close>取消</button><button class="md-btn md-btn-filled" type="button" data-save-task-edit>保存</button>
+                `,
+                onMount: (root, close) => {
+                    root.querySelector('[data-save-task-edit]')?.addEventListener('click', () => {
+                        this.savePlanTaskEdit(planId, taskId);
+                    });
+                }
             });
         },
 
@@ -366,17 +405,23 @@
             const category = String(document.getElementById('planEditCategory')?.value || task.category || 'main');
             task.name = nextName;
             task.category = ['warmup', 'main', 'cooldown'].includes(category) ? category : 'main';
+            const curSpec = task.spec || {};
             task.spec = {
-                ...task.spec,
-                sets: Math.max(1, Number(document.getElementById('planEditSets')?.value || task.spec.sets || 1)),
-                reps: Math.max(0, Number(document.getElementById('planEditReps')?.value || task.spec.reps || 0)),
-                work: Math.max(0, Number(document.getElementById('planEditWork')?.value || task.spec.work || 0)),
-                actionRest: Math.max(0, Number(document.getElementById('planEditRest')?.value || task.spec.actionRest || 0)),
-                repRest: Math.max(0, Number(document.getElementById('planEditRepRest')?.value || task.spec.repRest || 0)),
+                ...curSpec,
+                sets: Math.max(1, Number(document.getElementById('planEditSets')?.value || curSpec.sets || 1)),
+                reps: Math.max(0, Number(document.getElementById('planEditReps')?.value || curSpec.reps || 0)),
+                work: Math.max(0, Number(document.getElementById('planEditWork')?.value || curSpec.work || 0)),
+                actionRest: Math.max(0, Number(document.getElementById('planEditRest')?.value || curSpec.actionRest || 0)),
+                repRest: Math.max(0, Number(document.getElementById('planEditRepRest')?.value || curSpec.repRest || 0)),
                 isAlt: !!document.getElementById('planEditIsAlt')?.checked
             };
             task.aiReasoning = String(document.getElementById('planEditReason')?.value || '').trim();
-            task.invalidSpec = (task.spec.reps <= 0 && task.spec.work <= 0);
+            const hasValidDose = (Number(task.spec.reps) > 0 || Number(task.spec.work) > 0);
+            task.invalidSpec = !hasValidDose;
+            if (hasValidDose) {
+                task.requiresUserConfirm = false;
+                task.userConfirmed = true;
+            }
             const choiceId = nameInput?.getAttribute?.('data-plan-edit-choice-id') || '';
             const choice = this.resolvePlanActionChoiceForText?.(task.name, choiceId) || null;
             if (choice || nameChanged) {
@@ -406,8 +451,162 @@
             this._closeActiveModal();
         },
 
+        openAddPlanTaskModal(planId) {
+            const activePlans = this.activeRecords?.(this.db.dailyPlans || []) || [];
+            const plan = planId ? activePlans.find((item) => item.id === planId) : this.getTodayDailyPlan?.();
+            if (!plan) return;
+            const policyContext = window.rehabPolicy?.buildPlanPolicyContext?.({ db: this.db, types: [plan.type || 'rehab'] });
+            const candidatePrescriptions = policyContext?.mustKeepActions?.length
+                ? policyContext.mustKeepActions
+                : (policyContext?.preferredActions?.length ? policyContext.preferredActions : (policyContext?.prescriptionActions || []));
+            const blockedKeys = new Set((policyContext?.hardBlocks || []).map((b) => b.actionKey || b.canonicalName || b.name));
+            const validPrescriptions = candidatePrescriptions.filter((act) => {
+                const key = act.actionKey || act.canonicalName || act.name;
+                return !blockedKeys.has(key) && act.policyType !== 'blocked' && act.status !== 'dropped';
+            });
+
+            return this._openModal({
+                title: '添加计划动作',
+                icon: 'add_circle',
+                bodyHtml: `
+                    <div class="md-grid modal-grid" style="gap:10px">
+                        <div class="md-field span-full">
+                            <input id="planAddName" type="text" placeholder=" " autocomplete="off" oninput="data.renderPlanEditActionSuggestions?.(this)" onfocus="data.renderPlanEditActionSuggestions?.(this)">
+                            <label>动作名称</label>
+                        </div>
+                        <div id="planAddActionSuggestions" class="plan-action-suggestions span-full"></div>
+                        ${validPrescriptions.length ? `
+                            <div class="span-full" style="margin-top:-4px; margin-bottom:4px;">
+                                <small style="display:block; margin-bottom:6px; opacity:0.8;">可直接选择处方动作：</small>
+                                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                                    ${validPrescriptions.slice(0, 6).map((act) => {
+                                        const name = act.displayName || act.canonicalName || act.name;
+                                        return `<button type="button" class="md-btn md-btn-tonal plan-fill-prescription-btn" style="padding:4px 8px; font-size:12px; height:auto; min-height:28px;" data-action-name="${this.escapeHtml(name)}" data-prescription-id="${this.escapeHtml(act.prescriptionActionId || act.id || '')}">${this.escapeHtml(name)}</button>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="md-field">
+                            <select id="planAddCategory">
+                                <option value="main" selected>主训练</option>
+                                <option value="warmup">热身</option>
+                                <option value="cooldown">拉伸/放松</option>
+                            </select>
+                            <label>阶段</label>
+                        </div>
+                        <div class="md-field"><input id="planAddSets" type="number" placeholder=" " value="3"><label>组数</label></div>
+                        <div class="md-field"><input id="planAddReps" type="number" placeholder=" " value="12"><label>次数</label></div>
+                        <div class="md-field"><input id="planAddWork" type="number" placeholder=" " value="0"><label>时长（秒）</label></div>
+                        <div class="md-field"><input id="planAddRest" type="number" placeholder=" " value="60"><label>组间休息</label></div>
+                        <div class="md-field"><input id="planAddRepRest" type="number" min="0" placeholder=" " value="20"><label>次/侧间休息（秒）</label></div>
+                        <label class="plan-edit-alt"><input id="planAddIsAlt" type="checkbox"><span>双侧交替（左右换边）</span></label>
+                        <div class="md-field span-full"><input id="planAddReason" type="text" placeholder=" " value=""><label>修改理由/备注（可选）</label></div>
+                    </div>`,
+                actionsHtml: `
+                    <button class="md-btn" type="button" data-modal-close>取消</button>
+                    <button class="md-btn md-btn-filled plan-save-task-add-btn" type="button" data-plan-id="${this.escapeHtml(plan.id)}">添加并保存</button>
+                `,
+                onMount: (root, close) => {
+                    root.querySelectorAll('.plan-fill-prescription-btn').forEach((btn) => {
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const actName = btn.getAttribute('data-action-name') || '';
+                            const pActId = btn.getAttribute('data-prescription-id') || '';
+                            this.fillPlanAddAction(actName, pActId);
+                        });
+                    });
+                    const saveBtn = root.querySelector('.plan-save-task-add-btn');
+                    if (saveBtn) {
+                        saveBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const pId = saveBtn.getAttribute('data-plan-id') || plan.id;
+                            this.savePlanTaskAdd(pId);
+                        });
+                    }
+                }
+            });
+        },
+
+        fillPlanAddAction(name, prescriptionActionId = '') {
+            const input = document.getElementById('planAddName');
+            if (input) {
+                input.value = name;
+                if (prescriptionActionId) input.setAttribute('data-plan-edit-choice-id', prescriptionActionId);
+            }
+        },
+
+        savePlanTaskAdd(planId) {
+            const activePlans = this.activeRecords?.(this.db.dailyPlans || []) || [];
+            const plan = planId ? activePlans.find((item) => item.id === planId) : this.getTodayDailyPlan?.();
+            if (!plan) return;
+            const nameInput = document.getElementById('planAddName');
+            const name = String(nameInput?.value || '').trim();
+            if (!name) {
+                window.toast?.show?.('请输入动作名称', 'warning');
+                return;
+            }
+            const category = String(document.getElementById('planAddCategory')?.value || 'main');
+            const sets = Math.max(1, Number(document.getElementById('planAddSets')?.value || 3));
+            const reps = Math.max(0, Number(document.getElementById('planAddReps')?.value || 0));
+            const work = Math.max(0, Number(document.getElementById('planAddWork')?.value || 0));
+            const actionRest = Math.max(0, Number(document.getElementById('planAddRest')?.value || 60));
+            const repRest = Math.max(0, Number(document.getElementById('planAddRepRest')?.value || 20));
+            const isAlt = !!document.getElementById('planAddIsAlt')?.checked;
+            const reason = String(document.getElementById('planAddReason')?.value || '').trim();
+            const choiceId = nameInput?.getAttribute?.('data-plan-edit-choice-id') || '';
+            const choice = this.resolvePlanActionChoiceForText?.(name, choiceId) || null;
+            const meta = choice || window.planPolicy?.actionMetaForName?.([name, reason].filter(Boolean).join(' ')) || {};
+
+            const taskData = {
+                name,
+                category: ['warmup', 'main', 'cooldown'].includes(category) ? category : 'main',
+                spec: {
+                    sets,
+                    reps,
+                    work,
+                    actionRest,
+                    repRest,
+                    isAlt,
+                    mode: isAlt ? (work > 0 ? 'alt-hold' : 'alt-reps') : (work > 0 ? 'hold' : 'reps')
+                },
+                userOverride: true,
+                aiReasoning: reason,
+                actionKey: choice?.actionKey || meta.actionKey || '',
+                canonicalName: choice?.canonicalName || meta.canonicalName || name,
+                progressionGroup: choice?.progressionGroup || meta.progressionGroup || '',
+                progressionLevel: Number(choice?.progressionLevel ?? meta.progressionLevel ?? 0),
+                chainId: choice?.chainId || meta.chainId || '',
+                sourceActionId: choice?.sourceActionId || '',
+                prescriptionActionId: choice?.prescriptionActionId || '',
+                policy: {
+                    source: choice?.source || 'user-add',
+                    choiceLabel: choice?.sourceLabel || '手动添加',
+                    prescriptionName: choice?.source === 'prescription' ? choice.name : ''
+                }
+            };
+            this.addTask?.(plan.id, taskData);
+            this._closeActiveModal();
+            this.refreshPlanTaskDrawer?.(plan.id);
+            this.renderTodayPage?.();
+            window.toast?.show?.('已添加动作', 'success');
+        },
+
+        refreshPlanTaskDrawer(planId) {
+            const b = document.getElementById('planTaskDrawerBody');
+            if (b) b.innerHTML = this.renderPlanTaskDrawerBody?.(planId);
+        },
+
         markPlanTaskDone(planId, taskId) {
-            const { task } = this.findTask?.(planId, taskId) || {};
+            const { plan, task } = this.findTask?.(planId, taskId) || {};
+            if (!task) return;
+            const spec = task.spec || {};
+            const reps = Number(spec.reps || 0);
+            const work = Number(spec.work || 0);
+            const hasValidDose = !task.invalidSpec && (reps > 0 || work > 0);
+            if (!hasValidDose) {
+                window.toast?.show?.('请先补充动作剂量参数后再标记完成', 'warning');
+                return this.openPlanTaskEdit?.(planId, taskId);
+            }
             if (task?.requiresUserConfirm && !task.userConfirmed) {
                 const confirmMeta = taskConfirmMeta(task);
                 return this._openModal({
@@ -415,29 +614,109 @@
                     icon: 'verified',
                     bodyHtml: `<p class="md-muted">${this.escapeHtml(task.name || '此动作')} ${confirmMeta.detail}确认后标记完成并记录反馈。</p>`,
                     actionsHtml: `
-                        <button class="md-btn" type="button" data-modal-close>取消</button><button class="md-btn md-btn-filled" type="button" onclick="data.confirmPlanTaskSuggestion('${planId}','${taskId}', { silent: true, keepModalOpen: true }); data.markPlanTaskDone('${planId}','${taskId}')">确认并完成</button>
-                    `
+                        <button class="md-btn" type="button" data-modal-close>取消</button><button class="md-btn md-btn-filled" type="button" data-confirm-mark-done>确认并完成</button>
+                    `,
+                    onMount: (root, close) => {
+                        root.querySelector('[data-confirm-mark-done]')?.addEventListener('click', () => {
+                            this.confirmPlanTaskSuggestion?.(planId, taskId, { silent: true, keepModalOpen: true });
+                            close();
+                            this.markPlanTaskDone(planId, taskId);
+                        });
+                    }
                 });
             }
             this.updateItemStatus?.(planId, taskId, 'done');
+            this.appendManualPlanHistory?.(plan, task);
             this.openPlanFeedback?.(planId, taskId);
             this.render?.();
         },
 
+        appendManualPlanHistory(plan, task) {
+            if (!plan || !task) return false;
+            const action = this.buildWorkoutActionFromPlanTask(task, { asCooldown: task.category === 'cooldown' });
+            const record = {
+                id: this.generateRecordId?.('history') || `history-${Date.now()}`,
+                date: new Date().toLocaleString(),
+                dayKey: this.logicalDateKey?.() || this.dateKey?.(new Date()) || '',
+                duration: 0,
+                actions: [action],
+                actualSets: [],
+                plan: true,
+                planType: plan.type || task.planType || 'rehab',
+                planId: plan.id,
+                planTaskId: task.id,
+                planManualDone: true,
+                updatedAt: Date.now(),
+                deleted: false
+            };
+            if (this.history?.append) this.history.append(record);
+            else if (Array.isArray(this.db.history)) this.db.history.unshift(record);
+            else return false;
+            return true;
+        },
+
         openPlanTaskMenu(planId, taskId) {
-            const { task } = this.findTask?.(planId, taskId) || {};
+            const { plan, task } = this.findTask?.(planId, taskId) || {};
             if (!task) return;
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             const tomorrowKey = this.dateKey(tomorrow);
             const confirmMeta = taskConfirmMeta(task);
+            const items = (plan?.items || []).filter((i) => !i.deleted && (i.status === task.status || (task.status === 'todo' && i.status === 'in-progress') || (task.status === 'in-progress' && i.status === 'todo')));
+            const itemIndex = items.findIndex((i) => i.id === taskId);
+            const canMoveUp = itemIndex > 0;
+            const canMoveDown = itemIndex >= 0 && itemIndex < items.length - 1;
             return this._openModal({
                 title: this.escapeHtml(task.name || '任务'),
                 icon: 'more_vert',
                 bodyHtml: `<div class="weekly-plan-picker">
-                    ${task.requiresUserConfirm && !task.userConfirmed ? `<button class="model-picker-row plan-policy-confirm-row" type="button" onclick="data.confirmPlanTaskSuggestion('${planId}','${taskId}')"><span class="material-symbols-rounded">verified</span><span class="model-picker-main"><strong>${confirmMeta.title}</strong><small>${confirmMeta.detail}确认后执行</small></span></button>` : ''}
-                    <button class="model-picker-row" type="button" onclick="data.openPlanTaskEdit('${planId}','${taskId}')"><span class="material-symbols-rounded">edit</span><span class="model-picker-main"><strong>编辑动作</strong><small>临时修改名称、阶段和训练参数</small></span></button><button class="model-picker-row" type="button" onclick="data.movePlanTaskTo('${planId}','${taskId}','${this.logicalDateKey?.() || this.dateKey(new Date())}')"><span class="material-symbols-rounded">today</span><span class="model-picker-main"><strong>移到今天</strong><small>回到当前日期执行</small></span></button><button class="model-picker-row" type="button" onclick="data.movePlanTaskTo('${planId}','${taskId}','${tomorrowKey}')"><span class="material-symbols-rounded">event</span><span class="model-picker-main"><strong>移到明天</strong><small>延后一天执行</small></span></button><button class="model-picker-row" type="button" onclick="data.togglePlanTaskLock('${planId}','${taskId}')"><span class="material-symbols-rounded">${task.userOverride ? 'lock_open' : 'lock'}</span><span class="model-picker-main"><strong>${task.userOverride ? '取消锁定' : '锁定任务'}</strong><small>锁定后 AI 不覆盖</small></span></button><button class="model-picker-row" type="button" onclick="data.deletePlanTaskConfirm('${planId}','${taskId}')"><span class="material-symbols-rounded">delete</span><span class="model-picker-main"><strong>删除任务</strong><small>软删除，可同步</small></span></button></div>`,
-                actionsHtml: `<button class="md-btn" type="button" data-modal-close>关闭</button>`
+                    ${task.requiresUserConfirm && !task.userConfirmed ? `<button class="model-picker-row plan-policy-confirm-row" type="button" data-menu-action="confirm-suggestion"><span class="material-symbols-rounded">verified</span><span class="model-picker-main"><strong>${confirmMeta.title}</strong><small>${confirmMeta.detail}确认后执行</small></span></button>` : ''}
+                    ${task.status !== 'done' && task.status !== 'skipped' ? `<button class="model-picker-row" type="button" data-menu-action="skip-task"><span class="material-symbols-rounded">skip_next</span><span class="model-picker-main"><strong>跳过动作</strong><small>标记跳过并继续后续训练</small></span></button>` : ''}
+                    <button class="model-picker-row" type="button" data-menu-action="edit-task" data-handler="data.openPlanTaskEdit"><span class="material-symbols-rounded">edit</span><span class="model-picker-main"><strong>编辑动作</strong><small>临时修改名称、阶段和训练参数</small></span></button>
+                    ${canMoveUp ? `<button class="model-picker-row" type="button" data-task-order-delta="-1"><span class="material-symbols-rounded">arrow_upward</span><span class="model-picker-main"><strong>上移动作</strong><small>提前一个顺位执行</small></span></button>` : ''}
+                    ${canMoveDown ? `<button class="model-picker-row" type="button" data-task-order-delta="1"><span class="material-symbols-rounded">arrow_downward</span><span class="model-picker-main"><strong>下移动作</strong><small>延后一个顺位执行</small></span></button>` : ''}
+                    <button class="model-picker-row" type="button" data-menu-action="move-today"><span class="material-symbols-rounded">today</span><span class="model-picker-main"><strong>移到今天</strong><small>回到当前日期执行</small></span></button>
+                    <button class="model-picker-row" type="button" data-menu-action="move-tomorrow"><span class="material-symbols-rounded">event</span><span class="model-picker-main"><strong>移到明天</strong><small>延后一天执行</small></span></button>
+                    <button class="model-picker-row" type="button" data-menu-action="toggle-lock"><span class="material-symbols-rounded">${task.userOverride ? 'lock_open' : 'lock'}</span><span class="model-picker-main"><strong>${task.userOverride ? '取消锁定' : '锁定任务'}</strong><small>锁定后 AI 不覆盖</small></span></button>
+                    <button class="model-picker-row" type="button" data-menu-action="delete-confirm"><span class="material-symbols-rounded">delete</span><span class="model-picker-main"><strong>删除任务</strong><small>软删除，可同步</small></span></button>
+                </div>`,
+                actionsHtml: `<button class="md-btn" type="button" data-modal-close>关闭</button>`,
+                onMount: (root, close) => {
+                    root.querySelectorAll('[data-task-order-delta]').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            const delta = Number(btn.getAttribute('data-task-order-delta') || 0);
+                            if (delta) {
+                                this.movePlanTaskOrder?.(planId, taskId, delta);
+                                close();
+                                this.refreshPlanTaskDrawer?.(planId);
+                                this.render?.();
+                            }
+                        });
+                    });
+                    root.querySelectorAll('[data-menu-action]').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            const action = btn.getAttribute('data-menu-action');
+                            close();
+                            if (action === 'confirm-suggestion') {
+                                this.confirmPlanTaskSuggestion?.(planId, taskId);
+                            } else if (action === 'skip-task') {
+                                this.skipPlanTask?.(planId, taskId);
+                            } else if (action === 'edit-task') {
+                                this.openPlanTaskEdit?.(planId, taskId);
+                            } else if (action === 'move-today') {
+                                this.movePlanTaskTo?.(planId, taskId, this.logicalDateKey?.() || this.dateKey(new Date()));
+                            } else if (action === 'move-tomorrow') {
+                                this.movePlanTaskTo?.(planId, taskId, tomorrowKey);
+                            } else if (action === 'toggle-lock') {
+                                this.togglePlanTaskLock?.(planId, taskId);
+                            } else if (action === 'delete-confirm') {
+                                this.deletePlanTaskConfirm?.(planId, taskId);
+                            }
+                            this.refreshPlanTaskDrawer?.(planId);
+                            this.render?.();
+                        });
+                    });
+                }
             });
         },
 
@@ -480,6 +759,12 @@
         async handlePlanTaskTap(planId, taskId) {
             const { task } = this.findTask?.(planId, taskId) || {};
             if (!task) return;
+            const hasValidDose = task.spec && ((Number(task.spec.sets) > 0 && (Number(task.spec.reps) > 0 || Number(task.spec.work) > 0)) || Number(task.spec.work) > 0);
+            if (task.invalidSpec || !hasValidDose) {
+                window.toast?.show?.('请先补充动作剂量参数', 'info');
+                this.openPlanTaskEdit?.(planId, taskId);
+                return;
+            }
             if (task.requiresUserConfirm && !task.userConfirmed) {
                 const confirmMeta = taskConfirmMeta(task);
                 this._confirmModal({
@@ -495,12 +780,51 @@
                 });
                 return;
             }
+            if (this.activeRun?.planId === planId && this.activeRun?.taskId === taskId && window.workout?.isPlaying) {
+                const navBtn = typeof navButton === 'function' ? navButton('workout') : document.querySelector('[data-tab="workout"]');
+                await ui.tab?.('workout', navBtn);
+                return;
+            }
             if (window.workout?.isPlaying) {
                 const ok = confirm('正在训练，切换到计划任务？');
                 if (!ok) return;
                 window.workout.stop?.();
             }
             await this.runPlanTask(planId, taskId);
+        },
+
+        skipPlanTask(planId, taskId, options = {}) {
+            const { plan, task } = this.findTask?.(planId, taskId) || {};
+            if (!plan || !task) return;
+            this.updateItemStatus?.(planId, taskId, 'skipped', {}, { save: true });
+            this.createProgressionAdjustmentSuggestion?.(planId, taskId);
+            window.toast?.show?.(`已跳过「${task.name}」`, 'info');
+            this.render?.();
+            this.refreshPlanTaskDrawer?.(planId);
+            const opts = typeof options === 'boolean' ? { silent: !options } : (options || {});
+            if (!opts.silent) {
+                const fn = this.afterPlanFeedback || window.dataPlanCooldown?.afterPlanFeedback;
+                fn?.call(this, planId, taskId, {
+                    cooldownCompleted: true,
+                    didSaveFeedback: false,
+                    sessionId: opts.sessionId || this._currentPlanSessionId || this.activeRun?.sessionId || null
+                });
+            }
+        },
+
+        finishPlanSession(planId) {
+            const plan = (this.getTodayDailyPlans?.() || []).find((p) => p.id === planId) || this.getTodayDailyPlan?.();
+            const items = (plan?.items || []).filter((i) => !i.deleted);
+            const doneCount = items.filter((i) => i.status === 'done').length;
+            const totalCount = items.length;
+            this.activeRun = null;
+            this._currentPlanSessionId = null;
+            this._currentPlanSessionPlanId = null;
+            this.updatePlanWorkoutBanner?.();
+            window.toast?.show?.(`今日训练完成！共完成 ${doneCount}/${totalCount} 项动作`, 'success', { timeout: 5000 });
+            this.maybePromptSavePlanRoutine?.();
+            this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
+            this.render?.();
         },
 
         buildWorkoutActionFromPlanTask(task, options = {}) {
@@ -532,19 +856,39 @@
         async runPlanTask(planId, taskId, options = {}) {
             const { plan, task } = this.findTask?.(planId, taskId) || {};
             if (!plan || !task) return;
+            const hasValidDose = task.spec && ((Number(task.spec.sets) > 0 && (Number(task.spec.reps) > 0 || Number(task.spec.work) > 0)) || Number(task.spec.work) > 0);
+            if (task.invalidSpec || !hasValidDose) {
+                window.toast?.show?.('请先补充动作剂量参数', 'info');
+                this.openPlanTaskEdit?.(planId, taskId);
+                return;
+            }
             if (task.requiresUserConfirm && !task.userConfirmed && !options.confirmedSuggestion) {
                 window.toast?.show?.('需先确认', 'error');
                 return;
             }
+            if (this._currentPlanSessionPlanId && this._currentPlanSessionPlanId !== planId) {
+                this._currentPlanSessionId = null;
+                if (this.activeRun && this.activeRun.planId !== planId) {
+                    this.activeRun = null;
+                }
+            }
+            this._currentPlanSessionPlanId = planId;
             this.updateItemStatus?.(planId, taskId, 'in-progress', {}, { save: false });
             const previousPlan = JSON.parse(JSON.stringify(this._planActions?.() || []));
+            const sessionId = options.sessionId || this._currentPlanSessionId || (this.activeRun?.planId === planId ? this.activeRun?.sessionId : null) || (this.generateRecordId ? this.generateRecordId('session') : ('sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6)));
+            this._currentPlanSessionId = sessionId;
             this.activeRun = {
                 planId,
                 taskId,
+                sessionId,
                 previousPlan,
-                queueFollowup: !!options.queueFollowup,
-                asCooldown: !!options.asCooldown
+                queueFollowup: options.queueFollowup !== false,
+                asCooldown: !!options.asCooldown,
+                mainTaskId: options.mainTaskId || (options.asCooldown ? null : taskId)
             };
+            if (typeof window !== 'undefined' && window.workout) {
+                window.workout.planContext = JSON.parse(JSON.stringify(this.activeRun));
+            }
             this.closePlanTaskDrawer?.();
             this._replacePlanActions?.([this.buildWorkoutActionFromPlanTask(task, options)]);
             this.save();
@@ -576,11 +920,12 @@
         },
 
         handlePlanWorkoutFinished(historyRecord) {
-            const ctx = this.activeRun || historyRecord.__planCtx || null;
+            const ctx = this.activeRun || historyRecord.__planCtx || (typeof window !== 'undefined' && window.workout?.planContext) || null;
             if (!ctx) return;
             const { plan, task } = this.findTask?.(ctx.planId, ctx.taskId) || {};
             if (!plan || !task) {
                 if (this.activeRun) this.activeRun = null;
+                if (typeof window !== 'undefined' && window.workout?.planContext) window.workout.planContext = null;
                 this.updatePlanWorkoutBanner?.();
                 return;
             }
@@ -589,7 +934,26 @@
             historyRecord.planId = ctx.planId;
             historyRecord.planTaskId = ctx.taskId;
             historyRecord.planCooldown = !!ctx.asCooldown;
-            this.updateItemStatus?.(ctx.planId, ctx.taskId, 'done', { doneSets: Number(task.spec?.sets || 1) }, { save: false });
+            const plannedSets = Math.max(1, Number(task.spec?.sets || 1));
+            const actualSetsCount = Array.isArray(historyRecord.actualSets) ? historyRecord.actualSets.length : 0;
+            let targetStatus = 'done';
+            let targetDoneSets = plannedSets;
+            if (historyRecord.manualStop) {
+                if (actualSetsCount <= 0) {
+                    targetStatus = task.status === 'in-progress' ? 'in-progress' : 'todo';
+                    targetDoneSets = Number(task.doneSets || 0);
+                } else if (actualSetsCount < plannedSets) {
+                    targetStatus = 'in-progress';
+                    targetDoneSets = actualSetsCount;
+                } else {
+                    targetStatus = 'done';
+                    targetDoneSets = plannedSets;
+                }
+            } else {
+                targetStatus = 'done';
+                targetDoneSets = plannedSets;
+            }
+            this.updateItemStatus?.(ctx.planId, ctx.taskId, targetStatus, { doneSets: targetDoneSets }, { save: false });
             if (ctx.previousPlan) this._replacePlanActions?.(ctx.previousPlan);
             this.save();
             this.updatePlanWorkoutBanner?.();
@@ -597,20 +961,34 @@
             const planId = ctx.planId;
             const isCooldown = !!ctx.asCooldown;
             this._planSaveRoutineManualStop = !!historyRecord.manualStop;
+            this._currentPlanSessionId = ctx.sessionId;
+            this._currentPlanSessionPlanId = planId;
             this.activeRun = null;
-            if (!isCooldown) this.openPlanFeedback?.(planId, ctx.taskId);
-            else if (!queueFollowup) {
-                this.maybePromptSavePlanRoutine?.({ manualStop: !!historyRecord.manualStop });
-                this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
-            }
-            if (queueFollowup) {
-                const nextPlan = this.getTodayDailyPlans?.()?.find((item) => item.pendingCooldowns?.length);
+            if (typeof window !== 'undefined' && window.workout?.planContext) window.workout.planContext = null;
+            if (!isCooldown) {
+                const prefill = {};
+                if (historyRecord.discomfort) {
+                    if (historyRecord.discomfort.painScore != null) prefill.painScore = historyRecord.discomfort.painScore;
+                    if (historyRecord.discomfort.painPart) prefill.painPart = historyRecord.discomfort.painPart;
+                    if (historyRecord.discomfort.note) prefill.note = historyRecord.discomfort.note;
+                } else if (historyRecord.stopReason) {
+                    prefill.note = historyRecord.stopReason;
+                }
+                this.openPlanFeedback?.(planId, ctx.taskId, { prefill, manualStop: !!historyRecord.manualStop, sessionId: ctx.sessionId });
+            } else {
+                const currentPlan = (this.getTodayDailyPlans?.() || []).find((item) => item.id === planId);
+                const nextPlan = (queueFollowup && currentPlan?.pendingCooldowns?.length) ? currentPlan : null;
                 const next = nextPlan?.pendingCooldowns?.[0];
                 if (next) {
-                    setTimeout(() => this.runQueuedCooldown?.(nextPlan.id, next), 500);
-                } else if (isCooldown) {
-                    this.maybePromptSavePlanRoutine?.({ manualStop: !!historyRecord.manualStop });
-                    this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
+                    setTimeout(() => this.runQueuedCooldown?.(nextPlan.id, next, { queueFollowup: true, sessionId: ctx.sessionId }), 500);
+                } else {
+                    const fn = this.afterPlanFeedback || window.dataPlanCooldown?.afterPlanFeedback;
+                    if (fn) {
+                        fn.call(this, planId, ctx.mainTaskId || ctx.taskId, { cooldownCompleted: true, sessionId: ctx.sessionId });
+                    } else {
+                        this.maybePromptSavePlanRoutine?.({ manualStop: !!historyRecord.manualStop });
+                        this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
+                    }
                 }
             }
         },

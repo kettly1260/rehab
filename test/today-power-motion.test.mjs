@@ -76,13 +76,13 @@ function assertComposable(body, name) {
   assert.match(body, /opacity|transform/, `${name} should animate opacity/transform`);
 }
 
-test('hero and rings expose aria-hidden motion aura layers', () => {
+test('Today recovery hero replaces visible ring dashboard while legacy ring helper stays idle-safe', () => {
   const api = loadPlanUi();
   const plans = [{ id: 'p1', type: 'rehab', title: '康复计划', items: [] }];
   const html = api.renderPlanTodaySection.call(createContext(api, plans));
-  assert.match(html, /class="hero"/);
-  assert.match(html, /class="hero-motion-aura"[^>]*aria-hidden="true"/);
-  assert.match(html, /class="ring ring-train[\s\S]*class="ring-motion-aura"[^>]*aria-hidden="true"/);
+  assert.match(html, /class="hero\b/);
+  assert.match(html, /today-readiness-card/);
+  assert.doesNotMatch(html, /class="rings"|class="ring ring-train/);
   const diet = api.renderPlanIntakeRing.call(createContext(api, plans));
   assert.match(diet, /class="ring ring-diet"/);
   assert.match(diet, /class="ring-motion-aura"[^>]*aria-hidden="true"/);
@@ -90,12 +90,14 @@ test('hero and rings expose aria-hidden motion aura layers', () => {
   assert.match(diet, /--pro-stop:/);
 });
 
-test('dynamic ring data and train onclick remain intact', () => {
+test('Today primary action keeps the real plan task start path without a visible progress ring', () => {
   const api = loadPlanUi();
-  const plans = [{ id: 'plan-x', type: 'bulk', title: '增肌', items: [] }];
+  const plans = [{ id: 'plan-x', type: 'bulk', title: '增肌', items: [{ id: 'task-x', name: '深蹲', status: 'todo', spec: { sets: 3, reps: 8 } }] }];
   const html = api.renderPlanTodaySection.call(createContext(api, plans));
-  assert.match(html, /openPlanTaskDrawer\('plan-x'\)|openNewPlanSheet\(\)/);
-  assert.match(html, /--plan-progress:/);
+  assert.doesNotMatch(html, /--plan-progress:|class="rings"/);
+  const primary = api.renderTodayPrimaryAction.call(createContext(api, plans));
+  assert.match(primary, /handlePlanTaskTap\('plan-x','task-x'\)/);
+  assert.match(primary, /开始今日训练/);
   const diet = api.renderPlanIntakeRing.call(createContext(api, plans));
   assert.match(diet, /75%|[\d]+%/);
   assert.match(diet, /1500\/2000/);

@@ -2,7 +2,7 @@ function enhanceToday(root) {
     root.classList.add('v7-feature-today');
     root.querySelectorAll('.hero, .glass-card').forEach((element) => element.classList.add('today-v7-surface'));
     root.querySelectorAll('.hero-motion-aura, .ring-motion-aura').forEach((element) => element.setAttribute('aria-hidden', 'true'));
-    const primary = root.querySelector('.plan-actions .md-btn-filled');
+    const primary = root.querySelector('.today-primary-launch');
     root.querySelectorAll('.v7-today-primary-cta').forEach((element) => {
         if (element !== primary) {
             element.classList.remove('v7-today-primary-cta', 'v7-liquid-control');

@@ -663,9 +663,10 @@ to
     max-width: 100% | var(--advice-assistant-bubble-max-width, 96%) (36-responsive.css / 46-advice-ai.css)
 
 .advice-bubble-content
-  files: 36-responsive.css, 46-advice-ai.css
+  files: 36-responsive.css, 46-advice-ai.css, 67-v7-coach.css
     font-size: 13.5px | 14px (36-responsive.css / 46-advice-ai.css)
     line-height: 1.64 | 1.68 (36-responsive.css / 46-advice-ai.css)
+    color: var(--md-sys-on-surface) | var(--v7-text) (46-advice-ai.css / 67-v7-coach.css)
 
 [data-theme-mode="dark"] .md-nav-rail
   files: 37-dark-mode.css, 56-v6-nav.css
@@ -719,6 +720,14 @@ to
     padding: 8px 10px | 10px 12px (46-advice-ai.css / 46-advice-ai.css)
     background: var(--md-sys-surface-container) | color-mix(in srgb, var(--md-sys-primary-container) 58%, var(--md-sys-surface-container)) (46-advice-ai.css / 46-advice-ai.css)
     color: var(--md-sys-on-surface) | var(--md-sys-on-primary-container) (46-advice-ai.css / 46-advice-ai.css)
+
+.advice-bubble-author
+  files: 46-advice-ai.css, 67-v7-coach.css
+    color: color-mix(in srgb, var(--md-sys-primary) 78%, var(--md-sys-on-surface)) | var(--v7-text) (46-advice-ai.css / 67-v7-coach.css)
+
+.advice-bubble-dot
+  files: 46-advice-ai.css, 67-v7-coach.css
+    color: color-mix(in srgb, var(--md-sys-on-surface-variant) 58%, transparent) | var(--v7-text) (46-advice-ai.css / 67-v7-coach.css)
 
 .weekly-plan-strip
   files: 49-action-history-weekly.css
@@ -1018,81 +1027,73 @@ to
 
 .rehab-v7-shell .md-nav-rail.v7-bottom-nav
   files: 63-v7-navigation.css
-    bottom: calc(var(--v7-space-2) + env(safe-area-inset-bottom)) | calc(var(--v7-space-1) + env(safe-area-inset-bottom)) (63-v7-navigation.css / 63-v7-navigation.css)
-    width: min(calc(100% - 24px), 460px) | calc(100% - 16px) (63-v7-navigation.css / 63-v7-navigation.css)
-
-.rehab-v7-shell .v7-bottom-nav .nav-item.active .nav-content > .material-symbols-rounded
-  files: 63-v7-navigation.css
-    transform: none | translateY(-1px) (63-v7-navigation.css / 63-v7-navigation.css)
+    width: min(calc(100% - 36px), 420px) | calc(100% - 24px) (63-v7-navigation.css / 63-v7-navigation.css)
 
 .rehab-v7-shell .v7-bottom-nav .nav-content small
   files: 63-v7-navigation.css
-    font-size: 0.6875rem | 0.625rem (63-v7-navigation.css / 63-v7-navigation.css)
+    font-size: var(--v7-type-xs) | 0.625rem (63-v7-navigation.css / 63-v7-navigation.css)
 
-.rehab-v7-shell #today .rings
-  files: 64-v7-today.css
-    gap: var(--v7-space-4) | var(--v7-space-2) (64-v7-today.css / 64-v7-today.css)
-
-.rehab-v7-shell #today .quick-dock
-  files: 64-v7-today.css
-    gap: var(--v7-space-2) | 6px (64-v7-today.css / 64-v7-today.css)
-
-.rehab-v7-shell #today .record-quick-btn
-  files: 64-v7-today.css
-    min-height: 4.4rem | 4rem (64-v7-today.css / 64-v7-today.css)
-
-.rehab-v7-shell #workout .timer-panel
+.rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > .routine-tool:not(.hidden)
   files: 65-v7-workout.css
-    min-height: 17.5rem | 16rem (65-v7-workout.css / 65-v7-workout.css)
+    display: block | flex (65-v7-workout.css / 65-v7-workout.css)
 
-.rehab-v7-shell #workout .timer-panel #mainTime
-  files: 65-v7-workout.css
-    font-size: 5rem | 4.5rem (65-v7-workout.css / 65-v7-workout.css)
+.rehab-v7-shell #records .md-top-app-bar
+  files: 66-v7-records.css
+    min-height: 4.75rem | 6.5rem (66-v7-records.css / 66-v7-records.css)
+    padding: var(--v7-space-4) 0 var(--v7-space-3) | 1.25rem 0 0.75rem (66-v7-records.css / 66-v7-records.css)
 
-.rehab-v7-shell #workout .input-card
-  files: 65-v7-workout.css
-    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+.rehab-v7-shell #records .v7-records-overview-link
+  files: 66-v7-records.css
+    min-width: 8rem | 4.5rem (66-v7-records.css / 66-v7-records.css)
+    color: var(--v7-text) | var(--v7-primary-strong) (66-v7-records.css / 66-v7-records.css)
 
-.rehab-v7-shell #workout .cardio-card
-  files: 65-v7-workout.css
-    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+.rehab-v7-shell #records .v7-records-card-head button
+  files: 66-v7-records.css
+    color: var(--v7-text-muted) | var(--v7-primary) (66-v7-records.css / 66-v7-records.css)
 
-.rehab-v7-shell #workout .strength-log-card
-  files: 65-v7-workout.css
-    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
-
-.rehab-v7-shell #workout .routine-tool
-  files: 65-v7-workout.css
-    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
-
-.rehab-v7-shell #workout .workout-plan-card
-  files: 65-v7-workout.css
-    padding: var(--v7-space-5) | var(--v7-space-4) (65-v7-workout.css / 65-v7-workout.css)
+.rehab-v7-shell #records .v7-records-section-head button
+  files: 66-v7-records.css
+    color: var(--v7-text-muted) | var(--v7-primary) (66-v7-records.css / 66-v7-records.css)
 
 .rehab-v7-shell #ai-coach.v7-feature-coach
   files: 67-v7-coach.css
-    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) (67-v7-coach.css / 67-v7-coach.css)
+    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) | var(--v7-space-4) (67-v7-coach.css / 67-v7-coach.css / 67-v7-coach.css)
 
-.rehab-v7-shell #ai-coach .advice-composer-stack
+.rehab-v7-shell #ai-coach .md-top-app-bar.v7-coach-header
   files: 67-v7-coach.css
-    bottom: calc(5.75rem + env(safe-area-inset-bottom)) | calc(5.25rem + env(safe-area-inset-bottom)) (67-v7-coach.css / 67-v7-coach.css)
-    border-radius: var(--v7-radius-xl) | var(--v7-radius-lg) (67-v7-coach.css / 67-v7-coach.css)
+    min-height: 6.6rem | 6.25rem (67-v7-coach.css / 67-v7-coach.css)
+
+.rehab-v7-shell #ai-coach .v7-coach-page-subtitle
+  files: 67-v7-coach.css
+    max-width: 18rem | 15.5rem (67-v7-coach.css / 67-v7-coach.css)
+
+.rehab-v7-shell #ai-coach .advice-v6-chat-list[data-advice-virtual-active="true"]
+  files: 67-v7-coach.css
+    max-height: 21rem | 20rem (67-v7-coach.css / 67-v7-coach.css)
 
 .rehab-v7-shell #profile.v7-feature-profile
   files: 68-v7-profile.css
-    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) (68-v7-profile.css / 68-v7-profile.css)
+    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) | var(--v7-space-4) (68-v7-profile.css / 68-v7-profile.css / 68-v7-profile.css)
 
 .rehab-v7-shell #profile .md-top-app-bar
   files: 68-v7-profile.css
     margin-inline: calc(clamp(14px, 4vw, 24px) * -1) | calc(var(--v7-space-3) * -1) (68-v7-profile.css / 68-v7-profile.css)
-    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) (68-v7-profile.css / 68-v7-profile.css)
+    padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) | var(--v7-space-2) (68-v7-profile.css / 68-v7-profile.css / 68-v7-profile.css)
+
+.rehab-v7-shell #profileOverview
+  files: 68-v7-profile.css
+    display: grid | block (68-v7-profile.css / 68-v7-profile.css)
 
 .rehab-v7-shell #profile .profile-hero
   files: 68-v7-profile.css
     grid-template-columns: minmax(0, 1fr) minmax(180px, .9fr) | 1fr (68-v7-profile.css / 68-v7-profile.css)
     padding: var(--v7-space-5) | var(--v7-space-4) (68-v7-profile.css / 68-v7-profile.css)
 
-## DUPLICATES (same selector + same property + same value): 30
+.rehab-v7-shell #profile .v7-profile-more-settings > summary
+  files: 68-v7-profile.css
+    border-bottom: 1px solid var(--v7-row-divider) | 0 (68-v7-profile.css / 68-v7-profile.css)
+
+## DUPLICATES (same selector + same property + same value): 31
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
     display: flex (09-workout-timer.css / 52-v6-workout.css)
@@ -1238,7 +1239,11 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-## COMPLEMENTS (same selector, disjoint properties): 167
+.rehab-v7-shell #ai-coach .advice-v6-page
+  files: 67-v7-coach.css
+    gap: var(--v7-space-4) (67-v7-coach.css / 67-v7-coach.css)
+
+## COMPLEMENTS (same selector, disjoint properties): 195
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1412,6 +1417,12 @@ body.is-paused .fab-play
 
 .advice-search-toggle
   files: 46-advice-ai.css
+
+.advice-month-content
+  files: 46-advice-ai.css, 67-v7-coach.css
+
+.advice-date-group
+  files: 46-advice-ai.css, 67-v7-coach.css
 
 .advice-bubble
   files: 46-advice-ai.css, 41-m3e-effects.css
@@ -1647,6 +1658,12 @@ body.is-paused .fab-play
 .rehab-v7-shell .v7-icon-button
   files: 61-v7-primitives.css
 
+.rehab-v7-shell .v7-summary-strip
+  files: 61-v7-primitives.css
+
+.rehab-v7-shell .v7-grouped-panel
+  files: 61-v7-primitives.css
+
 .rehab-v7-shell .v7-modal
   files: 61-v7-primitives.css
 
@@ -1668,8 +1685,11 @@ body.is-paused .fab-play
 .rehab-v7-shell .v7-liquid-control[data-v7-interacting="true"]
   files: 62-v7-effects.css
 
-.rehab-v7-shell .v7-bottom-nav .nav-content > .material-symbols-rounded
-  files: 63-v7-navigation.css
+.rehab-v7-shell[data-v7-effects="economy"] .v7-liquid-control::before
+  files: 62-v7-effects.css
+
+.rehab-v7-shell[data-v7-effects="economy"] .v7-liquid-indicator::before
+  files: 62-v7-effects.css
 
 .rehab-v7-shell .v7-bottom-nav__indicator
   files: 63-v7-navigation.css
@@ -1679,6 +1699,21 @@ body.is-paused .fab-play
 
 .rehab-v7-shell #today .glass-card
   files: 64-v7-today.css
+
+.rehab-v7-shell #today .today-readiness-head p
+  files: 64-v7-today.css
+
+.rehab-v7-shell #today .today-plan-copy small
+  files: 64-v7-today.css
+
+.rehab-v7-shell #today .today-plan-state
+  files: 64-v7-today.css
+
+.rehab-v7-shell #workout.v7-feature-workout
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .timer-panel
+  files: 65-v7-workout.css
 
 .rehab-v7-shell #workout .mode-tab
   files: 65-v7-workout.css
@@ -1694,6 +1729,30 @@ body.is-paused .fab-play
 
 .rehab-v7-shell #workout .list-item
   files: 65-v7-workout.css
+
+.rehab-v7-shell #workout[data-v7-workout-state="paused"] .timer-panel
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout[data-v7-workout-state="resting"] .timer-panel
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .v7-workout-readiness-card
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .v7-workout-plan-card
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .v7-workout-session-strip
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout .v7-workout-session-strip em
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #workout[data-v7-workout-state="idle"] .fab-play
+  files: 65-v7-workout.css
+
+.rehab-v7-shell #records.v7-feature-records
+  files: 66-v7-records.css
 
 .rehab-v7-shell #records .health-swipe-page
   files: 66-v7-records.css
@@ -1713,10 +1772,40 @@ body.is-paused .fab-play
 .rehab-v7-shell #records .weight-chart-wrap
   files: 66-v7-records.css
 
+.rehab-v7-shell #records .v7-records-summary
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-trend-card
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-calendar-card
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-recent-card
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-section-head
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-trend-labels
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-calendar-weekdays
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-calendar-days
+  files: 66-v7-records.css
+
+.rehab-v7-shell #records .v7-records-empty
+  files: 66-v7-records.css
+
 .rehab-v7-shell #ai-coach .ai-insight
   files: 67-v7-coach.css
 
 .rehab-v7-shell #ai-coach .advice-v6-chat-list
+  files: 67-v7-coach.css
+
+.rehab-v7-shell #ai-coach .advice-scroll-rail
   files: 67-v7-coach.css
 
 .rehab-v7-shell #profile .profile-stats

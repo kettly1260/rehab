@@ -14,6 +14,7 @@ test('V7 router normalizes five top-level routes and legacy aliases', () => {
     assert.equal(normalizePage('missing'), 'today');
     assert.deepEqual(parseV7Hash('#/profile/library'), { page: 'profile', routineView: 'library' });
     assert.deepEqual(parseV7Hash('#/records/weight'), { page: 'records', healthView: 'weight' });
+    assert.deepEqual(parseV7Hash('#/records/diet'), { page: 'records', healthView: 'diet' });
     assert.deepEqual(parseV7Hash('#/ai/advice?range=week'), { page: 'ai-coach', adviceRange: 'week' });
 });
 

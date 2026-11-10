@@ -105,13 +105,12 @@ function createContext(api, plans) {
   };
 }
 
-test('today card removes Today kicker and shows recent plan dock', () => {
+test('today plan card keeps the recent-plan entry without the old Today kicker', () => {
   const api = loadPlanUi();
   const plans = [{ id: 'p1', type: 'bulk', title: '增肌日程', items: [], pendingCooldowns: [] }];
-  const html = api.renderPlanTodaySection.call(createContext(api, plans));
+  const html = api.renderTodayV6PlanCard.call(createContext(api, plans));
 
   assert.equal(html.includes('<span class="cardio-kicker">今日</span>'), false);
-  assert.match(html, /openPlanTodayAiSheet/);
   assert.match(html, /aria-label="近期计划"/);
   assert.match(html, /3-7天/);
   // FIND-07: hard buttons must call data.openPlanWeeklySheet (no silent planWeekly?.open).
@@ -164,11 +163,12 @@ test('multiple-plan tabs call selectTodayPlan on the data bag', () => {
     { id: 'rehab', type: 'rehab', title: '康复计划', items: [] },
     { id: 'bulk', type: 'bulk', title: '增肌日程', items: [] }
   ];
-  const html = api.renderPlanTodaySection.call(createContext(api, plans));
+  const html = api.renderTodayV6PlanCard.call(createContext(api, plans));
 
   // Core first-paint HTML routes through data.selectTodayPlan; plan-ui provides the method after merge.
-  assert.match(html, /data\.selectTodayPlan\?\.\(['"]rehab['"]\)/);
-  assert.match(html, /data\.selectTodayPlan\?\.\(['"]bulk['"]\)/);
+  assert.match(html, /data\.selectTodayPlan\(['"]rehab['"]\)/);
+  assert.match(html, /data\.selectTodayPlan\(['"]bulk['"]\)/);
+  assert.doesNotMatch(html, /data\.selectTodayPlan\?\./);
   assert.doesNotMatch(html, /window\.dataPlanUi\.selectTodayPlan/);
 });
 
@@ -378,4 +378,44 @@ test('editing a saved plan task updates action identity and locks the task', () 
   assert.equal(task.canonicalName, '侧卧髋外展');
   assert.notEqual(task.actionKey, 'bridge-basic');
   assert.equal(ctx.saved, true);
+});
+
+test('manual plan task completion records a plan completion without workout duration', () => {
+  const api = loadPlanUi();
+  const task = {
+    id: 'task-1',
+    name: '基础臀桥',
+    planType: 'rehab',
+    category: 'main',
+    spec: { sets: 2, reps: 10, work: 3 }
+  };
+  const plan = { id: 'plan-1', type: 'rehab', title: '康复计划', items: [task] };
+  const appended = [];
+  const statuses = [];
+  const ctx = {
+    ...createContext(api, [plan]),
+    findTask() { return { plan, task }; },
+    generateRecordId(prefix) { return `${prefix}-manual`; },
+    updateItemStatus(planId, taskId, status) {
+      statuses.push([planId, taskId, status]);
+    },
+    history: {
+      append(record) { appended.push(record); }
+    },
+    openPlanFeedback() {},
+    render() {}
+  };
+
+  api.markPlanTaskDone.call(ctx, 'plan-1', 'task-1');
+
+  assert.deepEqual(statuses, [['plan-1', 'task-1', 'done']]);
+  assert.equal(appended.length, 1);
+  const record = appended[0];
+  assert.equal(record.duration, 0);
+  assert.equal(record.plan, true);
+  assert.equal(record.planManualDone, true);
+  assert.equal(record.planId, 'plan-1');
+  assert.equal(record.planTaskId, 'task-1');
+  assert.equal(record.actions.length, 1);
+  assert.equal(record.actions[0].plan, true);
 });

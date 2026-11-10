@@ -168,34 +168,63 @@ const adviceRules = {
 
     /* --- Rule implementations --- */
 
-    _proteinDeficit({ macros, bodyWeight, goalType }) {
-        if (!macros || !bodyWeight) return null;
-        const target = goalType === 'gain' ? 1.6 : 1.2;
-        const perKg = macros.pro / bodyWeight;
-        if (perKg >= target * 0.85) return null;
-        const deficitG = Math.round((target * bodyWeight) - macros.pro);
+    _proteinDeficit({ macros, bodyWeight, goalType, foodRecordCount, dietGoal, analysisDays }) {
+        if (!macros) return null;
+        if (foodRecordCount === 0) return null;
+        if (!Number(macros.pro) && (foodRecordCount == null || foodRecordCount <= 0)) return null;
+
+        let targetPro = 0;
+        let targetPerKg = 0;
+        let targetSource = '';
+
+        const configuredPro = Number(dietGoal?.dailyPro || dietGoal?.proGoal || dietGoal?.protein || 0);
+        if (configuredPro > 0) {
+            targetPro = configuredPro;
+            targetSource = `目标 ${targetPro}g（设定目标）`;
+            if (bodyWeight > 0) targetPerKg = targetPro / bodyWeight;
+        } else if (bodyWeight > 0) {
+            const factor = goalType === 'gain' ? 1.6 : 1.2;
+            targetPro = Math.round(factor * bodyWeight);
+            targetPerKg = factor;
+            targetSource = `目标 ${targetPro}g（按 ${factor} g/kg 估算）`;
+        } else {
+            return null;
+        }
+
+        const currentPro = Number(macros.pro || 0);
+        if (currentPro >= targetPro * 0.85) return null;
+
+        const deficitG = Math.round(targetPro - currentPro);
         if (deficitG <= 5) return null;
+
+        const daysText = analysisDays ? `近${analysisDays}天` : '今日';
+        const perKgText = bodyWeight > 0 ? `（${(currentPro / bodyWeight).toFixed(1)} g/kg）` : '';
+
         return {
             id: 'protein_deficit',
             title: '蛋白质缺口 ' + deficitG + 'g',
-            subtitle: '近N天均蛋白 ' + perKg.toFixed(1) + ' g/kg，目标 ' + target + ' g/kg',
+            subtitle: `${daysText}摄入 ${Math.round(currentPro)}g${perKgText}，${targetSource}`,
             badge: '↓' + deficitG + 'g',
             source: 'rule',
-            data: { deficitG, perKg, target },
+            data: { deficitG, currentPro, targetPro, targetPerKg, targetSource },
         };
     },
 
-    _trainingGap({ dailyPlans, today }) {
-        if (!dailyPlans || !today) return null;
+    _trainingGap({ dailyPlans, history, exerciseLogs, today }) {
+        if (!today) return null;
         const recentDates = [];
         for (let i = 1; i <= 7; i++) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
             recentDates.push(d.toISOString().slice(0, 10));
         }
-        const activeDays = recentDates.filter(date =>
-            dailyPlans.some(p => p.date === date && !p.deleted)
-        );
+        const isTrainedDate = (date) => {
+            const hasPlan = (dailyPlans || []).some(p => p.date === date && !p.deleted && (p.items || []).some(item => !item.deleted && (item.status === 'done' || (item.doneSets && item.doneSets > 0))));
+            const hasHistory = (history || []).some(h => !h.deleted && (h.dayKey === date || String(h.date || '').slice(0, 10) === date));
+            const hasLog = (exerciseLogs || []).some(e => !e.deleted && e.date === date);
+            return hasPlan || hasHistory || hasLog;
+        };
+        const activeDays = recentDates.filter(isTrainedDate);
         const gap = activeDays.length === 0 ? 7 : (() => {
             const last = activeDays[0];
             return Math.round((new Date(today) - new Date(last)) / 86400000);
@@ -222,33 +251,39 @@ const adviceRules = {
         return {
             id: 'weight_plateau',
             title: '体重停滞',
-            subtitle: '近' + recent.length + '天体重均值变化 < 0.5kg',
+            subtitle: '近' + recent.length + '次记录体重均值变化 < 0.5kg',
             badge: '停滞',
             source: 'rule',
             data: { delta },
         };
     },
 
-    _excessDeficit({ weekDeficit }) {
+    _excessDeficit({ weekDeficit, recordedDays = 7 }) {
         if (weekDeficit == null || weekDeficit >= -800) return null;
         return {
             id: 'excess_deficit',
             title: '赤字过大',
-            subtitle: '近7天平均赤字 ' + Math.abs(weekDeficit) + ' kcal',
+            subtitle: `近${recordedDays}天平均赤字 ${Math.abs(weekDeficit)} kcal`,
             badge: '⚠ 赤字',
             source: 'rule',
             data: { weekDeficit },
         };
     },
 
-    _trainingStreak({ dailyPlans, today }) {
-        if (!dailyPlans || !today) return null;
+    _trainingStreak({ dailyPlans, history, exerciseLogs, today }) {
+        if (!today) return null;
+        const isTrainedDate = (date) => {
+            const hasPlan = (dailyPlans || []).some(p => p.date === date && !p.deleted && (p.items || []).some(item => !item.deleted && (item.status === 'done' || (item.doneSets && item.doneSets > 0))));
+            const hasHistory = (history || []).some(h => !h.deleted && (h.dayKey === date || String(h.date || '').slice(0, 10) === date));
+            const hasLog = (exerciseLogs || []).some(e => !e.deleted && e.date === date);
+            return hasPlan || hasHistory || hasLog;
+        };
         let streak = 0;
         for (let i = 0; i < 14; i++) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
             const key = d.toISOString().slice(0, 10);
-            if (dailyPlans.some(p => p.date === key && !p.deleted)) streak++;
+            if (isTrainedDate(key)) streak++;
             else break;
         }
         if (streak < 5) return null;
@@ -267,7 +302,7 @@ const adviceRules = {
     renderLocalAdvice(diag) {
         if (!diag) return '';
         const templates = {
-            protein_deficit: (d) => `按 ${d.target} g/kg × 体重估算，今日还需 ≈${d.deficitG}g 蛋白。<ul><li>鸡胸 150g + 1 杯希腊酸奶</li><li>或：3 个鸡蛋 + 1 勺蛋白粉</li></ul>`,
+            protein_deficit: (d) => `按 ${d.targetSource || (d.target ? d.target + ' g/kg × 体重' : '目标')}，今日还需 ≈${d.deficitG}g 蛋白。<ul><li>鸡胸 150g + 1 杯希腊酸奶</li><li>或：3 个鸡蛋 + 1 勺蛋白粉</li></ul>`,
             training_gap: (d) => `连续 ${d.gap} 天未训练，建议：<ul><li>从轻量恢复训练开始</li><li>降低训练量至上次的 60-70%</li></ul>`,
             weight_plateau: () => `<ul><li>检查近期饮食是否有隐形热量</li><li>考虑调整训练强度或增加有氧</li><li>建议重新评估 TDEE</li></ul>`,
             excess_deficit: (d) => `近7天赤字 ${Math.abs(d.weekDeficit)} kcal，风险提示：<ul><li>过大赤字可能导致肌肉流失</li><li>建议适当增加摄入 200-300 kcal</li></ul>`,

@@ -238,16 +238,12 @@ test('today diet cards render 650 kcal without loading food-log or health-diet m
     const overview = host.__elements.todayOverview.innerHTML;
     const diet = host.__elements.todayDietStatus.innerHTML;
 
-    assert.match(overview, />36%<\/b>/);
-    assert.match(overview, /650\/1800/);
-    assert.match(overview, /距目标还差 1150 千卡/);
-    assert.match(diet, /饮食摄入/);
-    assert.match(diet, />1150</);
-    assert.match(diet, /650 \/ 1800/);
-    assert.match(diet, />75g</);
+    assert.match(overview, /今日恢复/);
+    assert.match(overview, /恢复状态待评估/);
+    assert.match(diet, /今日状态/);
+    assert.match(diet, />650</);
+    assert.match(diet, /摄入 \/ 1800 kcal/);
     assert.match(diet, />45g</);
-    assert.match(diet, />18g</);
-    assert.doesNotMatch(overview, />0\/1800</);
     assert.doesNotMatch(diet, /999/);
 });
 
@@ -277,15 +273,10 @@ test('renderTodayPage summarizes today health data exactly once and reuses the s
 
     const seen = [];
     const originalSection = host.renderPlanTodaySection;
-    const originalRing = host.renderPlanIntakeRing;
     const originalDiet = host.renderTodayV6DietCard;
     host.renderPlanTodaySection = function (summary) {
         seen.push(['hero', summary || this._ths]);
         return originalSection.call(this, summary);
-    };
-    host.renderPlanIntakeRing = function (summary) {
-        seen.push(['ring', summary || this._ths]);
-        return originalRing.call(this, summary);
     };
     host.renderTodayV6DietCard = function (summary) {
         seen.push(['diet', summary || this._ths]);
@@ -295,14 +286,13 @@ test('renderTodayPage summarizes today health data exactly once and reuses the s
     host.renderTodayPage();
 
     assert.equal(calls, 1);
-    assert.equal(seen.length, 3);
+    assert.equal(seen.length, 2);
     assert.equal(seen[0][1], marker);
     assert.equal(seen[1][1], marker);
-    assert.equal(seen[2][1], marker);
     assert.equal(seen[0][1], seen[1][1]);
-    assert.equal(seen[1][1], seen[2][1]);
-    assert.match(host.__elements.todayOverview.innerHTML, /650\/1800/);
-    assert.match(host.__elements.todayDietStatus.innerHTML, /650 \/ 1800/);
+    assert.match(host.__elements.todayOverview.innerHTML, /今日恢复/);
+    assert.match(host.__elements.todayDietStatus.innerHTML, /650/);
+    assert.match(host.__elements.todayDietStatus.innerHTML, /1800 kcal/);
 });
 
 test('renderTodayPage still computes summary once when diet DOM sinks are missing', () => {
@@ -345,6 +335,8 @@ test('today diet render falls back safely when healthSummaryPure is unavailable'
     context.document = host.__document;
 
     assert.doesNotThrow(() => host.renderTodayPage());
-    assert.match(host.__elements.todayOverview.innerHTML, /120\/1800/);
-    assert.match(host.__elements.todayDietStatus.innerHTML, /0g/);
+    assert.match(host.__elements.todayOverview.innerHTML, /今日恢复/);
+    assert.match(host.__elements.todayDietStatus.innerHTML, />120</);
+    assert.match(host.__elements.todayDietStatus.innerHTML, /摄入 \/ 1800 kcal/);
+    assert.match(host.__elements.todayDietStatus.innerHTML, /蛋白/);
 });

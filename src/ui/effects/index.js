@@ -1,10 +1,11 @@
 const STORAGE_KEY = 'rehab.v7.effects.v1';
-const MODES = new Set(['balanced', 'economy']);
+const MODES = new Set(['full', 'balanced', 'economy']);
 
 export function resolveEffectsMode({ storedMode = '', reducedMotion = false, saveData = false } = {}) {
+    if (reducedMotion || saveData) return 'economy';
+    if (storedMode === 'full') return 'full';
     if (storedMode === 'economy') return 'economy';
-    if (storedMode === 'balanced') return reducedMotion || saveData ? 'economy' : 'balanced';
-    return reducedMotion || saveData ? 'economy' : 'balanced';
+    return 'balanced';
 }
 
 function isVisible(element) {

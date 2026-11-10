@@ -8,9 +8,13 @@ const js = await readFile(new URL('../src/ui/effects/index.js', import.meta.url)
 
 test('effect mode resolves to economy for reduced motion and Save-Data', () => {
     assert.equal(resolveEffectsMode({}), 'balanced');
+    assert.equal(resolveEffectsMode({ storedMode: 'full' }), 'full');
+    assert.equal(resolveEffectsMode({ storedMode: 'balanced' }), 'balanced');
     assert.equal(resolveEffectsMode({ reducedMotion: true }), 'economy');
     assert.equal(resolveEffectsMode({ saveData: true }), 'economy');
     assert.equal(resolveEffectsMode({ storedMode: 'economy' }), 'economy');
+    assert.equal(resolveEffectsMode({ storedMode: 'full', reducedMotion: true }), 'economy');
+    assert.equal(resolveEffectsMode({ storedMode: 'full', saveData: true }), 'economy');
 });
 
 test('V7 effects avoid continuous expensive animation contracts', () => {
@@ -18,6 +22,10 @@ test('V7 effects avoid continuous expensive animation contracts', () => {
     assert.doesNotMatch(css, /transition\s*:\s*all\b/i);
     assert.doesNotMatch(js, /requestAnimationFrame|setInterval/);
     assert.match(css, /\[data-v7-effects="economy"\][\s\S]*backdrop-filter:\s*none/i);
+    assert.match(css, /\[data-v7-effects="economy"\][\s\S]*filter:\s*none/i);
+    assert.match(css, /\[data-v7-effects="full"\][\s\S]*blur\(10px\)/i);
+    assert.match(css, /--v7-liquid-active-opacity:\s*1/);
+    assert.match(css, /--v7-liquid-active-opacity:\s*\.58/);
 });
 
 test('will-change is interaction-scoped', () => {

@@ -12,35 +12,136 @@
         root.remove();
     }
 
+    function formatTaskSpec(task) {
+        const s = task?.spec || {};
+        const parts = [];
+        if (s.sets) parts.push(`${s.sets}组`);
+        if (s.reps) parts.push(`${s.reps}次`);
+        if (s.work) parts.push(`${s.work}秒`);
+        return parts.join(' × ') || '';
+    }
+
     window.dataPlanCooldown = {
-        afterPlanFeedback(planId, taskId) {
+        afterPlanFeedback(planId, taskId, options = {}) {
+            const opts = typeof options === 'boolean' ? { didSaveFeedback: options } : (options || {});
             const { plan, task } = this.findTask?.(planId, taskId) || {};
             if (!plan || !task) return;
+            const sessionId = opts.sessionId || this._currentPlanSessionId || this.activeRun?.sessionId;
+
+            if (opts.isModalClose) {
+                const items = (plan.items || []).filter((item) => item && !item.deleted);
+                const hasPending = items.some((item) => item.status !== 'done' && item.status !== 'skipped');
+                if (!hasPending) {
+                    this.finishPlanSession?.(planId);
+                }
+                return;
+            }
+            const proceedToNextTask = () => {
+                const items = (plan.items || []).filter((item) => item && !item.deleted);
+                const currentIndex = items.findIndex((item) => item.id === taskId);
+                const nextTask = items.slice(currentIndex + 1).find((item) => item.category !== 'cooldown' && (item.status === 'todo' || item.status === 'in-progress'))
+                    || items.find((item) => item.id !== taskId && item.category !== 'cooldown' && (item.status === 'todo' || item.status === 'in-progress'));
+                if (nextTask) {
+                    this.showPlanNextTaskPrompt(planId, nextTask, sessionId);
+                    return;
+                }
+                if (Array.isArray(plan.pendingCooldowns) && plan.pendingCooldowns.length > 0) {
+                    this.showCentralizedCooldownPrompt(planId);
+                    return;
+                }
+                this.finishPlanSession?.(planId);
+            };
+
+            if (opts.cooldownCompleted || task.category === 'cooldown') {
+                proceedToNextTask();
+                return;
+            }
+
             const refs = Array.isArray(task.cooldownRefs) ? task.cooldownRefs : [];
             if (!refs.length) {
-                this.maybePromptSavePlanRoutine?.();
-                this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
+                proceedToNextTask();
                 return;
             }
             const cooldownId = refs[0];
             const cooldownTask = (plan.items || []).find((item) => item.id === cooldownId && !item.deleted) || null;
-            if (!cooldownTask) return;
+            if (!cooldownTask) {
+                proceedToNextTask();
+                return;
+            }
             const prefs = this.ensurePlanPrefs?.() || {};
             if (prefs.cooldownMode === 'centralized') {
                 this.queueCooldown?.(planId, cooldownId);
                 this.renderTodayPage?.();
-                this.maybePromptSavePlanRoutine?.();
-                this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
+                proceedToNextTask();
                 return;
             }
             if (prefs.cooldownMode === 'paired') {
-                this.runPlanTask?.(planId, cooldownId, { asCooldown: true });
+                this.runPlanTask?.(planId, cooldownId, { asCooldown: true, sessionId, mainTaskId: taskId });
                 return;
             }
-            this.showPlanCooldownPrompt(planId, cooldownId, cooldownTask);
+            this.showPlanCooldownPrompt(planId, cooldownId, cooldownTask, proceedToNextTask);
         },
 
-        showPlanCooldownPrompt(planId, taskId, cooldownTask) {
+        showPlanNextTaskPrompt(planId, nextTask, sessionId) {
+            document.querySelectorAll('.plan-cooldown-toast').forEach((el) => removePrompt(el));
+            const root = document.createElement('div');
+            root.className = 'plan-cooldown-toast';
+            root.innerHTML = `
+                <div class="plan-cooldown-toast-head">
+                    <strong>准备开始下一项「${this.escapeHtml(nextTask.name || '计划动作')}」</strong>
+                    <small>${this.escapeHtml(formatTaskSpec(nextTask))}</small>
+                </div>
+                <div class="plan-cooldown-actions">
+                    <button class="md-btn" type="button" data-plan-next-act="skip">跳过此项</button>
+                    <button class="md-btn md-btn-tonal" type="button" data-plan-next-act="finish">结束训练</button>
+                    <button class="md-btn md-btn-filled" type="button" data-plan-next-act="start">开始下一项</button>
+                </div>`;
+            document.body.appendChild(root);
+            root.querySelectorAll('[data-plan-next-act]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const act = btn.getAttribute('data-plan-next-act');
+                    removePrompt(root);
+                    if (act === 'start') {
+                        this.runPlanTask?.(planId, nextTask.id, { sessionId });
+                    } else if (act === 'skip') {
+                        this.skipPlanTask?.(planId, nextTask.id, { sessionId });
+                    } else {
+                        this.finishPlanSession?.(planId);
+                    }
+                });
+            });
+        },
+
+        showCentralizedCooldownPrompt(planId) {
+            const plan = (this.getTodayDailyPlans?.() || []).find((p) => p.id === planId) || (this.db?.dailyPlans || []).find((p) => p.id === planId && !p.deleted) || this.getTodayDailyPlan?.();
+            const count = plan?.pendingCooldowns?.length || 0;
+            document.querySelectorAll('.plan-cooldown-toast').forEach((el) => removePrompt(el));
+            const root = document.createElement('div');
+            root.className = 'plan-cooldown-toast';
+            root.innerHTML = `
+                <div class="plan-cooldown-toast-head">
+                    <strong>主项训练已完成！有 ${count} 个待集中拉伸动作</strong>
+                    <small>建议进行放松拉伸以促进恢复</small>
+                </div>
+                <div class="plan-cooldown-actions">
+                    <button class="md-btn" type="button" data-plan-cd-act="finish">完成训练</button>
+                    <button class="md-btn md-btn-filled" type="button" data-plan-cd-act="start">开始拉伸</button>
+                </div>`;
+            document.body.appendChild(root);
+            root.querySelectorAll('[data-plan-cd-act]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const act = btn.getAttribute('data-plan-cd-act');
+                    removePrompt(root);
+                    if (act === 'start') {
+                        this.runAllQueuedCooldowns?.(planId);
+                    } else {
+                        this.finishPlanSession?.(planId);
+                    }
+                });
+            });
+        },
+
+        showPlanCooldownPrompt(planId, taskId, cooldownTask, onDone) {
             document.querySelectorAll('.plan-cooldown-toast').forEach((el) => removePrompt(el));
             const root = document.createElement('div');
             root.className = 'plan-cooldown-toast';
@@ -66,25 +167,24 @@
                     clearInterval(root._planTimer);
                     this.queueCooldown?.(planId, taskId);
                     this.renderTodayPage?.();
-                    this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
                     removePrompt(root);
+                    onDone?.();
                 }
             }, 200);
             root.querySelectorAll('[data-plan-act]').forEach((btn) => {
                 btn.addEventListener('click', () => {
                     const act = btn.getAttribute('data-plan-act');
+                    removePrompt(root);
                     if (act === 'queue') {
                         this.queueCooldown?.(planId, taskId);
                         this.renderTodayPage?.();
-                        this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
+                        onDone?.();
                     } else if (act === 'now') {
                         this.dequeueCooldown?.(planId, taskId, { save: false });
-                        this.runPlanTask?.(planId, taskId, { asCooldown: true });
+                        this.runPlanTask?.(planId, taskId, { asCooldown: true, sessionId: this.activeRun?.sessionId });
                     } else {
-                        this.maybePromptSavePlanRoutine?.();
-                        this.maybeAutoAdjustNextDayAfterFeedback?.(planId);
+                        onDone?.();
                     }
-                    removePrompt(root);
                 });
             });
         },
@@ -117,20 +217,21 @@
             });
         },
 
-        runQueuedCooldown(planId, taskId) {
-            const plan = (this.getTodayDailyPlans?.() || []).find((item) => item.id === planId) || this.getTodayDailyPlan?.();
+        runQueuedCooldown(planId, taskId, options = {}) {
+            const plan = (this.getTodayDailyPlans?.() || []).find((item) => item.id === planId) || (this.db?.dailyPlans || []).find((p) => p.id === planId && !p.deleted) || this.getTodayDailyPlan?.();
             if (!plan || !taskId) return;
             this.dequeueCooldown?.(plan.id, taskId);
-            this.runPlanTask?.(plan.id, taskId, { asCooldown: true });
+            this.runPlanTask?.(plan.id, taskId, { asCooldown: true, ...options });
             this._closeActiveModal?.();
         },
 
-        runAllQueuedCooldowns() {
-            const plan = (this.getTodayDailyPlans?.() || []).find((item) => item.pendingCooldowns?.length);
+        runAllQueuedCooldowns(targetPlanId) {
+            const plans = this.getTodayDailyPlans?.() || [];
+            const plan = targetPlanId ? (plans.find((p) => p.id === targetPlanId) || (this.db?.dailyPlans || []).find((p) => p.id === targetPlanId && !p.deleted)) : plans.find((p) => p.pendingCooldowns?.length);
             const nextId = plan?.pendingCooldowns?.[0];
             if (!plan || !nextId) return;
             this.dequeueCooldown?.(plan.id, nextId);
-            this.runPlanTask?.(plan.id, nextId, { asCooldown: true, queueFollowup: true });
+            this.runPlanTask?.(plan.id, nextId, { asCooldown: true, queueFollowup: true, sessionId: this._currentPlanSessionId || null });
             this._closeActiveModal?.();
         }
     };

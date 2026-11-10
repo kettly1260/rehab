@@ -72,8 +72,12 @@ const cardio = {
             workout.isPlaying = true;
             workout.isPaused = false;
             workout.totalSec = 0;
+            workout._runToken = (workout._runToken || 0) + 1;
+            const currentRunToken = workout._runToken;
+            this._runToken = currentRunToken;
             this.updatePlan();
             await workout.acquireWakeLock();
+            if (!this.isRunning || !workout.isPlaying || workout._runToken !== currentRunToken) return;
             workout.setupMediaSession();
             workout.keepAudioAlive();
             workout.initBackGuard();
@@ -92,7 +96,7 @@ const cardio = {
     },
 
     tick() {
-        if (!this.isRunning || this.isPaused) return;
+        if (!this.isRunning || this.isPaused || !workout.isPlaying || workout._runToken !== this._runToken) return;
         this.seconds++;
         workout.totalSec = this.seconds;
         this.updateUI();
@@ -145,7 +149,7 @@ const cardio = {
     },
 
     closeEditModal() {
-        if (!window.navStack?.requestClose?.('modal')) this.closeEditModalInternal();
+        if (!window.navStack?.requestClose?.('modal', 'cardioEditModal')) this.closeEditModalInternal();
     },
 
     closeEditModalInternal() {
