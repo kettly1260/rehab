@@ -209,7 +209,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: block;
-    src: url("../assets/material-symbols-rounded.woff2?v=460") format("woff2");
+    src: url("../assets/material-symbols-rounded.woff2?v=461") format("woff2");
 }
 
 .material-symbols-rounded {
@@ -15885,7 +15885,7 @@ html.rehab-v7-shell body.v7-secondary-open .v7-fab-quick-record {
 }
 
 .rehab-v7-shell #ai-coach .md-top-app-bar.v7-coach-header {
-    min-height: 6.6rem;
+    min-height: 6.85rem;
     padding: 1.55rem var(--v7-space-2) var(--v7-space-3);
     align-items: flex-start;
     border: 0;
@@ -15912,7 +15912,7 @@ html.rehab-v7-shell body.v7-secondary-open .v7-fab-quick-record {
 }
 
 .rehab-v7-shell #ai-coach .v7-coach-page-subtitle {
-    max-width: 14rem;
+    max-width: 17rem;
     color: var(--v7-text-muted);
     font-size: var(--v7-type-sm);
     line-height: var(--v7-leading-normal);
@@ -15924,8 +15924,9 @@ html.rehab-v7-shell body.v7-secondary-open .v7-fab-quick-record {
     margin-left: auto;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
-    gap: 0.3rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
 }
 
 .rehab-v7-shell #ai-coach .v7-coach-header .bar-trailing > .md-chip { display: none; }
@@ -15958,6 +15959,11 @@ html.rehab-v7-shell body.v7-secondary-open .v7-fab-quick-record {
 .rehab-v7-shell #ai-coach .v7-coach-header-btn:hover {
     background: var(--v7-surface-muted);
     color: var(--v7-text);
+}
+
+.rehab-v7-shell #ai-coach .v7-coach-header-btn:focus-visible {
+    outline: 2px solid var(--v7-primary);
+    outline-offset: 2px;
 }
 
 .rehab-v7-shell #ai-coach .v7-coach-header-btn:active {
@@ -16657,7 +16663,7 @@ html.rehab-v7-shell body.v7-secondary-open .v7-fab-quick-record {
     }
 
     .rehab-v7-shell #ai-coach .md-top-app-bar.v7-coach-header {
-        min-height: 6.25rem;
+        min-height: 6.5rem;
         padding-top: 1.35rem;
     }
 

@@ -1073,11 +1073,11 @@ to
 
 .rehab-v7-shell #ai-coach .md-top-app-bar.v7-coach-header
   files: 67-v7-coach.css
-    min-height: 6.6rem | 6.25rem (67-v7-coach.css / 67-v7-coach.css)
+    min-height: 6.85rem | 6.5rem (67-v7-coach.css / 67-v7-coach.css)
 
 .rehab-v7-shell #ai-coach .v7-coach-page-subtitle
   files: 67-v7-coach.css
-    max-width: 14rem | 15.5rem (67-v7-coach.css / 67-v7-coach.css)
+    max-width: 17rem | 15.5rem (67-v7-coach.css / 67-v7-coach.css)
 
 .rehab-v7-shell #ai-coach .v7-coach-model-capsule
   files: 67-v7-coach.css
