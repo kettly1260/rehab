@@ -53,7 +53,6 @@ export function createBottomNavigation(options = {}) {
         activePointerId = event.pointerId;
         indicator.dataset.v7Interacting = 'true';
         updateIndicatorPointer(event);
-        try { nav.setPointerCapture?.(event.pointerId); } catch {}
     };
 
     const onPointerMove = (event) => {

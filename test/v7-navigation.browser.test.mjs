@@ -113,11 +113,12 @@ test('V7 bottom navigation matches compact reference geometry and interaction st
         assert.ok(initial);
         assert.ok(initial.nav.x >= 17 && initial.nav.x <= 19, `nav x=${initial.nav.x}`);
         assert.ok(initial.nav.width >= 352 && initial.nav.width <= 356, `nav width=${initial.nav.width}`);
-        assert.ok(initial.nav.height >= 38 && initial.nav.height <= 42, `nav height=${initial.nav.height}`);
+        assert.ok(initial.nav.height >= 70 && initial.nav.height <= 76, `nav height=${initial.nav.height}`);
         assert.ok(initial.nav.bottom >= 4 && initial.nav.bottom <= 12, `nav bottom=${initial.nav.bottom}`);
         assert.ok(initial.indicator.width >= 58 && initial.indicator.width <= 66, `indicator width=${initial.indicator.width}`);
-        assert.ok(initial.indicator.height >= 28 && initial.indicator.height <= 34, `indicator height=${initial.indicator.height}`);
-        assert.ok(initial.iconDisplays.every((display) => display === 'none'));
+        assert.ok(initial.indicator.height >= 60 && initial.indicator.height <= 66, `indicator height=${initial.indicator.height}`);
+        assert.ok(initial.iconDisplays.every((display) => display !== 'none'), `icons must be visible, got ${JSON.stringify(initial.iconDisplays)}`);
+        assert.equal(initial.iconDisplays.length, 5);
         assert.deepEqual(initial.labels, ['今日', '训练', '记录', '教练', '我的']);
 
         await page.evaluate(() => {

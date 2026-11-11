@@ -11,16 +11,16 @@
     height: var(--v7-nav-height);
     min-height: var(--v7-nav-height);
     margin: 0;
-    padding: 0.1875rem 0.3125rem;
+    padding: 0.25rem 0.3125rem;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible;
     transform: translateX(-50%);
     border: 1px solid color-mix(in srgb, var(--v7-border) 66%, white);
-    border-radius: calc(var(--v7-nav-height) / 2);
+    border-radius: 1.5rem;
     background: color-mix(in srgb, var(--v7-surface) 92%, transparent);
     box-shadow: 0 5px 16px rgba(26, 42, 33, 0.065);
     isolation: isolate;
-    contain: layout paint;
+    contain: layout;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     transition: opacity var(--v7-motion-fast) var(--v7-ease-standard), transform var(--v7-motion-fast) var(--v7-ease-standard);
@@ -45,36 +45,63 @@
 .rehab-v7-shell .v7-bottom-nav .nav-item {
     position: relative;
     z-index: 2;
-    display: grid;
-    place-items: center;
-    min-width: 0;
-    min-height: var(--v7-nav-item-min);
-    padding: 0 0.125rem;
-    border: 0;
-    border-radius: var(--v7-radius-pill);
-    background: transparent;
-    color: var(--v7-text-muted);
-    -webkit-tap-highlight-color: transparent;
-}
-
-.rehab-v7-shell .v7-bottom-nav .nav-item .nav-indicator {
-    display: none;
-}
-
-.rehab-v7-shell .v7-bottom-nav .nav-content {
-    position: relative;
-    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 0;
+    min-height: 48px;
+    height: 100%;
+    padding: 0.25rem 0.125rem;
+    border: 0;
+    border-radius: var(--v7-radius-lg);
+    background: transparent;
+    color: var(--v7-text-muted);
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-item .nav-indicator,
+.rehab-v7-shell .v7-bottom-nav .nav-item .ripple {
+    display: none !important;
+}
+
+.rehab-v7-shell .v7-bottom-nav .nav-content,
+.rehab-v7-shell .v7-bottom-nav .nav-item.active .nav-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
     width: 100%;
+    height: 100%;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible;
     color: inherit;
 }
 
 .rehab-v7-shell .v7-bottom-nav .nav-content > .material-symbols-rounded,
 .rehab-v7-shell .v7-bottom-nav .nav-item.active .nav-content > .material-symbols-rounded {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    line-height: 1;
+    color: inherit;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    user-select: none;
 }
 
 .rehab-v7-shell .v7-bottom-nav .nav-content small {
@@ -82,11 +109,12 @@
     max-width: 100%;
     overflow: hidden;
     color: inherit;
-    font-size: var(--v7-type-xs);
+    font-size: 12px;
     font-weight: var(--v7-weight-medium);
-    line-height: 1.1;
+    line-height: 1.2;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: center;
 }
 
 .rehab-v7-shell .v7-bottom-nav .nav-item.active {
@@ -95,6 +123,7 @@
 
 .rehab-v7-shell .v7-bottom-nav .nav-item.active .nav-content small {
     font-weight: var(--v7-weight-semibold);
+    color: var(--v7-primary-strong);
 }
 
 .rehab-v7-shell .v7-bottom-nav .nav-item:focus-visible {
@@ -110,25 +139,24 @@
     bottom: 0.25rem;
     left: 0.375rem;
     width: calc(var(--v7-nav-slot) - 0.375rem);
-    border: 1px solid color-mix(in srgb, var(--v7-primary) 11%, transparent);
-    border-radius: var(--v7-radius-pill);
-    background: color-mix(in srgb, var(--v7-primary-soft) 78%, var(--v7-surface));
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 62%, transparent), 0 1px 3px rgba(26, 42, 33, 0.035);
+    border: 1px solid color-mix(in srgb, var(--v7-primary) 12%, transparent);
+    border-radius: 1.25rem;
+    background: color-mix(in srgb, var(--v7-primary-soft) 82%, var(--v7-surface));
+    box-shadow: 0 1px 3px rgba(26, 42, 33, 0.04);
+    overflow: hidden;
     transform: translateX(var(--v7-nav-offset, 0%));
     transform-origin: center;
-    transition: transform 200ms var(--v7-ease-emphasized), border-radius 160ms var(--v7-ease-standard), box-shadow 160ms var(--v7-ease-standard);
+    transition: transform 200ms var(--v7-ease-emphasized), box-shadow 160ms var(--v7-ease-standard);
     pointer-events: none;
 }
 
 .rehab-v7-shell .v7-bottom-nav[data-v7-nav-moving="true"] .v7-bottom-nav__indicator {
-    border-radius: 42% 58% 48% 52% / 52% 46% 54% 48%;
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 78%, transparent), 0 2px 5px color-mix(in srgb, var(--v7-primary) 10%, transparent);
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--v7-primary) 12%, transparent);
     will-change: transform;
 }
 
-.rehab-v7-shell .v7-bottom-nav[data-v7-nav-moving="true"] .v7-bottom-nav__indicator::before,
-.rehab-v7-shell .v7-bottom-nav__indicator[data-v7-interacting="true"]::before {
-    opacity: var(--v7-liquid-active-opacity, .58);
+.rehab-v7-shell .v7-bottom-nav__indicator::before {
+    display: none !important;
 }
 
 .rehab-v7-shell main {
@@ -143,10 +171,11 @@
 
 @media (max-width: 360px) {
     .rehab-v7-shell .md-nav-rail.v7-bottom-nav {
-        width: calc(100% - 24px);
+        width: calc(100% - 20px);
+        padding: 0.25rem 0.1875rem;
     }
     .rehab-v7-shell .v7-bottom-nav .nav-content small {
-        font-size: 0.625rem;
+        font-size: 11px;
     }
 }
 
@@ -154,6 +183,85 @@
     .rehab-v7-shell .v7-bottom-nav__indicator,
     .rehab-v7-shell .md-nav-rail.v7-bottom-nav {
         transition-duration: 1ms;
+    }
+}
+
+/* --- Quick Record FAB --- */
+.rehab-v7-shell .v7-fab-quick-record {
+    position: fixed;
+    z-index: 200;
+    right: max(16px, calc((100vw - var(--v7-content-max)) / 2 + 16px));
+    bottom: calc(var(--v7-nav-height) + 0.375rem + 16px + env(safe-area-inset-bottom));
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    border: 0;
+    background: var(--v7-primary);
+    color: var(--v7-on-primary);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--v7-primary) 38%, transparent), var(--v7-shadow-2);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform var(--v7-motion-fast) var(--v7-ease-standard),
+                background-color var(--v7-motion-fast) var(--v7-ease-standard),
+                box-shadow var(--v7-motion-fast) var(--v7-ease-standard),
+                opacity var(--v7-motion-fast) var(--v7-ease-standard);
+}
+
+.rehab-v7-shell .v7-fab-quick-record .material-symbols-rounded {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
+    color: inherit;
+    user-select: none;
+}
+
+.rehab-v7-shell .v7-fab-quick-record:hover {
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--v7-primary) 46%, transparent), var(--v7-shadow-float);
+    transform: translateY(-1px);
+}
+
+.rehab-v7-shell .v7-fab-quick-record:active {
+    transform: scale(0.92);
+}
+
+.rehab-v7-shell .v7-fab-quick-record:focus-visible {
+    outline: 3px solid var(--v7-focus);
+    outline-offset: 3px;
+}
+
+.rehab-v7-shell .v7-fab-quick-record.is-visible {
+    display: inline-flex;
+}
+
+:root.rehab-v7-shell[data-v7-active-page="today"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-v7-active-page="records"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-active-page="today"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-active-page="records"] .v7-fab-quick-record {
+    display: inline-flex;
+}
+
+:root.rehab-v7-shell[data-v7-active-page="workout"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-v7-active-page="ai-coach"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-v7-active-page="profile"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-active-page="workout"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-active-page="ai-coach"] .v7-fab-quick-record,
+:root.rehab-v7-shell[data-active-page="profile"] .v7-fab-quick-record {
+    display: none !important;
+}
+
+.rehab-v7-shell[data-v7-keyboard="visible"] .v7-fab-quick-record,
+html.rehab-v7-shell body.v7-secondary-open .v7-fab-quick-record {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rehab-v7-shell .v7-fab-quick-record {
+        transition: none;
     }
 }
 

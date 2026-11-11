@@ -53,7 +53,7 @@
         (function installNonBlockingStartup() {
             'use strict';
 
-            const releaseVersion = '446';
+            const releaseVersion = '460';
             let applicationLaunchStarted = false;
 
             function acknowledgeReleasePage() {
@@ -420,8 +420,8 @@
         })();
         /* APP_STARTUP_NON_BLOCKING_BOOT_END */
     </script>
-    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=446" as="font" type="font/woff2" crossorigin>
-    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=446">
+    <link rel="preload" data-rehab-font-preload="primary" data-href="assets/material-symbols-rounded.woff2?v=460" as="font" type="font/woff2" crossorigin>
+    <link data-rehab-stylesheet="primary" data-href="build/generated.css?v=460">
 </head>
 <body>
     <script>
@@ -828,6 +828,53 @@
         </section>
     </main>
 
+    <!-- Floating Quick Record Action Button -->
+    <button type="button"
+            id="quickRecordFab"
+            class="v7-fab-quick-record"
+            onclick="window.quickRecord?.open()"
+            aria-label="快捷记录"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="quickRecordSheet">
+        <span class="material-symbols-rounded">add</span>
+    </button>
+
+    <!-- Quick Record Bottom Sheet Modal -->
+    <div id="quickRecordSheet"
+         class="md-modal quick-record-sheet hidden"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="quickRecordSheetTitle"
+         aria-hidden="true">
+        <div class="quick-record-backdrop" onclick="window.quickRecord?.close()"></div>
+        <div class="quick-record-panel" role="document">
+            <div class="quick-record-header">
+                <h2 id="quickRecordSheetTitle" class="quick-record-title">快捷记录</h2>
+                <button type="button" class="quick-record-close-icon" onclick="window.quickRecord?.close()" aria-label="关闭">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+            <div class="quick-record-list" role="menu">
+                <button type="button" class="quick-record-row" data-q="diet" onclick="window.quickRecord?.choose('diet')" role="menuitem">
+                    <span class="material-symbols-rounded quick-record-icon">restaurant</span>
+                    <span class="quick-record-label">记饮食</span>
+                </button>
+                <button type="button" class="quick-record-row" data-q="cardio" onclick="window.quickRecord?.choose('exercise')" role="menuitem">
+                    <span class="material-symbols-rounded quick-record-icon">fitness_center</span>
+                    <span class="quick-record-label">记运动</span>
+                </button>
+                <button type="button" class="quick-record-row" data-q="weight" onclick="window.quickRecord?.choose('weight')" role="menuitem">
+                    <span class="material-symbols-rounded quick-record-icon">monitor_weight</span>
+                    <span class="quick-record-label">记体重</span>
+                </button>
+            </div>
+            <div class="quick-record-footer">
+                <button type="button" class="md-btn md-btn-tonal quick-record-cancel-btn" onclick="window.quickRecord?.close()">取消</button>
+            </div>
+        </div>
+    </div>
+
     <nav class="md-nav-rail">
         <button class="nav-item active" onclick="ui.tab('today', this)">
             <div class="nav-indicator"></div>
@@ -872,7 +919,7 @@
         (function earlyUpgradeOverlay() {
             try {
                 const url = new URL(window.location.href);
-                if (url.searchParams.get('__rehab_upgrade') !== '446') return;
+                if (url.searchParams.get('__rehab_upgrade') !== '460') return;
                 const el = document.createElement('div');
                 el.id = 'rehabUpgradeOverlay';
                 el.setAttribute('role', 'alertdialog');
@@ -892,27 +939,27 @@
         })();
     </script>
 
-    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=446"></script>
-    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=446"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=446"></script>
-    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="data.js?v=446"></script>
-    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=446"></script>
+    <script data-rehab-entry data-kind="classic" data-src="m3e-ripple.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="toast.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="error-bus.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="i18n.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="theme.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="render-safe.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="nav-stack.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="app-route.js?v=460"></script>
+    <script data-rehab-entry data-kind="module" data-src="data-utils-pure.js?v=460"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-taxonomy-pure.js?v=460"></script>
+    <script data-rehab-entry data-kind="module" data-src="action-identity.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-utils.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/idb.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="storage/migrate.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-records.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-schema.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-store.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-ui-core.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data-views.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="data.js?v=460"></script>
+    <script data-rehab-entry data-kind="classic" data-src="sync-status.js?v=460"></script>
     <div id="weightModal" class="md-modal md-modal-sheet hidden" aria-hidden="true">
         <div class="md-modal-backdrop" onclick="data.closeWeightModal()"></div>
         <div class="md-modal-card md-modal-sheet-card">
@@ -1440,7 +1487,7 @@
             return true;
         }
         window.claimServiceWorkerReload = claimServiceWorkerReload;
-        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v446';
+        const SERVICE_WORKER_CONTROLLER_RELOAD_KEY = 'rehab-sw-controller-reload-v460';
         void SERVICE_WORKER_CONTROLLER_RELOAD_KEY;
         function scheduleServiceWorkerRegistration() {
             if (scheduleServiceWorkerRegistration._scheduled) return;
@@ -1467,7 +1514,7 @@
                     return;
                 }
                 const script = document.createElement('script');
-                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=446') : 'app-update.js?v=446');
+                script.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl('app-update.js?v=460') : 'app-update.js?v=460');
                 script.async = true;
                 script.dataset.rehabAppUpdate = '1';
                 script.onload = () => resolve(window.appUpdate);
@@ -1479,11 +1526,11 @@
                 try {
                     // Do not re-register / normalize while an intentional SW navigate is in flight.
                     try {
-                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '446') {
+                        if (new URL(window.location.href).searchParams.get('__rehab_upgrade') === '460') {
                             return;
                         }
                     } catch {}
-                    const registration = await navigator.serviceWorker.register('./sw.js?v=446', { updateViaCache: 'none' });
+                    const registration = await navigator.serviceWorker.register('./sw.js?v=460', { updateViaCache: 'none' });
                     if (!registration) return;
                     await registration.update?.();
                     // Never auto-activate a waiting worker here. Quiet registration only discovers
@@ -1500,7 +1547,7 @@
                                 return null;
                             }
                         })();
-                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '446';
+                        const alreadyCurrent = controllerUrl && controllerUrl.searchParams.get('v') === '460';
                         // Bare controllers are normal for legacy installs until the user applies.
                         // Only suppress the banner when the controller scriptURL is already versioned.
                         if (!alreadyCurrent) {
@@ -1572,7 +1619,7 @@
             const p = new Promise((res, rej) => {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
-                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=446`) : `css-src/${name}.css?v=446`);
+                link.href = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(`css-src/${name}.css?v=460`) : `css-src/${name}.css?v=460`);
                 link.dataset.appCss = name;
                 link.onload = () => {
                     link.dataset.loaded = 'true';
@@ -1655,7 +1702,7 @@
                 };
                 if (MODULE_SCRIPTS.has(name)) s.type = 'module';
                 const ext = MJS_SCRIPTS.has(name) ? '.mjs' : '.js';
-                let href = `${name}${ext}?v=446`;
+                let href = `${name}${ext}?v=460`;
                 if (forceReload) href += `&_rl=${Date.now()}`;
                 s.src = (typeof window.resolveAssetUrl === 'function' ? window.resolveAssetUrl(href) : href);
                 s.onload = () => settle();
@@ -1873,8 +1920,8 @@
             ui.syncSwitchAria(document.getElementById('isAlt'));
             try {
                 const resolvedEntry = typeof window.resolveAssetUrl === 'function'
-                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=446')
-                    : 'src/app/bootstrap.js?v=446';
+                    ? window.resolveAssetUrl('src/app/bootstrap.js?v=460')
+                    : 'src/app/bootstrap.js?v=460';
                 const entry = new URL(resolvedEntry, document.baseURI).href;
                 const v7 = await import(entry);
                 await v7.bootstrapV7?.({ host: window, documentRef: document });

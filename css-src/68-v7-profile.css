@@ -102,6 +102,22 @@
     background: var(--v7-bg);
 }
 
+.rehab-v7-shell #profile .profile-version-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.rehab-v7-shell #profile .profile-v6-back-btn {
+    position: relative;
+    overflow: hidden;
+    color: var(--v7-text);
+}
+
+.rehab-v7-shell #profile .profile-v6-back-btn::after {
+    background: currentColor;
+}
+
 .rehab-v7-shell #profile .profile-v6-back-title {
     color: var(--v7-text);
     letter-spacing: 0;
@@ -123,7 +139,6 @@
 }
 
 .rehab-v7-shell #profile .sync-card,
-.rehab-v7-shell #profile .profile-version-footer,
 .rehab-v7-shell #profile .plan-equipment-card,
 .rehab-v7-shell #profile .weightloss-plan-card {
     border-radius: var(--v7-radius-xl);
@@ -135,12 +150,77 @@
 }
 
 .rehab-v7-shell #profile .profile-version-footer {
-    align-items: flex-start;
-    text-align: left;
+    margin-top: var(--v7-space-4);
+    padding: var(--v7-space-3) var(--v7-space-3) var(--v7-space-2);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    line-height: var(--v7-leading-normal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.25rem;
+}
+
+.rehab-v7-shell #profile .profile-version-footer .pvf-title {
+    color: var(--v7-text);
+    font-size: var(--v7-type-sm);
+    font-weight: var(--v7-weight-semibold);
+    letter-spacing: 0.2px;
+    text-align: center;
+}
+
+.rehab-v7-shell #profile .profile-version-footer .pvf-sub {
+    color: var(--v7-text-muted);
+    font-size: var(--v7-type-xs);
+    text-align: center;
+    word-break: break-all;
 }
 
 .rehab-v7-shell #profile .profile-version-footer .pvf-actions {
-    justify-content: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--v7-space-2);
+    margin-top: 0.375rem;
+}
+
+.rehab-v7-shell #profile .profile-version-footer .pvf-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: var(--v7-type-xs);
+    font-weight: var(--v7-weight-medium);
+    padding: 0.375rem 0.875rem;
+    min-height: 2rem;
+    border-radius: var(--v7-radius-pill);
+    border: 1px solid var(--v7-border);
+    background: var(--v7-surface);
+    color: var(--v7-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 150ms ease, transform 100ms ease;
+}
+
+.rehab-v7-shell #profile .profile-version-footer .pvf-action:not(:disabled):active {
+    transform: scale(0.97);
+}
+
+.rehab-v7-shell #profile .profile-version-footer .pvf-check {
+    background: var(--v7-primary-soft);
+    color: var(--v7-primary-strong);
+    border-color: color-mix(in srgb, var(--v7-primary) 18%, transparent);
+}
+
+.rehab-v7-shell #profile .profile-version-footer .pvf-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 @media (max-width: 480px) {

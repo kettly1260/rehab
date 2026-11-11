@@ -155,7 +155,7 @@ test('A-T1 browser: first click with delayed plan-ui opens one modal without Typ
             await waitBoot(page);
 
             // Click as soon as the plan entry is visible — do not wait for plan-ui.
-            const btn = page.locator('button:has-text("新建计划")').first();
+            const btn = page.locator('button:has-text("新建计划"), button:has-text("创建计划")').first();
             await btn.waitFor({ state: 'visible', timeout: 20000 });
             await btn.click({ timeout: 5000 });
 
@@ -468,7 +468,7 @@ test('H1-T2 browser: AI opener first click with delayed plan-ui opens plan modal
             await page.evaluate(() => {
                 if (window.data) window.data._activePageId = 'today';
             });
-            const aiBtn = page.locator('button:has-text("AI 生成"), [aria-label="AI"]').first();
+            const aiBtn = page.locator('button:has-text("AI 生成"), button:has-text("AI 安排"), [aria-label="AI"]').first();
             await aiBtn.waitFor({ state: 'visible', timeout: 20000 });
             await aiBtn.click({ timeout: 5000 });
             await page.waitForFunction(() => !!document.querySelector('.md-modal[data-rl-modal="1"]'), null, { timeout: 20000 });

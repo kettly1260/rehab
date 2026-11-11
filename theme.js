@@ -262,3 +262,5 @@ const theme = {
         dot.style.background = 'var(--md-sys-primary)';
     }
 };
+
+try { window.theme = theme; } catch {}

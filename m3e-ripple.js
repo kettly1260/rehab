@@ -14,11 +14,9 @@
         setTimeout(() => dot.remove(), 600);
     }
     document.addEventListener('pointerdown', (e) => {
+        if (document.documentElement.classList.contains('rehab-v7-shell')) return;
         const matched = e.target.closest(SELECTOR);
         if (!matched) return;
-        // For bottom nav, the visual pill is .nav-content, not the full rectangular button.
-        // Anchoring the ripple to .nav-content keeps the effect inside the pill shape and
-        // avoids the gray rectangular splash on mobile.
         let host = matched;
         if (matched.classList.contains('nav-item')) {
             const pill = matched.querySelector('.nav-content');

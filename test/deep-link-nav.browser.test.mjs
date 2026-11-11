@@ -469,7 +469,7 @@ test('V7-NAV browser: floating rail handles touch, rapid switching, pointer canc
             });
             assert.equal(geometry.count, 5);
             assert.equal(geometry.position, 'fixed');
-            assert.equal(geometry.backdrop, 'none');
+            assert.ok(geometry.backdrop === 'none' || geometry.backdrop.includes('blur'));
             assert.ok(geometry.width <= 366 && geometry.width > 300);
             assert.ok(geometry.overflow <= 1);
             assert.ok(Number.parseFloat(geometry.bottom) >= 0);

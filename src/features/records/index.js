@@ -9,14 +9,23 @@ function escapeHtml(value) {
         .replaceAll("'", '&#39;');
 }
 
-function isRecordsOverviewRoute(host) {
+function isRecordsOverviewRoute(host, root) {
     const raw = String(host?.location?.hash || '')
         .replace(/^#/, '')
         .replace(/^!/, '')
-        .replace(/^\/?/, '')
-        .split('?')[0];
-    const parts = raw.split('/').filter(Boolean);
-    return (parts[0] || 'records') === 'records' && !parts[1];
+        .replace(/^\/?/, '');
+    const [pathPart = '', queryPart = ''] = raw.split('?');
+    const parts = pathPart.split('/').filter(Boolean);
+    const query = new URLSearchParams(queryPart);
+    const subview = (parts[0] === 'records' ? parts[1] : '') || query.get('view') || '';
+    if (RECORD_VIEWS.has(subview)) {
+        if (root?.dataset) root.dataset.v7RecordsMode = 'subview';
+        return false;
+    }
+    if (root?.dataset?.v7RecordsMode === 'subview') {
+        return false;
+    }
+    return true;
 }
 
 function resolveDayKey(value) {
@@ -248,7 +257,7 @@ function renderRecordsOverview(root, data, host) {
     const signature = JSON.stringify([period, todayKey, history.map((item) => [item.id, item.date, item.duration, item.updatedAt, item.deleted])]);
     if (shell.dataset.v7Signature !== signature) {
         shell.dataset.v7Signature = signature;
-        shell.innerHTML = `<section class="v7-records-summary"><span><small>训练次数</small><b>${stats.count}</b><em>次</em><i class="${stats.countDelta < 0 ? 'is-negative' : ''}">${period === 'week' ? '比上周' : '比上月'} ${countDelta}</i></span><span><small>训练时长</small><b>${hours.toFixed(1)}</b><em>小时</em><i class="${stats.secondsDelta < 0 ? 'is-negative' : ''}">${durationDelta}</i></span><span><small>连续天数</small><b>${streak.current}</b><em>天</em><i>最长 ${streak.longest} 天</i></span></section><section class="v7-records-trend-card"><div class="v7-records-card-head"><b>训练负荷趋势</b><span>近 7 天</span></div>${trendSvg(points)}<div class="v7-records-trend-labels">${points.map((point) => `<span class="${dayKey(point.date) === dayKey(now) ? 'is-current' : ''}">${weekdayLabel(point.date)}</span>`).join('')}</div></section><section class="v7-records-calendar-card"><div class="v7-records-card-head"><b>本月活动</b><button type="button" data-v7-records-view="calendar">查看日历</button></div>${twoWeekCalendar(history, now)}</section><section class="v7-records-recent-section"><div class="v7-records-section-head"><b>最近记录</b><button type="button" data-v7-records-view="training">查看全部</button></div><div class="v7-records-recent-card">${recentRows(data, history, now, 2)}</div></section><nav class="v7-records-subnav" aria-label="记录子视图"><button type="button" data-v7-records-view="training">训练</button><button type="button" data-v7-records-view="weight">体重</button><button type="button" data-v7-records-view="diet">饮食</button><button type="button" data-v7-records-view="calendar">日历</button></nav>`;
+        shell.innerHTML = `<nav class="v7-records-subnav" aria-label="记录子视图"><button type="button" class="is-active" data-v7-records-overview-link="true" aria-current="page">总览</button><button type="button" data-v7-records-view="diet">饮食</button><button type="button" data-v7-records-view="weight">体重</button><button type="button" data-v7-records-view="training">健康</button><button type="button" data-v7-records-view="calendar">日历</button></nav><section class="v7-records-summary"><span><small>训练次数</small><b>${stats.count}</b><em>次</em><i class="${stats.countDelta < 0 ? 'is-negative' : ''}">${period === 'week' ? '比上周' : '比上月'} ${countDelta}</i></span><span><small>训练时长</small><b>${hours.toFixed(1)}</b><em>小时</em><i class="${stats.secondsDelta < 0 ? 'is-negative' : ''}">${durationDelta}</i></span><span><small>连续天数</small><b>${streak.current}</b><em>天</em><i>最长 ${streak.longest} 天</i></span></section><section class="v7-records-trend-card"><div class="v7-records-card-head"><b>训练负荷趋势</b><span>近 7 天</span></div>${trendSvg(points)}<div class="v7-records-trend-labels">${points.map((point) => `<span class="${dayKey(point.date) === dayKey(now) ? 'is-current' : ''}">${weekdayLabel(point.date)}</span>`).join('')}</div></section><section class="v7-records-calendar-card"><div class="v7-records-card-head"><b>本月活动</b><button type="button" data-v7-records-view="calendar">查看日历</button></div>${twoWeekCalendar(history, now)}</section><section class="v7-records-recent-section"><div class="v7-records-section-head"><b>最近记录</b><button type="button" data-v7-records-view="training">查看全部</button></div><div class="v7-records-recent-card">${recentRows(data, history, now, 2)}</div></section>`;
     }
 
     let periodButton = root.querySelector('.v7-records-period-button');
@@ -267,7 +276,7 @@ function renderRecordsOverview(root, data, host) {
 
 function syncRecordsRouteUi(root, data, host) {
     if (!root?.querySelector || !root?.ownerDocument?.createElement) return;
-    const overview = isRecordsOverviewRoute(host);
+    const overview = isRecordsOverviewRoute(host, root);
     root.dataset.v7RecordsOverview = String(overview);
     const title = root.querySelector('.md-top-app-bar .app-title');
     const periodButton = root.querySelector('.v7-records-period-button');
@@ -321,6 +330,7 @@ function clearEnhancements(root) {
     root.classList.remove('v7-page-mounted', 'v7-feature-records');
     delete root.dataset.v7RecordsView;
     delete root.dataset.v7RecordsOverview;
+    delete root.dataset.v7RecordsMode;
     delete root.dataset.v7RecordsPeriod;
     if (root.querySelector) {
         root.querySelector('.v7-records-overview-shell')?.remove();
@@ -386,15 +396,27 @@ export const recordsFeature = Object.freeze({
             }
             const overviewLink = event.target?.closest?.('[data-v7-records-overview-link]');
             if (overviewLink && root.contains(overviewLink)) {
-                host.location.hash = '#/records';
+                root.dataset.v7RecordsMode = 'overview';
+                root.dataset.v7RecordsOverview = 'true';
+                if (host?.location && host.location.hash !== '#/records') {
+                    host.location.hash = '#/records';
+                }
+                enhanceRecords(root, data, host);
                 return;
             }
-            const viewButton = event.target?.closest?.('[data-v7-records-view]');
+            const viewButton = event.target?.closest?.('[data-v7-records-view], [data-health-view]');
             if (viewButton && root.contains(viewButton)) {
-                const next = viewButton.dataset.v7RecordsView;
+                const next = viewButton.dataset.v7RecordsView || viewButton.dataset.healthView;
                 if (RECORD_VIEWS.has(next)) {
-                    data?.scrollToHealthView?.(next);
-                    scheduleEnhance();
+                    root.dataset.v7RecordsMode = 'subview';
+                    root.dataset.v7RecordsOverview = 'false';
+                    if (viewButton.dataset.v7RecordsView) {
+                        data?.scrollToHealthView?.(next);
+                    }
+                    if (host?.location && host.location.hash !== `#/records/${next}`) {
+                        host.location.hash = `#/records/${next}`;
+                    }
+                    enhanceRecords(root, data, host);
                 }
                 return;
             }

@@ -134,6 +134,22 @@ test('V7 Profile exposes the full settings inventory and preserves nested back n
         await page.evaluate(() => window.data.setRoutineView('library'));
         await page.waitForFunction(() => document.querySelector('#profile')?.dataset.v7ProfileView === 'library');
         await page.waitForSelector('#profileContent [data-library-view]');
+        const backBtnCheck = await page.evaluate(() => {
+            const btn = document.querySelector('#profile .profile-v6-back-btn');
+            if (!btn) return null;
+            const style = getComputedStyle(btn);
+            const rect = btn.getBoundingClientRect();
+            return {
+                position: style.position,
+                overflow: style.overflow,
+                width: rect.width,
+                height: rect.height
+            };
+        });
+        assert.ok(backBtnCheck);
+        assert.equal(backBtnCheck.position, 'relative', 'Back button must have relative positioning to constrain ripple/hover');
+        assert.equal(backBtnCheck.overflow, 'hidden', 'Back button must clip overflow');
+        assert.ok(backBtnCheck.width <= 37 && backBtnCheck.height <= 37, 'Back button dimensions must stay bounded to circular target');
 
         await page.goBack({ waitUntil: 'domcontentloaded' });
         await page.waitForFunction(() => document.querySelector('#profile')?.dataset.v7ProfileView === 'home');

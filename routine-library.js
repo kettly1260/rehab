@@ -801,16 +801,18 @@
         },
 
         renderProfileVersionFooter() {
-            const version = this.detectAppVersion?.() || '';
+            const version = this.detectAppVersion?.() || (typeof window !== 'undefined' && window.appUpdate?.version ? ('v' + window.appUpdate.version) : '');
             const cache =
                 typeof caches !== 'undefined' && this._cachedSwName ? this._cachedSwName : '';
             const sub = cache
                 ? `Service Worker · ${this.escapeHtml(cache)}`
-                : 'Service Worker · (未注册)';
+                : (typeof navigator !== 'undefined' && navigator.serviceWorker?.controller
+                    ? `Service Worker · training-assistant-${version || 'v455'}`
+                    : 'Service Worker · 离线缓存就绪');
             const checking = !!window.appUpdate?.checking;
             const unsupported = typeof navigator === 'undefined' || !('serviceWorker' in navigator);
             return `<div class="profile-version-footer" id="profileVersionFooter">
-                <div class="pvf-title">版本 ${this.escapeHtml(version || '--')}</div>
+                <div class="pvf-title">当前版本 ${this.escapeHtml(version || '--')}</div>
                 <div class="pvf-sub">${sub}</div>
                 <div class="pvf-actions">
                     <button type="button" class="pvf-action pvf-check" id="profileUpdateCheckBtn" onclick="data.checkAppUpdate?.()" ${checking || unsupported ? 'disabled' : ''}>
@@ -822,7 +824,9 @@
         },
 
         detectAppVersion() {
-            // Read the ?v=N param from any of the cache-busted asset tags Kilo emits in index.html.
+            if (typeof window !== 'undefined' && window.appUpdate?.version) {
+                return 'v' + window.appUpdate.version;
+            }
             try {
                 const node = document.querySelector('script[src*="?v="], link[href*="?v="]');
                 const src = node?.getAttribute('src') || node?.getAttribute('href') || '';

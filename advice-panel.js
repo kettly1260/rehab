@@ -1336,8 +1336,8 @@ const advicePanel = {
 
     refreshAdviceModelChip() {
         const chip = document.querySelector('.advice-model-chip');
-        if (!chip) return;
-        chip.outerHTML = this.renderAdviceModelChip();
+        if (chip) chip.outerHTML = this.renderAdviceModelChip();
+        try { window.dispatchEvent?.(new CustomEvent('advice:render-state')); } catch {}
     },
 
     openAdviceModelPicker() {

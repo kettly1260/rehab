@@ -127,7 +127,7 @@
             fillTodaySlot(quickActions, ctx.renderTodayActionDock?.() || '', 'todayQuickActions');
             fillTodaySlot(planStatus, ctx.renderTodayV6PlanCard?.() || '', 'todayPlanStatus');
             fillTodaySlot(dietStatus, ctx.renderTodayV6DietCard?.() || '', 'todayDietStatus');
-            const trendHtml = `${ctx.renderTodayCompletionTrend?.() || ''}${ctx.renderTodayPrimaryAction?.() || ''}`;
+            const trendHtml = ctx.renderTodayCompletionTrend?.() || '';
             fillTodaySlot(timeline, trendHtml || ctx.renderTodayTimeline?.() || '', 'todayTimeline');
 
             if (aiCard) {

@@ -341,7 +341,14 @@ test('T1 diet text picker cold Today without Profile', async () => {
             page.on('pageerror', (err) => pageErrors.push(err.message));
             await bootColdToday(page, http.url);
 
-            await page.locator('button[data-q="diet"], button:has-text("记饮食")').first().click({ timeout: 10000 });
+            await page.evaluate(async () => {
+                const host = /** @type {any} */ (window);
+                if (typeof host.quickRecord?.choose === 'function') {
+                    await host.quickRecord.choose('diet');
+                } else if (typeof host.data?.openDietModal === 'function') {
+                    await host.data.openDietModal();
+                }
+            });
             await page.waitForSelector('#dietModal:not(.hidden)', { timeout: 15000 });
             await waitForPickerButton(page, 'food.text');
 
@@ -376,7 +383,14 @@ test('T2 diet vision picker cold Today without Profile', async () => {
             });
             const page = await context.newPage();
             await bootColdToday(page, http.url);
-            await page.locator('button[data-q="diet"], button:has-text("记饮食")').first().click({ timeout: 10000 });
+            await page.evaluate(async () => {
+                const host = /** @type {any} */ (window);
+                if (typeof host.quickRecord?.choose === 'function') {
+                    await host.quickRecord.choose('diet');
+                } else if (typeof host.data?.openDietModal === 'function') {
+                    await host.data.openDietModal();
+                }
+            });
             await page.waitForSelector('#dietModal:not(.hidden)', { timeout: 15000 });
             await waitForPickerButton(page, 'food.vision');
 

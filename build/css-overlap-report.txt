@@ -1,7 +1,7 @@
 # css overlap report
 # real-conflict threshold: 220
 
-## REAL CONFLICTS (same selector + same property, different value): 217
+## REAL CONFLICTS (same selector + same property, different value): 220
 *
   files: 02-base.css, 36-responsive.css, 50-v6-ui.css, 40-a11y.css
     animation-duration: 1ms !important | 0.001ms !important (36-responsive.css / 50-v6-ui.css / 40-a11y.css)
@@ -1027,11 +1027,19 @@ to
 
 .rehab-v7-shell .md-nav-rail.v7-bottom-nav
   files: 63-v7-navigation.css
-    width: min(calc(100% - 36px), 420px) | calc(100% - 24px) (63-v7-navigation.css / 63-v7-navigation.css)
+    width: min(calc(100% - 36px), 420px) | calc(100% - 20px) (63-v7-navigation.css / 63-v7-navigation.css)
+    padding: 0.25rem 0.3125rem | 0.25rem 0.1875rem (63-v7-navigation.css / 63-v7-navigation.css)
 
 .rehab-v7-shell .v7-bottom-nav .nav-content small
   files: 63-v7-navigation.css
-    font-size: var(--v7-type-xs) | 0.625rem (63-v7-navigation.css / 63-v7-navigation.css)
+    font-size: 12px | 11px (63-v7-navigation.css / 63-v7-navigation.css)
+
+.rehab-v7-shell .v7-fab-quick-record
+  files: 63-v7-navigation.css
+    transition: transform var(--v7-motion-fast) var(--v7-ease-standard),
+                background-color var(--v7-motion-fast) var(--v7-ease-standard),
+                box-shadow var(--v7-motion-fast) var(--v7-ease-standard),
+                opacity var(--v7-motion-fast) var(--v7-ease-standard) | none (63-v7-navigation.css / 63-v7-navigation.css)
 
 .rehab-v7-shell #workout[data-v7-workout-state="idle"][data-v7-workout-editor="open"] > .routine-tool:not(.hidden)
   files: 65-v7-workout.css
@@ -1059,17 +1067,25 @@ to
   files: 67-v7-coach.css
     padding-inline: clamp(14px, 4vw, 24px) | var(--v7-space-3) | var(--v7-space-4) (67-v7-coach.css / 67-v7-coach.css / 67-v7-coach.css)
 
+.rehab-v7-shell #ai-coach .advice-v6-chat-list
+  files: 67-v7-coach.css
+    max-height: 18rem | 16.5rem (67-v7-coach.css / 67-v7-coach.css)
+
 .rehab-v7-shell #ai-coach .md-top-app-bar.v7-coach-header
   files: 67-v7-coach.css
     min-height: 6.6rem | 6.25rem (67-v7-coach.css / 67-v7-coach.css)
 
 .rehab-v7-shell #ai-coach .v7-coach-page-subtitle
   files: 67-v7-coach.css
-    max-width: 18rem | 15.5rem (67-v7-coach.css / 67-v7-coach.css)
+    max-width: 14rem | 15.5rem (67-v7-coach.css / 67-v7-coach.css)
 
-.rehab-v7-shell #ai-coach .advice-v6-chat-list[data-advice-virtual-active="true"]
+.rehab-v7-shell #ai-coach .v7-coach-model-capsule
   files: 67-v7-coach.css
-    max-height: 21rem | 20rem (67-v7-coach.css / 67-v7-coach.css)
+    max-width: 12.5rem | 13.5rem | 11.5rem (67-v7-coach.css / 67-v7-coach.css / 67-v7-coach.css)
+
+.rehab-v7-shell #ai-coach .v7-coach-model-name
+  files: 67-v7-coach.css
+    max-width: 6.5rem | 4.5rem (67-v7-coach.css / 67-v7-coach.css / 67-v7-coach.css)
 
 .rehab-v7-shell #profile.v7-feature-profile
   files: 68-v7-profile.css
@@ -1093,7 +1109,7 @@ to
   files: 68-v7-profile.css
     border-bottom: 1px solid var(--v7-row-divider) | 0 (68-v7-profile.css / 68-v7-profile.css)
 
-## DUPLICATES (same selector + same property + same value): 31
+## DUPLICATES (same selector + same property + same value): 30
 .timer-stats
   files: 09-workout-timer.css, 52-v6-workout.css
     display: flex (09-workout-timer.css / 52-v6-workout.css)
@@ -1239,11 +1255,7 @@ to
     width: 44px (54-v6-ai.css / 54-v6-ai.css)
     height: 44px (54-v6-ai.css / 54-v6-ai.css)
 
-.rehab-v7-shell #ai-coach .advice-v6-page
-  files: 67-v7-coach.css
-    gap: var(--v7-space-4) (67-v7-coach.css / 67-v7-coach.css)
-
-## COMPLEMENTS (same selector, disjoint properties): 195
+## COMPLEMENTS (same selector, disjoint properties): 193
 :root
   files: 01-vars.css, 49-plan.css, 41-m3e-effects.css
 
@@ -1802,16 +1814,10 @@ body.is-paused .fab-play
 .rehab-v7-shell #ai-coach .ai-insight
   files: 67-v7-coach.css
 
-.rehab-v7-shell #ai-coach .advice-v6-chat-list
-  files: 67-v7-coach.css
-
 .rehab-v7-shell #ai-coach .advice-scroll-rail
   files: 67-v7-coach.css
 
 .rehab-v7-shell #profile .profile-stats
-  files: 68-v7-profile.css
-
-.rehab-v7-shell #profile .profile-version-footer
   files: 68-v7-profile.css
 
 .rehab-v7-shell .advice-attachment-preview-card

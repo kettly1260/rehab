@@ -68,8 +68,8 @@
     --v7-icon-lg: 1.625rem;
     --v7-touch-min: 2.75rem;
     --v7-cta-height: 3.375rem;
-    --v7-nav-height: 2.5rem;
-    --v7-nav-item-min: 2.125rem;
+    --v7-nav-height: 4.5rem;
+    --v7-nav-item-min: 3rem;
     --v7-content-max: 46rem;
     --v7-page-gutter: 1rem;
     --v7-section-gap: 1.125rem;
@@ -124,4 +124,8 @@
         --v7-motion-normal: 1ms;
         --v7-motion-slow: 1ms;
     }
+}
+
+.rehab-v7-shell .ripple {
+    display: none !important;
 }

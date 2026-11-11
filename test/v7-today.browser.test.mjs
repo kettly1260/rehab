@@ -118,7 +118,7 @@ test('V7 Today matches repaired reference hierarchy in empty and populated real-
         assert.ok(empty.status && empty.trend && empty.cta && empty.nav);
         assert.ok(empty.overlap <= 1, `empty CTA/nav overlap=${empty.overlap}`);
         assert.ok(empty.overflow <= 1, `empty horizontal overflow=${empty.overflow}`);
-        assert.match(empty.ctaText, /创建今日计划/);
+        assert.match(empty.ctaText, /创建计划/);
         await page.screenshot({ path: path.join(evidenceRoot, 'today-empty-390x844.png'), fullPage: false });
 
         await page.evaluate(() => {

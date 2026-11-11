@@ -753,6 +753,12 @@
             if (index < 0) return;
             this.captureAdviceDraft?.();
             this.healthView = view;
+            const recordsRoot = document.getElementById('records');
+            if (recordsRoot?.dataset) {
+                recordsRoot.dataset.v7RecordsMode = 'subview';
+                recordsRoot.dataset.v7RecordsOverview = 'false';
+                recordsRoot.dataset.v7RecordsView = view;
+            }
             this.ensureHealthViewCss(view);
             this.syncHealthSubtabNav(view);
             this.updateHealthTabActive();

@@ -57,9 +57,11 @@ module.exports = [
       'src/legacy/adapters/services.js',
       'src/legacy/adapters/storage.js',
       'src/ui/effects/index.js',
-      'src/ui/navigation/bottom-nav.js'
+      'src/ui/navigation/bottom-nav.js',
+      'src/ui/navigation/quick-record.js'
     ],
-    limit: '26 KB'
+    // Includes quick-record.js (FAB + bottom sheet controller), coach model identity & reasoning capsule, and records subview routing.
+    limit: '29 KB'
   },
   {
     name: 'deferred-storage',

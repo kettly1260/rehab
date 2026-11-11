@@ -6,6 +6,7 @@ import { getFeature } from './feature-registry.js';
 import { createLegacyAdapters } from '../legacy/adapters/index.js';
 import { createEffectsController } from '../ui/effects/index.js';
 import { createBottomNavigation } from '../ui/navigation/bottom-nav.js';
+import { createQuickRecordController } from '../ui/navigation/quick-record.js';
 import { createSecondarySurfaceController } from '../ui/primitives/secondary-surfaces.js';
 
 const RUNTIME_KEY = Symbol.for('rehab.v7.runtime');
@@ -48,6 +49,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
     router.start();
     markBottomNav(documentRef);
     const bottomNavigation = createBottomNavigation({ documentRef, events });
+    const quickRecord = createQuickRecordController({ host, documentRef, events });
     secondarySurfaces.start();
     const activePage = context.activePage;
     await lifecycle.transition(getFeature(activePage), context, { source: 'bootstrap' });
@@ -65,6 +67,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         events,
         effects,
         bottomNavigation,
+        quickRecord,
         secondarySurfaces,
         diagnostics: Object.freeze({
             snapshot: () => ({
@@ -78,6 +81,7 @@ export async function bootstrapV7({ host = globalThis, documentRef = host.docume
         }),
         dispose() {
             offMount();
+            quickRecord.dispose();
             bottomNavigation.dispose();
             secondarySurfaces.dispose();
             effects.dispose();

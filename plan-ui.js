@@ -97,7 +97,7 @@
                 el.innerHTML = next;
                 if (el.dataset) el.dataset.todayShell = 'ready';
             };
-            const trendHtml = `${ctx.renderTodayCompletionTrend?.() || ''}${ctx.renderTodayPrimaryAction?.() || ''}`;
+            const trendHtml = ctx.renderTodayCompletionTrend?.() || '';
             fillIfNeeded(timeline, trendHtml || ctx.renderTodayTimeline?.() || '');
             if (aiCard) {
                 let aiHtml = ctx.renderTodayTimeline?.() || '';

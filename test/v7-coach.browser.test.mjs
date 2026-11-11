@@ -80,6 +80,8 @@ test('V7 Coach renders a stable chat surface and survives active-stream route ch
             overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - document.documentElement.clientWidth,
             railDisplay: getComputedStyle(document.querySelector('#ai-coach .advice-scroll-rail')).display,
             modelVisible: document.querySelector('#ai-coach .v7-coach-model-entry')?.getClientRects().length > 0,
+            modelHasIcon: !!document.querySelector('#ai-coach .v7-coach-model-entry .advice-model-icon'),
+            modelText: document.querySelector('#ai-coach .v7-coach-model-entry .v7-coach-model-name')?.textContent?.trim() || '',
             composerReasoning: document.querySelectorAll('#ai-coach .advice-composer-stack .advice-reasoning-chip').length,
             promptWidths: [...document.querySelectorAll('#ai-coach .v7-coach-suggestion-controls > button')].slice(0, 3).map((button) => button.getBoundingClientRect().width),
             promptLabels: [...document.querySelectorAll('#ai-coach .v7-coach-suggestion-controls > button')].slice(0, 3).map((button) => button.textContent.trim()),
@@ -97,7 +99,20 @@ test('V7 Coach renders a stable chat surface and survives active-stream route ch
         assert.ok(initial.overflow <= 1);
         assert.equal(initial.railDisplay, 'none');
         assert.equal(initial.modelVisible, true);
+        assert.equal(initial.modelHasIcon, true);
+        assert.ok(initial.modelText.length > 0);
         assert.equal(initial.composerReasoning, 0);
+
+        await page.evaluate(() => {
+            if (window.ai?.cfg) {
+                window.ai.cfg.provider = 'deepseek';
+                window.ai.cfg.model = 'deepseek-chat';
+            }
+            window.data.refreshAdviceModelChip?.();
+        });
+        await page.waitForFunction(() => document.querySelector('#ai-coach .v7-coach-model-entry .v7-coach-model-name')?.textContent?.includes('deepseek-chat'));
+        assert.equal(await page.evaluate(() => document.querySelector('#ai-coach .v7-coach-model-entry .v7-coach-model-name')?.textContent?.trim()), 'deepseek-chat');
+        assert.match(await page.evaluate(() => document.querySelector('#ai-coach .v7-coach-model-entry .advice-model-icon')?.getAttribute('src') || ''), /deepseek/i);
         assert.equal(initial.promptWidths.length, 3);
         assert.ok(Math.max(...initial.promptWidths) - Math.min(...initial.promptWidths) <= 1);
         assert.ok(initial.promptLabels.every((label) => label.length > 0 && label.length <= 8));
@@ -138,9 +153,19 @@ test('V7 Coach renders a stable chat surface and survives active-stream route ch
         await page.evaluate(() => window.data.openAdviceModelPicker());
         await page.waitForSelector('#aiModelPickerSheet:not(.hidden)');
         await page.evaluate(() => window.data.closeAdviceModelPicker());
+
+        assert.equal(await page.locator('#ai-coach .v7-coach-advanced-tools').count(), 0);
+        assert.equal(await page.locator('#ai-coach .v7-coach-usage-btn').count(), 1);
+        assert.equal(await page.locator('#ai-coach .v7-coach-regenerate-btn').count(), 1);
+
+        // Verify '+' button opens input tools menu (images, files, context)
+        await page.locator('#ai-coach #adviceAttachButton').click();
+        await page.waitForSelector('#ai-coach .v7-coach-plus-menu:not(.hidden)');
+        assert.equal(await page.locator('#ai-coach .v7-coach-menu-item').count(), 3);
+        await page.locator('#ai-coach #adviceAttachButton').click();
+        await page.waitForSelector('#ai-coach .v7-coach-plus-menu', { state: 'hidden' });
+
         await page.evaluate(() => window.data.toggleAdviceSearch());
-        await page.waitForSelector('#ai-coach #adviceSearchInput', { state: 'attached' });
-        await page.locator('#ai-coach .v7-coach-advanced-tools > summary').click();
         await page.waitForSelector('#ai-coach #adviceSearchInput');
         await page.locator('#adviceSearchInput').fill('训练');
         await page.waitForTimeout(350);

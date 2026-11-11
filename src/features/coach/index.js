@@ -10,10 +10,129 @@ const COACH_SURFACE_SELECTORS = [
     '.advice-empty'
 ].join(',');
 
+function syncCoachModelEntry(modelEntry, doc, data, host) {
+    if (!modelEntry || typeof doc?.createElement !== 'function') return;
+    const aiInstance = host?.ai;
+    const taskId = data?.advicePickerTaskId?.() || 'advice.chat';
+    const effective = aiInstance?.resolveTaskConfig?.(taskId)
+        || aiInstance?.getEffectiveConfig?.()
+        || aiInstance?.cfg
+        || {};
+    const route = aiInstance?.getTaskRoute?.(taskId) || {};
+    const selectable = typeof aiInstance?.listSelectableModels === 'function'
+        ? aiInstance.listSelectableModels(taskId)?.[0] || null
+        : null;
+    const profileId = String(effective.profileId || route?.primary?.profileId || aiInstance?.cfg?.activeProfileId || selectable?.profileId || '');
+    const activeProfile = (aiInstance?.cfg?.profiles || []).find((item) => item && item.id === profileId) || null;
+    const rawModel = String(
+        effective.model
+        || route?.primary?.modelId
+        || data?.resolveAdviceTaskModel?.({ taskId })
+        || activeProfile?.model
+        || aiInstance?.cfg?.model
+        || selectable?.modelId
+        || selectable?.id
+        || ''
+    ).trim();
+    const modelId = rawModel && rawModel !== '__current__' ? rawModel : '';
+    const provider = String(effective.provider || activeProfile?.provider || aiInstance?.cfg?.provider || selectable?.provider || 'openai');
+    const models = Array.isArray(aiInstance?.models) ? aiInstance.models : [];
+    const cached = models.find((item) => item && item.id === modelId && (!profileId || item.profileId === profileId))
+        || models.find((item) => item && item.id === modelId)
+        || selectable
+        || null;
+    const visual = data?.adviceModelVisual?.(modelId || cached?.displayName || provider || 'AI', provider, cached?.iconKey || cached?.vendor || '')
+        || host?.aiModelVisual?.resolve?.({ modelId: modelId || cached?.displayName || provider || 'AI', provider, iconKey: cached?.iconKey || cached?.vendor || '' })
+        || { key: 'ai', label: 'AI', mark: 'AI', iconSrcs: ['assets/model-icons/generic.svg'] };
+    const fullName = String(cached?.displayName || modelId || '').trim();
+    const shortName = fullName
+        ? (typeof data?.modelShortName === 'function' ? data.modelShortName(fullName) : (fullName.length > 18 ? `${fullName.slice(0, 16)}…` : fullName))
+        : '默认模型';
+    const ariaLabel = `切换分析模型：${fullName || '默认模型'}`;
+    const isOverride = Boolean(aiInstance?.cfg?.taskRoutes?.[taskId]);
+    const srcs = Array.isArray(visual.iconSrcs) ? visual.iconSrcs.filter(Boolean) : [];
+    const signature = `${visual.key || 'ai'}|${srcs.join(',')}|${visual.mark || 'AI'}|${shortName}|${isOverride ? '1' : '0'}`;
+
+    modelEntry.className = `v7-coach-model-entry advice-model-${visual.key || 'ai'}${isOverride ? ' is-override' : ''}`;
+    const style = data?.adviceModelThemeStyle?.(visual) || '';
+    if (style) modelEntry.setAttribute('style', style);
+    else modelEntry.removeAttribute('style');
+    modelEntry.setAttribute('aria-label', ariaLabel);
+    modelEntry.setAttribute('title', ariaLabel);
+
+    if (modelEntry.dataset?.v7ModelSignature === signature) return;
+    if (modelEntry.dataset) modelEntry.dataset.v7ModelSignature = signature;
+
+    const markSpan = doc.createElement('span');
+    markSpan.className = 'advice-model-mark v7-coach-model-mark';
+    if (srcs.length) {
+        const img = doc.createElement('img');
+        img.className = 'advice-model-icon';
+        img.alt = '';
+        img.src = srcs[0];
+        let fallbackIdx = 1;
+        img.addEventListener('error', () => {
+            if (fallbackIdx < srcs.length) img.src = srcs[fallbackIdx++];
+            else markSpan.textContent = visual.mark || 'AI';
+        });
+        markSpan.append(img);
+    } else {
+        markSpan.textContent = visual.mark || 'AI';
+    }
+
+    const nameSpan = doc.createElement('span');
+    nameSpan.className = 'v7-coach-model-name';
+    nameSpan.textContent = shortName;
+
+    const caretSpan = doc.createElement('span');
+    caretSpan.className = 'v7-coach-model-caret';
+    caretSpan.setAttribute('aria-hidden', 'true');
+    caretSpan.textContent = '⌄';
+
+    modelEntry.replaceChildren(markSpan, nameSpan, caretSpan);
+}
+
+function syncCoachReasoningChip(reasoningBtn, doc, data, host) {
+    if (!reasoningBtn || typeof doc?.createElement !== 'function') return;
+    const aiInstance = host?.ai;
+    const taskId = data?.advicePickerTaskId?.() || 'advice.chat';
+    const route = aiInstance?.getTaskRoute?.(taskId) || {};
+    const depth = String(route.reasoningDepth || 'auto');
+    const visual = host?.aiTaskSettings?.reasoningMeta?.(depth)
+        || { value: depth, label: depth === 'off' ? '直接回答' : '自动', icon: depth === 'off' ? 'block' : 'auto_awesome' };
+
+    reasoningBtn.type = 'button';
+    reasoningBtn.className = `advice-reasoning-chip is-${depth} v7-coach-selected-control v7-coach-advanced-reasoning`;
+    reasoningBtn.setAttribute('aria-label', `推理强度：${visual.label}`);
+    reasoningBtn.setAttribute('title', `推理强度：${visual.label}`);
+    reasoningBtn.setAttribute('onclick', 'window.advicePanel?.openAdviceReasoningPicker?.call(data)');
+
+    if (!reasoningBtn.__hasReasoningClick) {
+        reasoningBtn.__hasReasoningClick = true;
+        reasoningBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const fn = host?.advicePanel?.openAdviceReasoningPicker || data?.openAdviceReasoningPicker;
+            if (typeof fn === 'function') {
+                fn.call(data || host?.advicePanel);
+            }
+        });
+    }
+
+    let iconSpan = reasoningBtn.querySelector('.material-symbols-rounded');
+    if (!iconSpan) {
+        iconSpan = doc.createElement('span');
+        iconSpan.className = 'material-symbols-rounded';
+        reasoningBtn.replaceChildren(iconSpan);
+    }
+    iconSpan.textContent = visual.icon || 'auto_awesome';
+}
+
 function ensureCoachHeader(root, data) {
     if (typeof root.querySelector !== 'function') return;
     const header = root.querySelector('.md-top-app-bar');
     if (!header) return;
+    const doc = root.ownerDocument;
+    const host = doc?.defaultView || globalThis;
     header.classList.add('v7-coach-header');
     header.querySelector('.app-icon')?.setAttribute('aria-hidden', 'true');
     const title = header.querySelector('.app-title');
@@ -21,74 +140,196 @@ function ensureCoachHeader(root, data) {
     const leading = header.querySelector('.bar-leading');
     let subtitle = header.querySelector('.v7-coach-page-subtitle');
     if (!subtitle && leading) {
-        subtitle = root.ownerDocument.createElement('span');
+        subtitle = doc.createElement('span');
         subtitle.className = 'v7-coach-page-subtitle';
         subtitle.textContent = '基于你的训练、恢复和历史记录给出建议';
         leading.append(subtitle);
     }
 
     const trailing = header.querySelector('.bar-trailing');
-    let modelEntry = header.querySelector('.v7-coach-model-entry');
-    if (!modelEntry && trailing) {
-        modelEntry = root.ownerDocument.createElement('button');
-        modelEntry.type = 'button';
-        modelEntry.className = 'v7-coach-model-entry';
-        modelEntry.innerHTML = '<span>默认模型</span><span aria-hidden="true">⌄</span>';
-        modelEntry.addEventListener('click', () => data?.openAdviceModelPicker?.());
-        trailing.prepend(modelEntry);
+    if (!trailing) return;
+
+    let capsule = trailing.querySelector('.v7-coach-model-capsule');
+    if (!capsule) {
+        capsule = doc.createElement('div');
+        capsule.className = 'v7-coach-model-capsule';
+        trailing.prepend(capsule);
+    }
+
+    let modelEntry = capsule.querySelector('.v7-coach-model-entry');
+    if (!modelEntry) {
+        modelEntry = trailing.querySelector(':scope > .v7-coach-model-entry');
+        if (!modelEntry) {
+            modelEntry = doc.createElement('button');
+            modelEntry.type = 'button';
+            modelEntry.className = 'v7-coach-model-entry';
+            modelEntry.addEventListener('click', () => data?.openAdviceModelPicker?.());
+        }
+        capsule.append(modelEntry);
+    }
+    syncCoachModelEntry(modelEntry, doc, data, host);
+
+    let divider = capsule.querySelector('.v7-coach-capsule-divider');
+    if (!divider) {
+        divider = doc.createElement('span');
+        divider.className = 'v7-coach-capsule-divider';
+        divider.setAttribute('aria-hidden', 'true');
+        capsule.append(divider);
+    }
+
+    let reasoningBtn = capsule.querySelector('.advice-reasoning-chip');
+    if (!reasoningBtn) {
+        const existing = root.querySelector('.advice-reasoning-chip');
+        if (existing && existing !== reasoningBtn) {
+            reasoningBtn = existing;
+        } else {
+            reasoningBtn = doc.createElement('button');
+            reasoningBtn.type = 'button';
+            reasoningBtn.className = 'advice-reasoning-chip is-auto v7-coach-selected-control v7-coach-advanced-reasoning';
+        }
+        capsule.append(reasoningBtn);
+    }
+    syncCoachReasoningChip(reasoningBtn, doc, data, host);
+
+    root.querySelectorAll('.advice-composer-stack .advice-reasoning-chip').forEach((el) => {
+        if (el !== reasoningBtn) el.remove();
+    });
+
+    let actionsGroup = trailing.querySelector('.v7-coach-header-actions');
+    if (!actionsGroup) {
+        actionsGroup = doc.createElement('div');
+        actionsGroup.className = 'v7-coach-header-actions';
+        trailing.append(actionsGroup);
+    }
+
+    let usageBtn = actionsGroup.querySelector('.v7-coach-usage-btn');
+    if (!usageBtn) {
+        usageBtn = doc.createElement('button');
+        usageBtn.type = 'button';
+        usageBtn.className = 'v7-coach-header-btn v7-coach-usage-btn';
+        usageBtn.setAttribute('aria-label', 'AI 用量');
+        usageBtn.setAttribute('title', 'AI 用量');
+        usageBtn.innerHTML = '<span class="material-symbols-rounded">monitoring</span>';
+        usageBtn.addEventListener('click', () => data?.showAiUsageDialog?.());
+        actionsGroup.append(usageBtn);
+    }
+
+    let regenBtn = actionsGroup.querySelector('.v7-coach-regenerate-btn');
+    if (!regenBtn) {
+        regenBtn = doc.createElement('button');
+        regenBtn.type = 'button';
+        regenBtn.className = 'v7-coach-header-btn v7-coach-regenerate-btn';
+        regenBtn.setAttribute('aria-label', '重新生成建议');
+        regenBtn.setAttribute('title', '重新生成建议');
+        regenBtn.innerHTML = '<span class="material-symbols-rounded">refresh</span>';
+        regenBtn.addEventListener('click', () => data?.regenerateAdvice?.());
+        actionsGroup.append(regenBtn);
     }
 }
 
-function ensureCoachAdvancedTools(root, data) {
+function ensureCoachPlusMenu(root, data) {
+    if (typeof root.querySelector !== 'function') return;
+    const composer = root.querySelector('.advice-composer-stack');
+    const attachBtn = composer?.querySelector('#adviceAttachButton');
+    if (!composer || !attachBtn) return;
+    const doc = root.ownerDocument;
+
+    let menu = composer.querySelector('.v7-coach-plus-menu');
+    if (!menu) {
+        menu = doc.createElement('div');
+        menu.className = 'v7-coach-plus-menu hidden';
+        menu.setAttribute('role', 'menu');
+        menu.setAttribute('aria-label', '输入工具');
+        menu.innerHTML = `
+            <button type="button" class="v7-coach-menu-item" data-action="image">
+                <span class="material-symbols-rounded">photo_camera</span>
+                <span>添加图片</span>
+            </button>
+            <button type="button" class="v7-coach-menu-item" data-action="file">
+                <span class="material-symbols-rounded">upload_file</span>
+                <span>添加文件</span>
+            </button>
+            <button type="button" class="v7-coach-menu-item" data-action="context">
+                <span class="material-symbols-rounded">tune</span>
+                <span>数据维度</span>
+                <span class="v7-coach-menu-badge">自动</span>
+            </button>
+        `;
+        composer.prepend(menu);
+
+        menu.addEventListener('click', (e) => {
+            const item = e.target?.closest?.('.v7-coach-menu-item');
+            if (!item) return;
+            const action = item.dataset.action;
+            menu.classList.add('hidden');
+            attachBtn.classList.remove('is-open');
+            if (action === 'image') {
+                data?.openAdviceImagePicker?.();
+            } else if (action === 'file') {
+                data?.openAdviceFilePicker?.();
+            } else if (action === 'context') {
+                data?.toggleAdviceContextPanel?.();
+            }
+        });
+    }
+
+    const contexts = { diet: true, training: true, weight: true, goal: true, ...(data?.adviceContexts || {}) };
+    const contextMode = ['auto', 'light', 'none'].includes(data?.adviceContextMode) ? data.adviceContextMode : 'auto';
+    const modeLabel = { auto: '自动', light: '轻量', none: '仅提问' }[contextMode] || '自动';
+    const enabledCount = ['diet', 'training', 'weight', 'goal'].filter((k) => contexts[k]).length;
+    const badgeEl = menu.querySelector('.v7-coach-menu-badge');
+    if (badgeEl) {
+        badgeEl.textContent = contextMode !== 'auto' ? modeLabel : (enabledCount < 4 ? `${enabledCount}/4` : '自动');
+    }
+
+    if (!attachBtn.__hasV7PlusMenuClick) {
+        attachBtn.__hasV7PlusMenuClick = true;
+        const toggle = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            const isOpen = !menu.classList.contains('hidden');
+            menu.classList.toggle('hidden', isOpen);
+            attachBtn.classList.toggle('is-open', !isOpen);
+        };
+        attachBtn.addEventListener('click', toggle, true);
+        attachBtn.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }, true);
+        attachBtn.addEventListener('pointerup', (e) => {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }, true);
+    }
+}
+
+function ensureCoachConversationLayout(root) {
     if (typeof root.querySelector !== 'function') return;
     const page = root.querySelector('.advice-v6-page');
-    const composer = page?.querySelector('.advice-composer-stack');
-    if (!page || !composer) return;
-    let details = page.querySelector('.v7-coach-advanced-tools');
-    if (!details) {
-        details = root.ownerDocument.createElement('details');
-        details.className = 'v7-coach-advanced-tools';
-        details.innerHTML = '<summary>更多教练工具</summary><div class="v7-coach-advanced-actions"></div>';
-        composer.after(details);
-    }
-    const actions = details.querySelector('.v7-coach-advanced-actions');
-    const filterBar = page.querySelector(':scope > .advice-v6-filter-bar');
-    if (filterBar && actions && filterBar.parentElement !== actions) actions.append(filterBar);
+    if (!page) return;
 
-    const sectionHead = page.querySelector(':scope > .sect-head');
-    const clear = sectionHead?.querySelector('.a');
-    if (clear && actions && clear.parentElement !== actions) {
-        clear.classList.add('v7-coach-clear-action');
-        actions.append(clear);
-    }
-    if (sectionHead && !sectionHead.querySelector('.v7-coach-history-button')) {
-        const history = root.ownerDocument.createElement('button');
-        history.type = 'button';
-        history.className = 'v7-coach-history-button';
-        history.textContent = '历史记录';
-        history.addEventListener('click', () => data?.setAdviceRange?.('all'));
-        sectionHead.append(history);
-    }
+    // Completely remove any legacy v7-coach-advanced-tools
+    page.querySelectorAll('.v7-coach-advanced-tools').forEach((el) => {
+        const filterBar = el.querySelector('.advice-v6-filter-bar');
+        const clearBtn = el.querySelector('.v7-coach-clear-action');
+        if (filterBar) {
+            const sectHead = page.querySelector('.sect-head');
+            if (sectHead) sectHead.before(filterBar);
+            else page.prepend(filterBar);
+        }
+        if (clearBtn) {
+            clearBtn.classList.remove('v7-coach-clear-action');
+            const sectHead = page.querySelector('.sect-head');
+            if (sectHead && !sectHead.querySelector('.a')) sectHead.append(clearBtn);
+        }
+        el.remove();
+    });
 
-    if (actions && !actions.querySelector('.v7-coach-utility-actions')) {
-        const utility = root.ownerDocument.createElement('div');
-        utility.className = 'v7-coach-utility-actions';
-        const usage = root.ownerDocument.createElement('button');
-        usage.type = 'button';
-        usage.textContent = 'AI 用量';
-        usage.addEventListener('click', () => data?.showAiUsageDialog?.());
-        const regenerate = root.ownerDocument.createElement('button');
-        regenerate.type = 'button';
-        regenerate.textContent = '重新生成';
-        regenerate.addEventListener('click', () => data?.regenerateAdvice?.());
-        utility.append(usage, regenerate);
-        actions.prepend(utility);
-    }
-    const utility = actions?.querySelector('.v7-coach-utility-actions');
-    const reasoning = page.querySelector('.advice-reasoning-chip');
-    if (utility && reasoning && reasoning.parentElement !== utility) {
-        reasoning.classList.add('v7-coach-advanced-reasoning');
-        utility.append(reasoning);
+    const sectHead = page.querySelector('.sect-head');
+    const filterBar = page.querySelector('.advice-v6-filter-bar');
+    if (sectHead && filterBar && filterBar.nextElementSibling === sectHead) {
+        sectHead.after(filterBar);
     }
 }
 
@@ -133,7 +374,8 @@ function enhanceCoach(root, data) {
         button.dataset.v7CoachLabel = source || String(index + 1);
         button.textContent = label;
     });
-    ensureCoachAdvancedTools(root, data);
+    ensureCoachPlusMenu(root, data);
+    ensureCoachConversationLayout(root);
 }
 
 function unbindCoachScrollRuntime(data, host) {
@@ -235,9 +477,22 @@ export const coachFeature = Object.freeze({
             bubble.classList.toggle('v7-actions-open', open);
             toggle.setAttribute('aria-expanded', String(open));
         });
+        scope.listen(context.document || root.ownerDocument, 'click', (event) => {
+            const menu = root.querySelector('.v7-coach-plus-menu:not(.hidden)');
+            if (!menu) return;
+            const attachBtn = root.querySelector('#adviceAttachButton');
+            if (menu.contains(event.target) || attachBtn?.contains(event.target)) return;
+            menu.classList.add('hidden');
+            attachBtn?.classList.remove('is-open');
+        });
         scope.listen(root, 'click', scheduleEnhance);
         scope.listen(root, 'input', scheduleEnhance);
         scope.listen(host, 'advice:render-state', scheduleEnhance);
+        scope.listen(host, 'ai:ready', scheduleEnhance);
+        scope.listen(host, 'ai:override-change', scheduleEnhance);
+        scope.listen(host, 'ai:task-route-change', scheduleEnhance);
+        scope.listen(host, 'ai:task-routes-changed', scheduleEnhance);
+        scope.listen(host, 'ai:catalog-changed', scheduleEnhance);
         const Observer = host.MutationObserver;
         if (Observer) {
             const observer = new Observer(scheduleEnhance);
@@ -262,7 +517,10 @@ export const coachFeature = Object.freeze({
             clearCoachRuntime(data, root, host);
             root.classList.remove('v7-page-mounted', 'v7-feature-coach');
             root.querySelector?.('.v7-coach-page-subtitle')?.remove();
+            root.querySelector?.('.v7-coach-model-capsule')?.remove();
             root.querySelector?.('.v7-coach-model-entry')?.remove();
+            root.querySelector?.('.v7-coach-header-actions')?.remove();
+            root.querySelector?.('.v7-coach-plus-menu')?.remove();
             root.querySelectorAll('.v7-coach-action-toggle').forEach((element) => element.remove());
             root.querySelectorAll('.advice-bubble.v7-actions-open').forEach((element) => element.classList.remove('v7-actions-open'));
             root.querySelectorAll('.v7-coach-surface, .v7-coach-user-bubble, .v7-coach-assistant-bubble, .v7-coach-composer, .v7-coach-selected-control, .v7-coach-suggestion-controls, .v7-coach-secondary-surface').forEach((element) => {

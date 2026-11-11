@@ -5,7 +5,6 @@ const PROFILE_SURFACE_SELECTORS = [
     '.profile-hero',
     '.v7-profile-card',
     '.health-profile-card',
-    '.profile-version-footer',
     '.routine-tool',
     '.routine-card',
     '.action-card',
@@ -97,12 +96,38 @@ function profileHomeModel(data) {
     };
 }
 
+function renderProfileVersionFooter(data) {
+    if (typeof data?.renderProfileVersionFooter === 'function') {
+        return data.renderProfileVersionFooter();
+    }
+    const host = /** @type {any} */ (globalThis);
+    const version = data?.detectAppVersion?.()
+        || (host?.appUpdate?.version ? `v${host.appUpdate.version}` : '')
+        || '';
+    const checking = Boolean(host?.appUpdate?.checking);
+    return `<div class="profile-version-footer" id="profileVersionFooter">
+        <div class="pvf-title">当前版本 ${escapeHtml(version || '--')}</div>
+        <div class="pvf-sub">Service Worker · 离线缓存就绪</div>
+        <div class="pvf-actions">
+            <button type="button" class="pvf-action pvf-check" id="profileUpdateCheckBtn" onclick="data.checkAppUpdate?.()" ${checking ? 'disabled' : ''}>
+                <span class="material-symbols-rounded">system_update</span><span class="pvf-check-label">${checking ? '检测中...' : '检测更新'}</span>
+            </button>
+            <button type="button" class="pvf-action pvf-copy" onclick="data.copyAppVersionInfo?.()">复制版本信息</button>
+        </div>
+    </div>`;
+}
+
 function renderProfileHome(root, data, view) {
     if (view !== 'home' || typeof root.querySelector !== 'function') return;
     const overview = root.querySelector('#profileOverview');
     if (!overview) return;
+    const host = /** @type {any} */ (globalThis);
     const model = profileHomeModel(data);
-    const signature = JSON.stringify(model);
+    const version = data?.detectAppVersion?.()
+        || (host?.appUpdate?.version ? `v${host.appUpdate.version}` : '')
+        || '';
+    const cachedSw = data?._cachedSwName || '';
+    const signature = JSON.stringify([model, version, cachedSw]);
     if (overview.dataset.v7ProfileHomeSignature === signature && overview.querySelector('.v7-profile-home')) return;
     overview.dataset.v7ProfileHomeSignature = signature;
     overview.innerHTML = `<div class="v7-profile-home">
@@ -152,6 +177,8 @@ function renderProfileHome(root, data, view) {
             <small>恢复状态</small>
             <div><span><b>${escapeHtml(model.recoveryStatus)}</b><small>恢复评估</small></span><span><b>${escapeHtml(model.painText)}</b><small>疼痛反馈</small></span><button type="button" onclick="ui.tab('records')">查看趋势</button></div>
         </section>
+
+        ${renderProfileVersionFooter(data)}
     </div>`;
 }
 

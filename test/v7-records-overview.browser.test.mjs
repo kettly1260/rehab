@@ -145,6 +145,24 @@ test('V7 Records default route renders overview anatomy and preserves real subvi
         await page.evaluate(() => theme.setPreset('purple'));
         const purple = await visualSnapshot(page);
         assert.notEqual(purple.trendStroke, green.trendStroke);
+
+        // Verify switching to each subview (especially 'diet' which serializes to #/records)
+        // stays on that subview when clicking inside it, and returns to overview only via 总览.
+        await page.locator('#records .v7-records-subnav [data-v7-records-view="diet"]').click();
+        await page.waitForFunction(() => document.getElementById('records')?.dataset.v7RecordsOverview === 'false' && document.getElementById('records')?.dataset.v7RecordsView === 'diet');
+        await page.locator('#records #recordsContent').click({ position: { x: 20, y: 120 } });
+        await page.waitForTimeout(150);
+        assert.equal(await page.evaluate(() => document.getElementById('records')?.dataset.v7RecordsOverview), 'false');
+        assert.equal(await page.evaluate(() => document.getElementById('records')?.dataset.v7RecordsView), 'diet');
+
+        await page.locator('#records .record-tab[data-health-view="weight"]').click();
+        await page.waitForFunction(() => document.getElementById('records')?.dataset.v7RecordsView === 'weight');
+        assert.equal(await page.evaluate(() => document.getElementById('records')?.dataset.v7RecordsOverview), 'false');
+
+        await page.locator('#records .v7-records-overview-link').click();
+        await page.waitForFunction(() => document.getElementById('records')?.dataset.v7RecordsOverview === 'true');
+        assert.equal(await page.evaluate(() => document.querySelector('#records .app-title')?.textContent?.trim()), '训练记录');
+
         assert.deepEqual(errors, []);
         await context.close();
     } finally {
